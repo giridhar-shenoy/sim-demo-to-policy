@@ -25,7 +25,9 @@
         "timeout": 0
       },
       "seed_min": 0,
-      "seed_max": 99
+      "seed_max": 99,
+      "policy_ms_mean": 0.03940999999999999,
+      "policy_ms_max": 0.191
     },
     {
       "condition": "expert_eval_seeds",
@@ -49,7 +51,9 @@
         "timeout": 0
       },
       "seed_min": 10000,
-      "seed_max": 10099
+      "seed_max": 10099,
+      "policy_ms_mean": 0.038619999999999995,
+      "policy_ms_max": 0.16
     },
     {
       "condition": "expert_eval_seeds",
@@ -73,7 +77,9 @@
         "timeout": 0
       },
       "seed_min": 10000,
-      "seed_max": 10099
+      "seed_max": 10099,
+      "policy_ms_mean": 0.04000999999999998,
+      "policy_ms_max": 0.174
     }
   ]
 }
