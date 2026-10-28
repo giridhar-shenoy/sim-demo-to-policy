@@ -4,8 +4,12 @@ For the first 20 episodes of the dataset, feed frame ``--frame`` (default 2, ins
 approach phase) to the policy and compare its first action with the recorded one.
 During the approach the expert's x, y and yaw actions depend on where the cube is, so a
 policy that has learned to localise the cube must vary those outputs across episodes.
+It also swaps the two images of episode 0's frame for those of other episodes (same
+state) and records how much the first action moves: if the policy localised the cube
+from the images, the approach actions would change.
 Writes results/openloop_<run>.json: per-dimension std of data and prediction, their
-correlation, and the mean absolute error over frames 0, 10, ..., 90 of episode 0.
+correlation, the image-swap sensitivity, and the mean absolute error over frames
+0, 10, ..., 90 of episode 0.
 """
 
 from __future__ import annotations
@@ -61,6 +65,19 @@ def main() -> None:
         corr = float(np.corrcoef(pred[:, k], data[:, k])[0, 1]) if varies else None
         per_dim[name] = {"data_std": d_std, "pred_std": p_std, "corr": corr}
 
+    base = to_obs(ds[int(starts[0]) + args.frame])
+    policy.reset()
+    a_base = policy.act(base)
+    swaps = []
+    for start in starts[1 : args.episodes]:
+        other = to_obs(ds[int(start) + args.frame])
+        policy.reset()
+        swapped = {**base, "front": other["front"], "wrist": other["wrist"]}
+        swaps.append(np.abs(policy.act(swapped) - a_base))
+    blank = {**base, "front": np.zeros_like(base["front"]), "wrist": np.zeros_like(base["wrist"])}
+    policy.reset()
+    a_blank = policy.act(blank)
+
     err = []
     for i in range(0, min(100, lengths[0]), 10):
         item = ds[i]
@@ -72,6 +89,12 @@ def main() -> None:
         "frame": args.frame,
         "episodes": args.episodes,
         "first_action_across_episodes": per_dim,
+        "image_swap_max_abs_change": dict(
+            zip(ACTION_NAMES, np.max(swaps, axis=0).round(4).tolist(), strict=True)
+        ),
+        "black_images_abs_change": dict(
+            zip(ACTION_NAMES, np.abs(a_blank - a_base).round(4).tolist(), strict=True)
+        ),
         "episode0_mean_abs_err": dict(
             zip(ACTION_NAMES, np.mean(err, axis=0).round(4).tolist(), strict=True)
         ),
@@ -81,7 +104,10 @@ def main() -> None:
     path.write_text(json.dumps(out, indent=2) + "\n")
     for name in ("d_x", "d_y", "d_yaw"):
         d = per_dim[name]
-        print(f"{run} {name}: data std {d['data_std']:.2f}, pred std {d['pred_std']:.2f}")
+        print(
+            f"{run} {name}: data std {d['data_std']:.2f}, pred std {d['pred_std']:.4f}, "
+            f"max change when images are swapped {out['image_swap_max_abs_change'][name]:.4f}"
+        )
     print(f"wrote {path}")
 
 

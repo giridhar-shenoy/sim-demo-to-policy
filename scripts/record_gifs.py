@@ -1,8 +1,10 @@
-"""Record the README GIF: one ACT success and one ACT failure, side by side, labelled.
+"""Record the README GIF: one success and one ACT failure, side by side, labelled.
 
 Seeds are taken from the eval CSV (first nominal success and first nominal failure,
 falling back to the shifted rows), replayed with the same checkpoint, and checked
 against the CSV label so the GIF shows episodes that are in the published table.
+If the CSV has no ACT success, the left panel is the scripted expert on the failure's
+seed, labelled as the reference, so the GIF shows what the policy should have done.
 Frames come from the offscreen front camera (visual meshes); the inset in the top
 right corner is the 96 px wrist image the policy actually sees.
 """
@@ -19,6 +21,7 @@ from PIL import Image, ImageDraw, ImageFont
 from sdp.envs import PandaPickPlaceEnv
 from sdp.eval.act_policy import ACTPolicyAdapter
 from sdp.eval.harness import read_csv
+from sdp.expert.policy import ExpertPolicy
 
 PANEL_HW = (240, 320)
 
@@ -70,9 +73,15 @@ def main() -> None:
     env = PandaPickPlaceEnv(render_mode="rgb_array", render_size=PANEL_HW)
     panels = []
     try:
+        if "success" not in picked and "failure" in picked:
+            seed, dist, _ = picked["failure"]
+            frames, info = rollout(env, ExpertPolicy(), seed, dist)
+            label = label_episode(info["episode"], info)
+            text = f"Scripted expert (reference) seed {seed}: {label.upper()}"
+            panels.append([annotate(f, w, text, (150, 190, 255)) for f, w in frames[:: args.every]])
+            print(f"no ACT success in {args.csv}; left panel = expert on seed {seed} -> {label}")
         for key in ("success", "failure"):
             if key not in picked:
-                print(f"no {key} episode in {args.csv}; GIF has one panel")
                 continue
             seed, dist, csv_label = picked[key]
             frames, info = rollout(env, policy, seed, dist)
