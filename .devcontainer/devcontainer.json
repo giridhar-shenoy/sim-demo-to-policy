@@ -1,0 +1,27 @@
+{
+  "name": "sim-demo-to-policy",
+  "build": {
+    "dockerfile": "../Dockerfile",
+    "context": ".."
+  },
+  "workspaceFolder": "/workspace",
+  "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind",
+  "remoteUser": "dev",
+  "containerEnv": {
+    "MUJOCO_GL": "egl",
+    "SDP_MENAGERIE_DIR": "/opt/mujoco_menagerie"
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "charliermarsh.ruff",
+        "ms-vscode.cpptools",
+        "ms-iot.vscode-ros",
+        "ms-toolsai.jupyter"
+      ]
+    }
+  },
+  "postCreateCommand": "pip install --user pre-commit && pre-commit install"
+}
