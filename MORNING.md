@@ -16,6 +16,12 @@
    to match R1–R3 where you are deciding this; enabling it tonight would also block my
    direct pushes. Recommendation: enable it once v0.1 is merged. Blocks: nothing.
 
+3. **Commit d8bde37 bundles three changes** (training wrapper; eval adapter, report,
+   GIF script; docs) under the training-wrapper message, because of a staging mistake
+   right after the OOM restart. Splitting it would be a history rewrite (not allowed
+   tonight). Recommendation: leave it. If you want it split, run
+   `git rebase -i d8bde37~1` before anyone else pulls. Blocks: nothing.
+
 ## DECISIONS MADE OVERNIGHT (review)
 
 - **Action space = DLS IK, not mocap** (the prompt's "ask me before"; overnight rules

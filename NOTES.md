@@ -156,3 +156,14 @@ uv pip install --python .venv/bin/python --no-deps -e .
 - 02:42 start; 02:57 skeleton committed; 03:00 CI green on skeleton (4m52s).
 - 03:17 CHECKPOINT 1 (448 steps/s, expert 100/100). 03:21 CHECKPOINT 2 (50 demos).
 - 03:25 ACT training started (projected end ~03:52).
+- 03:32 **systemd-oomd killed this session and the training run** (step 590/3000; swap
+  was full machine-wide, two sessions killed). No checkpoint was saved (save_freq
+  1000). New machine rules from 03:35: wait for ≥ 5 GB MemAvailable inside the locks
+  before heavy jobs; dataloader workers 0 or 1 → `num_workers: 1` in act_cpu.yaml
+  (was 2). Batch size unchanged (8).
+- 03:34 Commit d8bde37 ("feat: add lerobot-train wrapper and the ACT CPU config")
+  also contains the eval adapter, `sdp eval`/`sdp report`, report.py, the GIF
+  script and the docs (architecture, results, tasks, hardware_transfer,
+  THIRD_PARTY): everything was still staged from a pre-commit run when I committed
+  the first group. It is unpushed, but splitting it is a history rewrite, which the
+  overnight rules do not allow, so it stays as one commit and is flagged in MORNING.md.
