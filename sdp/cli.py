@@ -28,7 +28,7 @@ def _record(args: argparse.Namespace) -> int:
     return 0
 
 
-def _eval(args: argparse.Namespace) -> int:
+def _eval(args: argparse.Namespace, argv: list[str] | None = None) -> int:
     import platform
 
     from sdp.envs import PandaPickPlaceEnv
@@ -53,14 +53,16 @@ def _eval(args: argparse.Namespace) -> int:
             )
     finally:
         env.close()
-    write_csv(rows, f"{args.out}.csv")
+    out = args.out or f"results/eval_{args.condition}_s{seeds[0]}"
+    write_csv(rows, f"{out}.csv")
     meta = {
+        "command": "sdp " + " ".join(sys.argv[1:] if argv is None else argv),
         "checkpoint": str(policy.path),
         "n_action_steps": policy.policy.config.n_action_steps,
         "chunk_size": policy.policy.config.chunk_size,
         "python": platform.python_version(),
     }
-    write_summary(summaries, f"{args.out}.json", meta=meta)
+    write_summary(summaries, f"{out}.json", meta=meta)
     return 0
 
 
@@ -92,7 +94,9 @@ def build_parser() -> argparse.ArgumentParser:
     ev.add_argument("--seed-start", type=int, default=0, help="offset into eval seeds 10000-19999")
     ev.add_argument("--distributions", nargs="+", default=["nominal", "shifted"])
     ev.add_argument("--n-action-steps", type=int, default=None, help="override the checkpoint's")
-    ev.add_argument("--out", required=True, help="output prefix for .csv and .json")
+    ev.add_argument(
+        "--out", default=None, help="output prefix (default results/eval_<condition>_s<seed>)"
+    )
     ev.set_defaults(func=_eval)
 
     rep = sub.add_parser("report", help="regenerate the result tables in the docs")
@@ -108,6 +112,8 @@ def main(argv: list[str] | None = None) -> int:
     if not getattr(args, "func", None):
         parser.print_help()
         return 0
+    if args.func is _eval:
+        return _eval(args, argv)
     return args.func(args)
 
 

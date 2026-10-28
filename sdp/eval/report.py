@@ -18,11 +18,24 @@ from pathlib import Path
 
 from sdp.eval.taxonomy import LABELS
 
-# Which results file each condition comes from, and the command that produces it.
+# Commands for results files whose JSON predates the "command" field.
 SOURCES = {
     "expert_pickplace.json": "python scripts/eval_expert.py",
-    "eval_act_pickplace.json": "scripts/eval_all.sh",
+    "eval_act_cpu_scripted50_s10000.json": (
+        "sdp eval --checkpoint outputs/train/act_cpu_scripted50 "
+        "--condition act_cpu_scripted50 --trials 100 --distributions nominal shifted"
+    ),
 }
+
+
+def _eval_files(results: Path) -> list[Path]:
+    files = [results / "expert_pickplace.json"] + sorted(results.glob("eval_*.json"))
+    return [f for f in files if f.is_file()]
+
+
+def source_command(path: Path) -> str:
+    meta = json.loads(path.read_text()).get("meta", {})
+    return meta.get("command") or SOURCES.get(path.name, "scripts/eval_all.sh")
 
 
 def _pct(x: float) -> str:
@@ -31,11 +44,9 @@ def _pct(x: float) -> str:
 
 def _load_conditions(results: Path) -> list[tuple[str, dict]]:
     rows = []
-    for name, _cmd in SOURCES.items():
-        path = results / name
-        if path.is_file():
-            for cond in json.loads(path.read_text())["conditions"]:
-                rows.append((name, cond))
+    for path in _eval_files(results):
+        for cond in json.loads(path.read_text())["conditions"]:
+            rows.append((path.name, cond))
     return rows
 
 
@@ -121,8 +132,11 @@ def speed_table(results: Path) -> str:
     )
 
 
+HEADLINE_FILE = "eval_act_cpu_v2_scripted50_s10100.json"
+
+
 def _act(results: Path) -> dict[str, dict]:
-    path = results / "eval_act_pickplace.json"
+    path = results / HEADLINE_FILE
     if not path.is_file():
         return {}
     return {c["distribution"]: c for c in json.loads(path.read_text())["conditions"]}
@@ -140,9 +154,13 @@ def headline(results: Path) -> str:
     act = _act(results)
     if "nominal" not in act:
         return "_ACT evaluation pending._"
+    c = act["nominal"]
+    train = results / "train_act_cpu_v2_scripted50.json"
+    minutes = json.loads(train.read_text())["wall_time_s"] / 60 if train.is_file() else None
+    budget = f", {minutes:.0f} min on the laptop CPU" if minutes else ""
     text = (
-        f"ACT trained for 3000 CPU steps on 50 scripted demonstrations succeeds in "
-        f"{_rate(act['nominal'])} held-out episodes"
+        f"ACT (run 2: 3000 training steps{budget}, 50 scripted demonstrations) succeeds "
+        f"in {_rate(c)} held-out test episodes (seeds {c['seed_min']}–{c['seed_max']})"
     )
     if "shifted" in act:
         text += f", and in {_rate(act['shifted'])} with the cube's start box shifted by 8 cm"
@@ -166,7 +184,7 @@ def index_table(results: Path) -> str:
             continue
         lines.append(
             f"| {c['condition']} ({c['distribution']}) | success, seeds "
-            f"{c['seed_min']}–{c['seed_max']} | {_rate(c)} | `{SOURCES[name]}` |"
+            f"{c['seed_min']}–{c['seed_max']} | {_rate(c)} | `{source_command(results / name)}` |"
         )
     for path in sorted(results.glob("train_*.json")):
         meta = json.loads(path.read_text())

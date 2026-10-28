@@ -59,8 +59,8 @@ def main() -> None:
     from sdp.eval.taxonomy import label_episode
 
     ap = argparse.ArgumentParser(description=__doc__)
-    ap.add_argument("--checkpoint", default="outputs/train/act_cpu_scripted50")
-    ap.add_argument("--csv", default="results/eval_act_pickplace.csv")
+    ap.add_argument("--checkpoint", default="outputs/train/act_cpu_v2_scripted50")
+    ap.add_argument("--csv", default="results/eval_act_cpu_v2_scripted50_s10100.csv")
     ap.add_argument("--out", default="docs/assets/act_success_failure.gif")
     ap.add_argument("--every", type=int, default=2, help="keep every n-th frame (20 Hz -> 10 fps)")
     args = ap.parse_args()
