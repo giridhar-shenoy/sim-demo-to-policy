@@ -86,11 +86,52 @@ def parse_log_line(line: str) -> dict[str, float] | None:
     return row if "step" in row else None
 
 
+def rows_from_lines(lines, log_freq: int) -> list[dict[str, float]]:
+    """Parse lerobot-train log lines into rows.
+
+    lerobot prints step counts of 1000 and above rounded ("step:2K" for 2350), so the
+    step column is rebuilt from the row index: lerobot logs exactly every ``log_freq``
+    steps. The printed value is kept as ``step_printed``.
+    """
+    rows = []
+    for line in lines:
+        row = parse_log_line(line)
+        if row:
+            row["step_printed"] = row["step"]
+            row["step"] = float((len(rows) + 1) * log_freq)
+            rows.append(row)
+    return rows
+
+
+def _log_freq(cmd: list[str]) -> int:
+    for arg in cmd:
+        if arg.startswith("--log_freq="):
+            return int(arg.split("=", 1)[1])
+    raise ValueError("--log_freq missing from the lerobot-train command")
+
+
+def write_rows(rows: list[dict[str, float]], csv_path: Path) -> None:
+    keys = sorted({k for r in rows for k in r}, key=lambda k: (k != "step", k))
+    with csv_path.open("w", newline="") as f:
+        writer = csv.DictWriter(f, fieldnames=keys)
+        writer.writeheader()
+        writer.writerows(rows)
+
+
+def reparse_log(output_dir: str | Path) -> Path:
+    """Rebuild ``<output_dir>.csv`` from ``<output_dir>.log`` (first line = the command)."""
+    output_dir = Path(output_dir)
+    lines = output_dir.with_suffix(".log").read_text().replace("\r", "\n").splitlines()
+    rows = rows_from_lines(lines[1:], _log_freq(lines[0].split()))
+    write_rows(rows, output_dir.with_suffix(".csv"))
+    return output_dir.with_suffix(".csv")
+
+
 def run(cmd: list[str], output_dir: Path) -> dict:
     log_path = output_dir.with_suffix(".log")
     csv_path = output_dir.with_suffix(".csv")
     log_path.parent.mkdir(parents=True, exist_ok=True)
-    rows = []
+    lines = []
     t0 = time.perf_counter()
     with (
         log_path.open("w") as log,
@@ -103,17 +144,12 @@ def run(cmd: list[str], output_dir: Path) -> dict:
         for line in proc.stdout:
             sys.stdout.write(line)
             log.write(line)
-            row = parse_log_line(line)
-            if row:
-                rows.append(row)
+            lines.append(line)
         code = proc.wait()
     wall = time.perf_counter() - t0
+    rows = rows_from_lines(lines, _log_freq(cmd))
     if rows:
-        keys = sorted({k for r in rows for k in r}, key=lambda k: (k != "step", k))
-        with csv_path.open("w", newline="") as f:
-            writer = csv.DictWriter(f, fieldnames=keys)
-            writer.writeheader()
-            writer.writerows(rows)
+        write_rows(rows, csv_path)
     meta = {"returncode": code, "wall_time_s": round(wall, 1), "log": str(log_path)}
     output_dir.with_suffix(".json").write_text(json.dumps(meta, indent=2) + "\n")
     return meta
@@ -123,9 +159,12 @@ def main(argv: list[str] | None = None) -> int:
     import argparse
 
     ap = argparse.ArgumentParser(description=__doc__)
-    ap.add_argument("--config", required=True)
-    ap.add_argument("--dataset", required=True, help="LeRobot dataset root")
+    ap.add_argument("--config")
+    ap.add_argument("--dataset", help="LeRobot dataset root")
     ap.add_argument("--output-dir", required=True)
+    ap.add_argument(
+        "--reparse-log", action="store_true", help="only rebuild <output-dir>.csv from its .log"
+    )
     ap.add_argument("--job-name", default=None)
     ap.add_argument("--steps", type=int, default=None, help="override steps (smoke runs)")
     ap.add_argument(
@@ -133,6 +172,11 @@ def main(argv: list[str] | None = None) -> int:
     )
     ap.add_argument("--dry-run", action="store_true", help="print the command and exit")
     args = ap.parse_args(argv)
+    if args.reparse_log:
+        print(reparse_log(args.output_dir))
+        return 0
+    if not (args.config and args.dataset):
+        ap.error("--config and --dataset are required unless --reparse-log")
 
     config = yaml.safe_load(Path(args.config).read_text())
     overrides: dict[str, object] = dict(s.split("=", 1) for s in args.set)

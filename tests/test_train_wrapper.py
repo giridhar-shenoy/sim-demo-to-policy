@@ -4,7 +4,7 @@ from pathlib import Path
 
 import yaml
 
-from sdp.train.train import build_command, flatten, parse_log_line
+from sdp.train.train import build_command, flatten, parse_log_line, rows_from_lines
 
 CONFIG = Path(__file__).resolve().parents[1] / "sdp" / "train" / "configs" / "act_cpu.yaml"
 
@@ -53,3 +53,15 @@ def test_parse_log_line():
     assert "s" not in row and "py" not in row and "03" not in row
     assert parse_log_line("step:1K smpl:8K loss:0.5")["step"] == 1000
     assert parse_log_line("Training: 8%| 236/3000") is None
+
+
+def test_rows_rebuild_rounded_steps():
+    lines = [
+        "step:950 smpl:8K loss:0.3",
+        "Training: 33%| 1000/3000",
+        "step:1K smpl:8K loss:0.29",
+        "step:1K smpl:8K loss:0.28",
+    ]
+    rows = rows_from_lines(lines, log_freq=50)
+    assert [r["step"] for r in rows] == [50, 100, 150]
+    assert [r["step_printed"] for r in rows] == [950, 1000, 1000]
