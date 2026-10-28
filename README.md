@@ -36,13 +36,14 @@ uv venv --python 3.12 .venv && source .venv/bin/activate
 uv pip install -r requirements.lock --extra-index-url https://download.pytorch.org/whl/cpu
 uv pip install --no-deps -e .
 scripts/fetch_menagerie.sh && export SDP_MENAGERIE_DIR=$PWD/third_party/mujoco_menagerie MUJOCO_GL=egl
-scripts/regenerate_all.sh   # ~40 min on a 4-core laptop CPU, ~25 min of it training
+scripts/regenerate_all.sh   # ~70 min on a 4-core laptop CPU, ~40 min of it training
 ```
 
 `regenerate_all.sh` measures env throughput, scores the scripted expert, records 50
-demos, trains ACT, evaluates 100 + 100 held-out episodes, renders the GIF and rewrites
-the tables below. The trained checkpoint is 96 MB, too large to commit; until it is
-attached to a GitHub Release, the script retrains it rather than downloading it.
+demos, trains both ACT runs, evaluates them on the dev and test seeds, renders the GIF
+and rewrites the tables below. Each checkpoint is 96 MB, too large to commit. Until
+they are attached to a GitHub Release (`scripts/download_release_assets.sh`), the
+script retrains them rather than downloading them.
 
 ## Results
 

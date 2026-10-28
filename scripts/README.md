@@ -7,13 +7,15 @@ it is removed from the README.
 
 | Script | Produces | Approx. time (4-core laptop) |
 |---|---|---|
-| `regenerate_all.sh` | everything below, in order, into a fresh `outputs/regen-*` dir | ~40 min |
+| `regenerate_all.sh` | everything below, in order, into a fresh `outputs/regen-*` dir | ~70 min |
 | `bench_env_speed.py` | `results/env_speed.json` | 15 s |
 | `eval_expert.py` | `results/expert_pickplace.{csv,json}` | 1.5 min |
 | `record_demos.sh [out]` | 50-episode LeRobot v3.0 dataset + `results/dataset_*.json` | 1 min |
-| `train_cpu.sh [dataset] [out]` | ACT checkpoint + `results/train_*.{csv,json}` | ~25 min |
-| `eval_all.sh [checkpoint]` | `results/eval_act_pickplace.{csv,json}` (100 + 100 episodes) | a few min |
+| `train_cpu.sh [dataset] [out] [config]` | ACT checkpoint + `results/train_*.{csv,json}` | 17–21 min |
+| `eval_all.sh [run1] [run2]` | `results/eval_*.{csv,json}`: run 1 on dev + test seeds, run 2 on test seeds (3 × 200 episodes) | ~15 min |
 | `record_gifs.sh [checkpoint]` | `docs/assets/act_success_failure.gif` | < 1 min |
+| `diagnose_openloop.py --checkpoint <run>` | `results/openloop_<run>.json`: does the first action vary with the cube's position? | 1 min |
+| `package_release_assets.sh` / `download_release_assets.sh` | release tarballs of the dataset and a checkpoint / fetch them | seconds |
 | `dataset_summary.py <root>` | episode counts and lengths of a dataset | seconds |
 | `fetch_menagerie.sh [dest]` | the pinned Menagerie Panda model | seconds |
 | `probe_render.py` | which MuJoCo GL backends work (used in CI) | seconds |
