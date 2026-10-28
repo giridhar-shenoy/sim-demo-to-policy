@@ -1,0 +1,34 @@
+name: ci
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build-test:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/setup-buildx-action@v3
+
+      # Builds the repo's own Dockerfile; apt and pip layers are cached in the
+      # GitHub Actions cache, so a pyproject-free change rebuilds only the last layers.
+      - name: Build image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          tags: sdp-ci:latest
+          load: true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Probe MuJoCo GL backends
+        run: docker run --rm sdp-ci:latest python scripts/probe_render.py
+
+      - name: Lint
+        run: docker run --rm sdp-ci:latest bash -c "ruff check . && ruff format --check ."
+
+      - name: Test
+        run: docker run --rm sdp-ci:latest pytest -q -rs
