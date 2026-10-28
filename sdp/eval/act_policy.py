@@ -47,6 +47,15 @@ class ACTPolicyAdapter:
             pretrained_path=str(self.path),
             preprocessor_overrides={"device_processor": {"device": device}},
         )
+        self._warm_up()
+
+    def _warm_up(self) -> None:
+        """One forward pass on a blank observation, so the first episode's timing does
+        not include torch's lazy initialisation (~0.6 s on the laptop)."""
+        state_dim = self.policy.config.input_features["observation.state"].shape[0]
+        blank = np.zeros((96, 96, 3), dtype=np.uint8)
+        self.act({"front": blank, "wrist": blank, "state": np.zeros(state_dim, np.float32)})
+        self.reset()
 
     def reset(self) -> None:
         self.policy.reset()
