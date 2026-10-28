@@ -1,0 +1,44 @@
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "sdp"
+version = "0.1.0.dev0"
+description = "Simulated pick-and-place demonstrations to an ACT policy in MuJoCo + LeRobot, with a held-out eval."
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.12"
+authors = [{ name = "Giridhar J Shenoy" }]
+# Exact versions used for the published numbers live in requirements.lock;
+# these are the direct pins.
+dependencies = [
+  "mujoco==3.17.0",
+  "gymnasium==1.4.0",
+  "lerobot[dataset,training]==0.6.1",
+  "torch==2.11.0",
+  "torchvision==0.26.0",
+  "imageio>=2.30",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "ruff==0.17.3", "pre-commit>=4"]
+diffusion = ["lerobot[diffusion]==0.6.1"]
+
+[project.scripts]
+sdp = "sdp.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["sdp*"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+extend-exclude = ["third_party", "outputs", "datasets"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "NPY"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = ["slow: takes more than ~30 s on a laptop CPU"]
