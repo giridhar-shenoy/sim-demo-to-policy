@@ -1,0 +1,52 @@
+{
+  "checkpoint": "outputs/train/act_cpu_scripted50/checkpoints/last/pretrained_model",
+  "dataset": "datasets/pickplace_scripted_50",
+  "frame": 2,
+  "episodes": 20,
+  "first_action_across_episodes": {
+    "d_x": {
+      "data_std": 0.3762822449207306,
+      "pred_std": 0.00013026782835368067,
+      "corr": -0.3465984604448426
+    },
+    "d_y": {
+      "data_std": 0.04458639398217201,
+      "pred_std": 0.0029721183236688375,
+      "corr": 0.3795216044563529
+    },
+    "d_z": {
+      "data_std": 5.960464477539063e-08,
+      "pred_std": 0.00026066601276397705,
+      "corr": null
+    },
+    "d_roll": {
+      "data_std": 0.0,
+      "pred_std": 0.0,
+      "corr": null
+    },
+    "d_pitch": {
+      "data_std": 0.0,
+      "pred_std": 0.0,
+      "corr": null
+    },
+    "d_yaw": {
+      "data_std": 0.5516501069068909,
+      "pred_std": 5.016912837163545e-05,
+      "corr": 0.4617389908951559
+    },
+    "gripper": {
+      "data_std": 0.0,
+      "pred_std": 0.0026424021925777197,
+      "corr": null
+    }
+  },
+  "episode0_mean_abs_err": {
+    "d_x": 0.04540000110864639,
+    "d_y": 0.11699999868869781,
+    "d_z": 0.07500000298023224,
+    "d_roll": 0.0,
+    "d_pitch": 0.0,
+    "d_yaw": 0.12200000137090683,
+    "gripper": 0.017500000074505806
+  }
+}
