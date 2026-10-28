@@ -104,6 +104,55 @@ flock ~/work/.locks/build.lock uv pip install --python .venv/bin/python \
 uv pip install --python .venv/bin/python --no-deps -e .
 ```
 
+- gym-hil 0.1.14 license on PyPI: `Apache-2.0` (classifier "Apache Software License").
+- LeRobot 0.6.1 checkpoint layout: `<out>/checkpoints/<step>/pretrained_model/`
+  {config.json, model.safetensors, train_config.json, policy_preprocessor.json +
+  normalizer safetensors, policy_postprocessor.json + unnormalizer safetensors};
+  `checkpoints/last` symlink. Preprocessor steps: rename_observations, to_batch,
+  device, normalizer; postprocessor: unnormalizer, device. Eval mirrors
+  `lerobot_eval`: preprocessor -> `policy.select_action` -> postprocessor.
+  Load with `ACTPolicy.from_pretrained(path)` +
+  `lerobot.policies.factory.make_pre_post_processors(cfg, pretrained_path=path,
+  preprocessor_overrides={"device_processor": {"device": "cpu"}})`.
+- Checkpoint size: 96 MB (> 50 MB) → cannot be committed; needs a GitHub Release
+  (Giri uploads) → WAITING FOR GIRI.
+- lerobot-train accepted `--policy.dim_model=256 --policy.n_encoder_layers=2
+  --policy.n_decoder_layers=1 --policy.chunk_size=20 --policy.n_action_steps=10
+  --policy.optimizer_lr=0.0001 --policy.optimizer_lr_backbone=1e-05
+  --dataset.episodes=[0,...,49]` (40-step probe, returncode 0).
+- Probe speed: steady state `updt_s` ≈ 0.50 s, `data_s` ≈ 0.006 s per step (batch 8,
+  num_workers 2) → 3000 steps ≈ 26 min projected (< 45 min budget).
+- Default video codec in LeRobot 0.6.1 datasets: AV1 (SVT-AV1 encoder, CRF 30, gop 2);
+  `SVT_LOG=1` silences its info output.
+- `pgrep -f "gz sim"` matches its own caller's command line (and any echo text that
+  contains "gz sim"); use `pgrep -f "[g]z sim"` from a script whose text has no literal
+  "gz sim". Cost me two false "waiting for Gazebo" starts.
+
+### Env findings
+
+- First env throughput was 26 steps/s with images. Profiling: 4096 px shadow map
+  (14 → 4.7 ms per 96 px frame), then the Panda's 400k-vertex visual meshes
+  (readPixels sync 3.9 ms). Fix: shadows off; observation cameras draw the collision
+  meshes (group 3, 3.3k vertices) → 448 steps/s with images, 1097 without.
+- The expert first steered the *measured* TCP; the integrated target ran ahead of the
+  lagging arm and drove the fingers into the table at the grasp (flagged as
+  collisions). Steering the integrated target fixed it: 100/100.
+- Drop detection first fired on one-step finger-contact flicker during carry; now a
+  drop is judged when the carried cube lands out of the fingers while the gripper is
+  commanded closed.
+- Eval seed design: nominal and shifted use the same seeds (paired); with identical
+  uniform draws the shifted pose is exactly nominal + (0.08, −0.08) m.
+
+### Training
+
+- LR: ACT default 1e-5 (tuned for ~100k steps) → 1e-4 for 3000 steps, backbone 1e-5.
+  No ablation was run (no time); recorded as an open question.
+- Full run started 03:25:33 IST under heavy+build+gazebo locks via
+  `/tmp/r4/run_train_locked.sh` → `scripts/train_cpu.sh`; log `/tmp/r4/train_full.log`,
+  outputs `outputs/train/act_cpu_scripted50/`, wrapper log/csv/json beside it.
+
 ### Time log
 
-- 02:42 start; 03:10 skeleton written, local checks green.
+- 02:42 start; 02:57 skeleton committed; 03:00 CI green on skeleton (4m52s).
+- 03:17 CHECKPOINT 1 (448 steps/s, expert 100/100). 03:21 CHECKPOINT 2 (50 demos).
+- 03:25 ACT training started (projected end ~03:52).

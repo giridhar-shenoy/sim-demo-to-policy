@@ -1,0 +1,24 @@
+# ACT, CPU-sized for a 4-core laptop (budget: 45 min wall time).
+# Keys are lerobot-train (0.6.1) config paths; train.py flattens them to --a.b=value.
+policy:
+  type: act
+  device: cpu
+  push_to_hub: false
+  dim_model: 256
+  n_encoder_layers: 2
+  n_decoder_layers: 1
+  chunk_size: 20        # 1 s of actions at 20 Hz
+  n_action_steps: 10    # execute half a chunk (0.5 s), then re-plan
+  # LeRobot's ACT default is 1e-5 for both, tuned for ~100k steps. At 3000 steps that
+  # leaves the transformer undertrained, so it gets 1e-4; the ImageNet-pretrained
+  # ResNet-18 backbone keeps 1e-5.
+  optimizer_lr: 1.0e-4
+  optimizer_lr_backbone: 1.0e-5
+batch_size: 8
+steps: 3000
+num_workers: 1          # machine rule after the 03:32 OOM: 0 or 1 dataloader workers
+log_freq: 50
+save_freq: 1000
+seed: 1000
+wandb:
+  enable: false

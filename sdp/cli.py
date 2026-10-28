@@ -28,6 +28,49 @@ def _record(args: argparse.Namespace) -> int:
     return 0
 
 
+def _eval(args: argparse.Namespace) -> int:
+    import platform
+
+    from sdp.envs import PandaPickPlaceEnv
+    from sdp.eval.act_policy import ACTPolicyAdapter
+    from sdp.eval.harness import run_condition, summarize, write_csv, write_summary
+    from sdp.seeds import eval_seeds
+
+    policy = ACTPolicyAdapter(args.checkpoint, n_action_steps=args.n_action_steps)
+    env = PandaPickPlaceEnv()
+    seeds = eval_seeds(args.trials, start=args.seed_start)
+    rows, summaries = [], []
+    try:
+        for dist in args.distributions:
+            res = run_condition(env, policy, seeds, dist, args.condition)
+            rows += res
+            summaries.append(summarize(res))
+            s = summaries[-1]
+            lo, hi = s["wilson95"]
+            print(
+                f"{args.condition} {dist}: {s['successes']}/{s['trials']} "
+                f"({100 * s['success_rate']:.0f} %, Wilson 95 % {100 * lo:.0f}-{100 * hi:.0f} %)"
+            )
+    finally:
+        env.close()
+    write_csv(rows, f"{args.out}.csv")
+    meta = {
+        "checkpoint": str(policy.path),
+        "n_action_steps": policy.policy.config.n_action_steps,
+        "chunk_size": policy.policy.config.chunk_size,
+        "python": platform.python_version(),
+    }
+    write_summary(summaries, f"{args.out}.json", meta=meta)
+    return 0
+
+
+def _report(args: argparse.Namespace) -> int:
+    from sdp.eval.report import update_docs
+
+    update_docs(args.results, args.targets)
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="sdp", description=__doc__)
     parser.add_argument("--version", action="version", version=f"sdp {__version__}")
@@ -41,6 +84,21 @@ def build_parser() -> argparse.ArgumentParser:
     rec.add_argument("--out", required=True, help="dataset root directory (must not exist)")
     rec.add_argument("--repo-id", default="local/sdp_pickplace_scripted")
     rec.set_defaults(func=_record)
+
+    ev = sub.add_parser("eval", help="evaluate an ACT checkpoint on held-out eval seeds")
+    ev.add_argument("--checkpoint", required=True, help="training output dir or pretrained_model")
+    ev.add_argument("--condition", required=True, help="row name, e.g. act_cpu_scripted50")
+    ev.add_argument("--trials", type=int, default=100, help="episodes per distribution")
+    ev.add_argument("--seed-start", type=int, default=0, help="offset into eval seeds 10000-19999")
+    ev.add_argument("--distributions", nargs="+", default=["nominal", "shifted"])
+    ev.add_argument("--n-action-steps", type=int, default=None, help="override the checkpoint's")
+    ev.add_argument("--out", required=True, help="output prefix for .csv and .json")
+    ev.set_defaults(func=_eval)
+
+    rep = sub.add_parser("report", help="regenerate the result tables in the docs")
+    rep.add_argument("--results", default="results")
+    rep.add_argument("--targets", nargs="+", default=["docs/results.md", "README.md"])
+    rep.set_defaults(func=_report)
     return parser
 
 

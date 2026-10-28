@@ -70,9 +70,9 @@ for ACT (CP3), GIF, README/docs, CI smokes (CP4).
 
 Does Sunday 1 Nov hold? **Yes.**
 
-## CHECKPOINT 2 — dataset loads — 29 Oct 2026 03:30 IST
+## CHECKPOINT 2 — dataset loads — 29 Oct 2026 03:21 IST
 
-Wall-clock so far: 48 min. `git status`: clean after the recorder commits.
+Wall-clock so far: 39 min. `git status`: clean after the recorder commits.
 
 ```text
 $ flock ~/work/.locks/heavy.lock flock ~/work/.locks/build.lock scripts/record_demos.sh

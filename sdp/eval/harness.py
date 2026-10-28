@@ -44,6 +44,8 @@ class EpisodeResult:
     init_yaw: float
     final_dx: float
     final_dy: float
+    policy_ms_mean: float
+    policy_ms_max: float
     wall_s: float
 
 
@@ -66,8 +68,11 @@ def run_episode(
     obs, info = env.reset(seed=seed, options={"distribution": distribution})
     policy.reset()
     frames = [env.render()] if record_frames else []
+    policy_s = []
     while True:
+        tp = time.perf_counter()
         action = np.asarray(policy.act(obs, env), dtype=np.float32)
+        policy_s.append(time.perf_counter() - tp)
         if on_step is not None:
             on_step(obs, action, info)
         obs, _, terminated, truncated, info = env.step(action)
@@ -89,6 +94,8 @@ def run_episode(
         init_yaw=round(float(yaw), 5),
         final_dx=round(float(info["cube_target_offset"][0]), 5),
         final_dy=round(float(info["cube_target_offset"][1]), 5),
+        policy_ms_mean=round(1e3 * float(np.mean(policy_s)), 3),
+        policy_ms_max=round(1e3 * float(np.max(policy_s)), 3),
         wall_s=round(time.perf_counter() - t0, 3),
     )
     return Rollout(result=result, frames=frames)
@@ -132,6 +139,8 @@ def summarize(results: list[EpisodeResult]) -> dict:
         "labels": {label: labels.get(label, 0) for label in LABELS},
         "seed_min": min(seeds),
         "seed_max": max(seeds),
+        "policy_ms_mean": float(np.mean([r.policy_ms_mean for r in results])),
+        "policy_ms_max": float(np.max([r.policy_ms_max for r in results])),
     }
 
 
@@ -162,6 +171,8 @@ def read_csv(path: str | Path) -> list[EpisodeResult]:
                     init_yaw=float(row["init_yaw"]),
                     final_dx=float(row["final_dx"]),
                     final_dy=float(row["final_dy"]),
+                    policy_ms_mean=float(row.get("policy_ms_mean") or "nan"),
+                    policy_ms_max=float(row.get("policy_ms_max") or "nan"),
                     wall_s=float(row["wall_s"]),
                 )
             )
