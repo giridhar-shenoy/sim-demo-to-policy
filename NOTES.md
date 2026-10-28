@@ -167,3 +167,28 @@ uv pip install --python .venv/bin/python --no-deps -e .
   THIRD_PARTY): everything was still staged from a pre-commit run when I committed
   the first group. It is unpushed, but splitting it is a history rewrite, which the
   overnight rules do not allow, so it stays as one commit and is flagged in MORNING.md.
+
+### ACT run 1 and run 2 (29 Oct, 03:46–04:45)
+
+- Run 1 (`act_cpu.yaml`): 03:46:03–04:07:03, wall 1259.8 s (21.0 min), final loss
+  0.096 (L1 0.068, KL 0.003). Eval on seeds 10000–10099 (now "dev"): nominal 0/100
+  (97 never_reached, 3 collision), shifted 0/100 (100 never_reached). Policy compute:
+  mean ≈ 3 ms per step, re-plan 26–42 ms (one 212 ms outlier in nominal).
+- Diagnosis (`/tmp/r4/debug_openloop.py`, now `scripts/diagnose_openloop.py`): on its
+  own training frames run 1 reproduces descend (z −0.59 vs −0.6), gripper, lift (z
+  0.5 vs 0.6) and carry (y 0.61 vs 0.6), but its first-step x / y / yaw outputs have
+  std 0.00 across 20 training episodes (data std 0.38 / 0.04 / 0.55). It ignores the
+  cube's position and also misses the constant y = −0.6 of the first frames.
+  Env observation at seed 0 vs dataset frame 0: state identical, images differ by
+  1.6 (front) / 2.1 (wrist) out of 255 (AV1). So not a pipeline bug.
+- Run 2 (`act_cpu_v2.yaml`): backbone lr 1e-4 and use_vae false. A third change
+  (`replace_final_stride_with_dilation: true`) failed in 4 s: torchvision ResNet-18
+  BasicBlock raises "Dilation > 1 not supported", so it was dropped. Run 2:
+  04:27:57–04:45:03, wall 1026.4 s (17.1 min), final L1 0.082 (not comparable to run
+  1's L1, which used the CVAE latent computed from the true actions).
+- Training-CSV bug found and fixed (0cf43ef): lerobot prints `step:2K`, so the step
+  column is rebuilt from `log_freq`; run 1's CSV was rebuilt from its log with
+  `python -m sdp.train.train --output-dir outputs/train/act_cpu_scripted50 --reparse-log`.
+- 04:45 post-run job (open-loop diagnosis of both runs, test-seed evals 10100–10199,
+  GIF) queued on the heavy lock behind R2's chain (`/tmp/r4/run_post_v2.sh`, log
+  `/tmp/r4/post_v2.log`).

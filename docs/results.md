@@ -10,6 +10,9 @@ torch 2.11, 4 threads), MuJoCo offscreen rendering via EGL on the integrated GPU
 |---|---|---|---|
 | Env throughput | steps/s, both 96 px cameras | 448 | `python scripts/bench_env_speed.py` |
 | expert_demo_seeds (nominal) | success, seeds 0–99 | 100/100 (100 %, Wilson 95 % 96 %–100 %) | `python scripts/eval_expert.py` |
+| act_cpu_scripted50 (nominal) | success, seeds 10000–10099 | 0/100 (0 %, Wilson 95 % 0 %–4 %) | `scripts/eval_all.sh` |
+| act_cpu_scripted50 (shifted) | success, seeds 10000–10099 | 0/100 (0 %, Wilson 95 % 0 %–4 %) | `scripts/eval_all.sh` |
+| Training act_cpu_scripted50 | wall time | 21.0 min | `scripts/train_cpu.sh` |
 | Dataset pickplace_scripted_50 | episodes (successful) / mean length | 50 (50) / 110.3 steps | `scripts/record_demos.sh` |
 <!-- sdp-report:index:end -->
 
@@ -18,7 +21,9 @@ torch 2.11, 4 threads), MuJoCo offscreen rendering via EGL on the integrated GPU
 | Use | Seeds | Enforced by |
 |---|---|---|
 | Demonstrations | 0–999 (the 50 demos use 0–49) | `sdp/seeds.py` `check_demo`, called by the recorder |
-| Evaluation | 10000–19999 (this table uses 10000–10099) | `sdp/seeds.py` `check_eval`, called by `sdp eval` |
+| Evaluation | 10000–19999 | `sdp/seeds.py` `check_eval`, called by `sdp eval` |
+| — dev | 10000–10099: run 1's eval, whose result led to run 2's config | `scripts/eval_all.sh` |
+| — test | 10100–10199: each run evaluated once, after run 2's config was frozen | `scripts/eval_all.sh` |
 | Overlap | none | `tests/test_seed_split.py` |
 
 A seed fully determines the cube's initial pose. Nominal and shifted evals use the
@@ -34,6 +39,11 @@ About 22 % of the shifted box overlaps the nominal box ((7 cm × 7 cm) / (15 cm 
 ## Success rates (Wilson 95 % intervals)
 
 Regenerate with `scripts/eval_all.sh` (ACT) and `python scripts/eval_expert.py` (expert).
+`act_cpu_scripted50` is run 1 (`sdp/train/configs/act_cpu.yaml`); `act_cpu_v2_scripted50`
+is run 2 (`act_cpu_v2.yaml`: backbone lr 1e-4 instead of 1e-5, CVAE off). Run 2 exists
+because run 1 scored 0/100 on the dev seeds; a training-set check showed its first-step
+x/y/yaw actions did not vary at all with the cube's position (std 0.00 over 20 training
+episodes). The headline uses the test seeds, which no configuration choice has seen.
 
 <!-- sdp-report:success:begin -->
 | Policy / data | Cube poses | Seeds | Trials | Success | Wilson 95 % CI | Mean length, successes (steps) | Per-episode CSV |
@@ -41,6 +51,8 @@ Regenerate with `scripts/eval_all.sh` (ACT) and `python scripts/eval_expert.py` 
 | expert_demo_seeds | nominal | 0–99 | 100 | 100/100 (100 %) | 96 %–100 % | 109.9 | [`results/expert_pickplace.csv`](../results/expert_pickplace.csv) |
 | expert_eval_seeds | nominal | 10000–10099 | 100 | 100/100 (100 %) | 96 %–100 % | 110.6 | [`results/expert_pickplace.csv`](../results/expert_pickplace.csv) |
 | expert_eval_seeds | shifted | 10000–10099 | 100 | 100/100 (100 %) | 96 %–100 % | 117.2 | [`results/expert_pickplace.csv`](../results/expert_pickplace.csv) |
+| act_cpu_scripted50 | nominal | 10000–10099 | 100 | 0/100 (0 %) | 0 %–4 % | – | [`results/eval_act_pickplace.csv`](../results/eval_act_pickplace.csv) |
+| act_cpu_scripted50 | shifted | 10000–10099 | 100 | 0/100 (0 %) | 0 %–4 % | – | [`results/eval_act_pickplace.csv`](../results/eval_act_pickplace.csv) |
 <!-- sdp-report:success:end -->
 
 Full-config rows (LeRobot defaults, 100k steps on a free GPU) are **not run**: the
@@ -56,6 +68,8 @@ Labels and their order are defined in `sdp/eval/taxonomy.py`; each episode gets 
 | expert_demo_seeds | nominal | 100 | 0 | 0 | 0 | 0 | 0 | 0 |
 | expert_eval_seeds | nominal | 100 | 0 | 0 | 0 | 0 | 0 | 0 |
 | expert_eval_seeds | shifted | 100 | 0 | 0 | 0 | 0 | 0 | 0 |
+| act_cpu_scripted50 | nominal | 0 | 3 | 97 | 0 | 0 | 0 | 0 |
+| act_cpu_scripted50 | shifted | 0 | 0 | 100 | 0 | 0 | 0 | 0 |
 <!-- sdp-report:taxonomy:end -->
 
 ## Training
@@ -65,6 +79,7 @@ Regenerate with `scripts/train_cpu.sh` (the loss curve is in `results/train_*.cs
 <!-- sdp-report:training:begin -->
 | Run | Config | Steps | Wall time | Final loss | Machine |
 |---|---|---|---|---|---|
+| act_cpu_scripted50 | `sdp/train/configs/act_cpu.yaml` | 3000 | 21.0 min | 0.096 | i5-1135G7 (4C/8T), 14 GB RAM, CPU only, torch 4 threads |
 <!-- sdp-report:training:end -->
 
 ## Dataset

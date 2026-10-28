@@ -11,6 +11,7 @@ and confidence intervals.
 It shows the whole demonstration-to-policy loop running end to end on a CPU, with every
 success rate traceable to a per-episode CSV whose seeds never overlap the demonstrations.
 <!-- sdp-report:headline:begin -->
+ACT trained for 3000 CPU steps on 50 scripted demonstrations succeeds in 0/100 (0 %, Wilson 95 % 0 %–4 %) held-out episodes, and in 0/100 (0 %, Wilson 95 % 0 %–4 %) with the cube's start box shifted by 8 cm.
 <!-- sdp-report:headline:end -->
 
 **Language split:** Python only. The imitation-learning stack (LeRobot, PyTorch,
@@ -46,14 +47,31 @@ attached to a GitHub Release, the script retrains it rather than downloading it.
 ## Results
 
 <!-- sdp-report:success:begin -->
+| Policy / data | Cube poses | Seeds | Trials | Success | Wilson 95 % CI | Mean length, successes (steps) | Per-episode CSV |
+|---|---|---|---|---|---|---|---|
+| expert_demo_seeds | nominal | 0–99 | 100 | 100/100 (100 %) | 96 %–100 % | 109.9 | [`results/expert_pickplace.csv`](results/expert_pickplace.csv) |
+| expert_eval_seeds | nominal | 10000–10099 | 100 | 100/100 (100 %) | 96 %–100 % | 110.6 | [`results/expert_pickplace.csv`](results/expert_pickplace.csv) |
+| expert_eval_seeds | shifted | 10000–10099 | 100 | 100/100 (100 %) | 96 %–100 % | 117.2 | [`results/expert_pickplace.csv`](results/expert_pickplace.csv) |
+| act_cpu_scripted50 | nominal | 10000–10099 | 100 | 0/100 (0 %) | 0 %–4 % | – | [`results/eval_act_pickplace.csv`](results/eval_act_pickplace.csv) |
+| act_cpu_scripted50 | shifted | 10000–10099 | 100 | 0/100 (0 %) | 0 %–4 % | – | [`results/eval_act_pickplace.csv`](results/eval_act_pickplace.csv) |
 <!-- sdp-report:success:end -->
 
 Failure labels (one per episode, defined in [`sdp/eval/taxonomy.py`](sdp/eval/taxonomy.py)):
 
 <!-- sdp-report:taxonomy:begin -->
+| Policy / data | Cube poses | success | collision | never_reached | grasp_missed | dropped | placed_outside | timeout |
+|---|---|---|---|---|---|---|---|---|
+| expert_demo_seeds | nominal | 100 | 0 | 0 | 0 | 0 | 0 | 0 |
+| expert_eval_seeds | nominal | 100 | 0 | 0 | 0 | 0 | 0 | 0 |
+| expert_eval_seeds | shifted | 100 | 0 | 0 | 0 | 0 | 0 | 0 |
+| act_cpu_scripted50 | nominal | 0 | 3 | 97 | 0 | 0 | 0 | 0 |
+| act_cpu_scripted50 | shifted | 0 | 0 | 100 | 0 | 0 | 0 | 0 |
 <!-- sdp-report:taxonomy:end -->
 
 <!-- sdp-report:training:begin -->
+| Run | Config | Steps | Wall time | Final loss | Machine |
+|---|---|---|---|---|---|
+| act_cpu_scripted50 | `sdp/train/configs/act_cpu.yaml` | 3000 | 21.0 min | 0.096 | i5-1135G7 (4C/8T), 14 GB RAM, CPU only, torch 4 threads |
 <!-- sdp-report:training:end -->
 
 More tables (dataset, env throughput, seed ranges, pose boxes) and the command behind
@@ -61,24 +79,45 @@ every row: [docs/results.md](docs/results.md).
 
 ### Reading the numbers
 
-Each ACT row is 100 independent episodes. Each episode starts from a cube pose fixed
-by its seed, and the seeds are 10000–10099, from the eval range 10000–19999. The 50
-demonstrations come from seeds 0–49, in the demo range 0–999. The two ranges cannot
-overlap: `sdp/seeds.py` enforces this and `tests/test_seed_split.py` tests it. The
-shifted condition reuses the same seeds with the cube's start box moved by
-(+8 cm, −8 cm), so each shifted episode is a paired twin of a nominal one; about 22 %
-of the shifted box still overlaps the training box. An episode is a success only if
-the cube's centre ends inside the 6 cm square, resting on the table, with the gripper
-open and the cube still, and all of that holds for 0.5 s. The episode limit is
-12.5 s. The intervals are 95 % Wilson score intervals. With 100 trials a rate near
-50 % carries about ±10 points, and a rate near 0 % or 100 % is still only bounded
-within about 4 points. So differences of less than about 15 points between rows are
-not evidence of anything, and one training seed says nothing about seed-to-seed
-variance.
+Every ACT row is 100 independent episodes. Each episode's starting cube pose is fixed
+by its seed. The 50 demonstrations use seeds 0–49, from the demo range 0–999. Eval
+seeds come from 10000–19999, so the ranges cannot overlap: `sdp/seeds.py` enforces it
+and `tests/test_seed_split.py` tests it. There were two training runs. Run 1 scored
+0/100 on seeds 10000–10099, which made those the *dev* seeds. A check on run 1's own
+training frames showed it ignored the cube's position, so run 2 changed two settings
+(below). Both runs were then scored once on seeds 10100–10199, the *test* seeds,
+which no configuration choice had seen. The headline uses those. The shifted
+condition reuses the same seeds with the cube's start box moved by (+8 cm, −8 cm), so
+each shifted episode is a paired twin of a nominal one; about 22 % of the shifted box
+still overlaps the training box. An episode counts as a success only if the cube's
+centre ends inside the 6 cm square, resting on the table, with the gripper open and
+the cube still, and all of that holds for 0.5 s within the 12.5 s limit. The
+intervals are 95 % Wilson score intervals. With 100 trials a rate near 50 % carries
+about ±10 points, and 0/100 still allows up to 4 %. So differences under ~15 points
+between rows are not evidence, and one training seed per run says nothing about
+seed-to-seed variance.
 
 ## Where it fails
 
-TODO (filled from the eval results)
+- **ACT-specific failure modes**: see the taxonomy table above. EVAL-NOTES (filled
+  from the eval results).
+- **Only scripted data.** All 50 demos come from one deterministic waypoint expert, so
+  every demonstration follows the same path with the same timing. That is the easiest
+  data an imitation learner can get. Teleoperated demos are slower, noisier and
+  multimodal, and they are what the method has to handle on a real robot. There is no
+  teleop row because teleop needs a person at the keyboard; that scripted-vs-teleop gap
+  is unmeasured.
+- **Image resolution.** At 96×96 the 4 cm cube covers 41–59 pixels (a bounding box
+  6–10 px wide) in the front image, measured over 20 eval seeds per distribution. The policy finds it mostly from the wrist camera once the hand is close, and
+  the cube's yaw is barely resolvable from the front view.
+- **CPU-sized model and schedule.** dim_model 256, 2 encoder and 1 decoder layers,
+  3000 steps of batch 8 is about 4.4 epochs over 5.5k frames, with one training seed.
+  LeRobot's defaults are 100k steps. These rates describe this budget, not ACT.
+- **No peg insertion and no So-101 yet.** The contact-rich task and the low-cost
+  5-DoF arm are deferred, so nothing here says how the pipeline does on contact-rich
+  manipulation or on a reduced workspace.
+- **Only one kind of shift.** The shifted condition moves the cube's start box. The
+  lighting, colours, camera poses, target position and object are never varied.
 
 ## What transfers to hardware
 
