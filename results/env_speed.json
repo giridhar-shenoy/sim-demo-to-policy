@@ -1,0 +1,9 @@
+{
+  "env": "PandaPickPlace-v0",
+  "steps": 2000,
+  "steps_per_s_with_images": 448.5,
+  "steps_per_s_without_images": 1096.9,
+  "mujoco_gl": "egl",
+  "cpu": "x86_64",
+  "load_avg_1min_at_end": 1.66
+}
