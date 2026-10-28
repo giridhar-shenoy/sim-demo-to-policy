@@ -69,3 +69,42 @@ What is left: recorder + 50 demos (CP2), training wrapper + 45-min run, eval har
 for ACT (CP3), GIF, README/docs, CI smokes (CP4).
 
 Does Sunday 1 Nov hold? **Yes.**
+
+## CHECKPOINT 2 — dataset loads — 29 Oct 2026 03:30 IST
+
+Wall-clock so far: 48 min. `git status`: clean after the recorder commits.
+
+```text
+$ flock ~/work/.locks/heavy.lock flock ~/work/.locks/build.lock scripts/record_demos.sh
+episode 50/50 seed 49: success (109 frames, 47 s elapsed)
+wrote 50 episodes to datasets/pickplace_scripted_50 (50 successful)
+{
+  "dataset": "pickplace_scripted_50",
+  "codebase_version": "v3.0",
+  "episodes": 50,
+  "frames": 5513,
+  "fps": 20,
+  "successful_episodes": 50,
+  "mean_episode_length_steps": 110.26,
+  "min_max_episode_length_steps": [104, 117],
+  "seeds": [0, 49],
+  ...
+}
+real 0m52.992s
+```
+
+| Dataset | Episodes | Frames | Mean length | Successful | Seeds |
+|---|---|---|---|---|---|
+| pickplace_scripted_50 | 50 | 5513 | 110.3 steps (5.5 s) | 50 | 0–49 |
+
+- Loads with `LeRobotDataset("local/pickplace_scripted_50", root=...)` (the summary
+  script does exactly that); `meta/info.json` → `codebase_version: "v3.0"`.
+- Recorder round-trip test (`tests/test_recorder.py`, 2 tiny episodes): 3 passed.
+- **Not done: the LeRobot visualiser** (`lerobot-dataset-viz`) needs a GUI (rerun
+  viewer) — listed under WAITING FOR GIRI.
+- Only the scripted dataset exists: teleop datasets (50 + 50 + 30) are cut by the
+  sprint override (teleop needs Giri at the keyboard; peg/So-101 envs not built).
+
+What is left: training wrapper + ACT CPU run (≤ 45 min), ACT eval (CP3), GIF, docs, CI smokes.
+
+Does Sunday 1 Nov hold? **Yes.**
