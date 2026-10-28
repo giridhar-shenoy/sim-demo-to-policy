@@ -10,9 +10,14 @@ torch 2.11, 4 threads), MuJoCo offscreen rendering via EGL on the integrated GPU
 |---|---|---|---|
 | Env throughput | steps/s, both 96 px cameras | 448 | `python scripts/bench_env_speed.py` |
 | expert_demo_seeds (nominal) | success, seeds 0–99 | 100/100 (100 %, Wilson 95 % 96 %–100 %) | `python scripts/eval_expert.py` |
-| act_cpu_scripted50 (nominal) | success, seeds 10000–10099 | 0/100 (0 %, Wilson 95 % 0 %–4 %) | `scripts/eval_all.sh` |
-| act_cpu_scripted50 (shifted) | success, seeds 10000–10099 | 0/100 (0 %, Wilson 95 % 0 %–4 %) | `scripts/eval_all.sh` |
+| act_cpu_scripted50 (nominal) | success, seeds 10000–10099 | 0/100 (0 %, Wilson 95 % 0 %–4 %) | `sdp eval --checkpoint outputs/train/act_cpu_scripted50 --condition act_cpu_scripted50 --trials 100 --distributions nominal shifted` |
+| act_cpu_scripted50 (shifted) | success, seeds 10000–10099 | 0/100 (0 %, Wilson 95 % 0 %–4 %) | `sdp eval --checkpoint outputs/train/act_cpu_scripted50 --condition act_cpu_scripted50 --trials 100 --distributions nominal shifted` |
+| act_cpu_scripted50 (nominal) | success, seeds 10100–10199 | 0/100 (0 %, Wilson 95 % 0 %–4 %) | `sdp eval --checkpoint outputs/train/act_cpu_scripted50 --condition act_cpu_scripted50 --trials 100 --seed-start 100` |
+| act_cpu_scripted50 (shifted) | success, seeds 10100–10199 | 0/100 (0 %, Wilson 95 % 0 %–4 %) | `sdp eval --checkpoint outputs/train/act_cpu_scripted50 --condition act_cpu_scripted50 --trials 100 --seed-start 100` |
+| act_cpu_v2_scripted50 (nominal) | success, seeds 10100–10199 | 0/100 (0 %, Wilson 95 % 0 %–4 %) | `sdp eval --checkpoint outputs/train/act_cpu_v2_scripted50 --condition act_cpu_v2_scripted50 --trials 100 --seed-start 100` |
+| act_cpu_v2_scripted50 (shifted) | success, seeds 10100–10199 | 0/100 (0 %, Wilson 95 % 0 %–4 %) | `sdp eval --checkpoint outputs/train/act_cpu_v2_scripted50 --condition act_cpu_v2_scripted50 --trials 100 --seed-start 100` |
 | Training act_cpu_scripted50 | wall time | 21.0 min | `scripts/train_cpu.sh` |
+| Training act_cpu_v2_scripted50 | wall time | 17.1 min | `scripts/train_cpu.sh` |
 | Dataset pickplace_scripted_50 | episodes (successful) / mean length | 50 (50) / 110.3 steps | `scripts/record_demos.sh` |
 <!-- sdp-report:index:end -->
 
@@ -51,8 +56,12 @@ episodes). The headline uses the test seeds, which no configuration choice has s
 | expert_demo_seeds | nominal | 0–99 | 100 | 100/100 (100 %) | 96 %–100 % | 109.9 | [`results/expert_pickplace.csv`](../results/expert_pickplace.csv) |
 | expert_eval_seeds | nominal | 10000–10099 | 100 | 100/100 (100 %) | 96 %–100 % | 110.6 | [`results/expert_pickplace.csv`](../results/expert_pickplace.csv) |
 | expert_eval_seeds | shifted | 10000–10099 | 100 | 100/100 (100 %) | 96 %–100 % | 117.2 | [`results/expert_pickplace.csv`](../results/expert_pickplace.csv) |
-| act_cpu_scripted50 | nominal | 10000–10099 | 100 | 0/100 (0 %) | 0 %–4 % | – | [`results/eval_act_pickplace.csv`](../results/eval_act_pickplace.csv) |
-| act_cpu_scripted50 | shifted | 10000–10099 | 100 | 0/100 (0 %) | 0 %–4 % | – | [`results/eval_act_pickplace.csv`](../results/eval_act_pickplace.csv) |
+| act_cpu_scripted50 | nominal | 10000–10099 | 100 | 0/100 (0 %) | 0 %–4 % | – | [`results/eval_act_cpu_scripted50_s10000.csv`](../results/eval_act_cpu_scripted50_s10000.csv) |
+| act_cpu_scripted50 | shifted | 10000–10099 | 100 | 0/100 (0 %) | 0 %–4 % | – | [`results/eval_act_cpu_scripted50_s10000.csv`](../results/eval_act_cpu_scripted50_s10000.csv) |
+| act_cpu_scripted50 | nominal | 10100–10199 | 100 | 0/100 (0 %) | 0 %–4 % | – | [`results/eval_act_cpu_scripted50_s10100.csv`](../results/eval_act_cpu_scripted50_s10100.csv) |
+| act_cpu_scripted50 | shifted | 10100–10199 | 100 | 0/100 (0 %) | 0 %–4 % | – | [`results/eval_act_cpu_scripted50_s10100.csv`](../results/eval_act_cpu_scripted50_s10100.csv) |
+| act_cpu_v2_scripted50 | nominal | 10100–10199 | 100 | 0/100 (0 %) | 0 %–4 % | – | [`results/eval_act_cpu_v2_scripted50_s10100.csv`](../results/eval_act_cpu_v2_scripted50_s10100.csv) |
+| act_cpu_v2_scripted50 | shifted | 10100–10199 | 100 | 0/100 (0 %) | 0 %–4 % | – | [`results/eval_act_cpu_v2_scripted50_s10100.csv`](../results/eval_act_cpu_v2_scripted50_s10100.csv) |
 <!-- sdp-report:success:end -->
 
 Full-config rows (LeRobot defaults, 100k steps on a free GPU) are **not run**: the
@@ -70,6 +79,10 @@ Labels and their order are defined in `sdp/eval/taxonomy.py`; each episode gets 
 | expert_eval_seeds | shifted | 100 | 0 | 0 | 0 | 0 | 0 | 0 |
 | act_cpu_scripted50 | nominal | 0 | 3 | 97 | 0 | 0 | 0 | 0 |
 | act_cpu_scripted50 | shifted | 0 | 0 | 100 | 0 | 0 | 0 | 0 |
+| act_cpu_scripted50 | nominal | 0 | 3 | 97 | 0 | 0 | 0 | 0 |
+| act_cpu_scripted50 | shifted | 0 | 0 | 100 | 0 | 0 | 0 | 0 |
+| act_cpu_v2_scripted50 | nominal | 0 | 7 | 93 | 0 | 0 | 0 | 0 |
+| act_cpu_v2_scripted50 | shifted | 0 | 5 | 95 | 0 | 0 | 0 | 0 |
 <!-- sdp-report:taxonomy:end -->
 
 ## Training
@@ -80,6 +93,7 @@ Regenerate with `scripts/train_cpu.sh` (the loss curve is in `results/train_*.cs
 | Run | Config | Steps | Wall time | Final loss | Machine |
 |---|---|---|---|---|---|
 | act_cpu_scripted50 | `sdp/train/configs/act_cpu.yaml` | 3000 | 21.0 min | 0.096 | i5-1135G7 (4C/8T), 14 GB RAM, CPU only, torch 4 threads |
+| act_cpu_v2_scripted50 | `sdp/train/configs/act_cpu_v2.yaml` | 3000 | 17.1 min | 0.082 | i5-1135G7 (4C/8T), 14 GB RAM, CPU only, torch 4 threads |
 <!-- sdp-report:training:end -->
 
 ## Dataset

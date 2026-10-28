@@ -11,7 +11,7 @@ and confidence intervals.
 It shows the whole demonstration-to-policy loop running end to end on a CPU, with every
 success rate traceable to a per-episode CSV whose seeds never overlap the demonstrations.
 <!-- sdp-report:headline:begin -->
-ACT trained for 3000 CPU steps on 50 scripted demonstrations succeeds in 0/100 (0 %, Wilson 95 % 0 %–4 %) held-out episodes, and in 0/100 (0 %, Wilson 95 % 0 %–4 %) with the cube's start box shifted by 8 cm.
+ACT (run 2: 3000 training steps, 17 min on the laptop CPU, 50 scripted demonstrations) succeeds in 0/100 (0 %, Wilson 95 % 0 %–4 %) held-out test episodes (seeds 10100–10199), and in 0/100 (0 %, Wilson 95 % 0 %–4 %) with the cube's start box shifted by 8 cm.
 <!-- sdp-report:headline:end -->
 
 **Language split:** Python only. The imitation-learning stack (LeRobot, PyTorch,
@@ -53,8 +53,12 @@ script retrains them rather than downloading them.
 | expert_demo_seeds | nominal | 0–99 | 100 | 100/100 (100 %) | 96 %–100 % | 109.9 | [`results/expert_pickplace.csv`](results/expert_pickplace.csv) |
 | expert_eval_seeds | nominal | 10000–10099 | 100 | 100/100 (100 %) | 96 %–100 % | 110.6 | [`results/expert_pickplace.csv`](results/expert_pickplace.csv) |
 | expert_eval_seeds | shifted | 10000–10099 | 100 | 100/100 (100 %) | 96 %–100 % | 117.2 | [`results/expert_pickplace.csv`](results/expert_pickplace.csv) |
-| act_cpu_scripted50 | nominal | 10000–10099 | 100 | 0/100 (0 %) | 0 %–4 % | – | [`results/eval_act_pickplace.csv`](results/eval_act_pickplace.csv) |
-| act_cpu_scripted50 | shifted | 10000–10099 | 100 | 0/100 (0 %) | 0 %–4 % | – | [`results/eval_act_pickplace.csv`](results/eval_act_pickplace.csv) |
+| act_cpu_scripted50 | nominal | 10000–10099 | 100 | 0/100 (0 %) | 0 %–4 % | – | [`results/eval_act_cpu_scripted50_s10000.csv`](results/eval_act_cpu_scripted50_s10000.csv) |
+| act_cpu_scripted50 | shifted | 10000–10099 | 100 | 0/100 (0 %) | 0 %–4 % | – | [`results/eval_act_cpu_scripted50_s10000.csv`](results/eval_act_cpu_scripted50_s10000.csv) |
+| act_cpu_scripted50 | nominal | 10100–10199 | 100 | 0/100 (0 %) | 0 %–4 % | – | [`results/eval_act_cpu_scripted50_s10100.csv`](results/eval_act_cpu_scripted50_s10100.csv) |
+| act_cpu_scripted50 | shifted | 10100–10199 | 100 | 0/100 (0 %) | 0 %–4 % | – | [`results/eval_act_cpu_scripted50_s10100.csv`](results/eval_act_cpu_scripted50_s10100.csv) |
+| act_cpu_v2_scripted50 | nominal | 10100–10199 | 100 | 0/100 (0 %) | 0 %–4 % | – | [`results/eval_act_cpu_v2_scripted50_s10100.csv`](results/eval_act_cpu_v2_scripted50_s10100.csv) |
+| act_cpu_v2_scripted50 | shifted | 10100–10199 | 100 | 0/100 (0 %) | 0 %–4 % | – | [`results/eval_act_cpu_v2_scripted50_s10100.csv`](results/eval_act_cpu_v2_scripted50_s10100.csv) |
 <!-- sdp-report:success:end -->
 
 Failure labels (one per episode, defined in [`sdp/eval/taxonomy.py`](sdp/eval/taxonomy.py)):
@@ -67,12 +71,17 @@ Failure labels (one per episode, defined in [`sdp/eval/taxonomy.py`](sdp/eval/ta
 | expert_eval_seeds | shifted | 100 | 0 | 0 | 0 | 0 | 0 | 0 |
 | act_cpu_scripted50 | nominal | 0 | 3 | 97 | 0 | 0 | 0 | 0 |
 | act_cpu_scripted50 | shifted | 0 | 0 | 100 | 0 | 0 | 0 | 0 |
+| act_cpu_scripted50 | nominal | 0 | 3 | 97 | 0 | 0 | 0 | 0 |
+| act_cpu_scripted50 | shifted | 0 | 0 | 100 | 0 | 0 | 0 | 0 |
+| act_cpu_v2_scripted50 | nominal | 0 | 7 | 93 | 0 | 0 | 0 | 0 |
+| act_cpu_v2_scripted50 | shifted | 0 | 5 | 95 | 0 | 0 | 0 | 0 |
 <!-- sdp-report:taxonomy:end -->
 
 <!-- sdp-report:training:begin -->
 | Run | Config | Steps | Wall time | Final loss | Machine |
 |---|---|---|---|---|---|
 | act_cpu_scripted50 | `sdp/train/configs/act_cpu.yaml` | 3000 | 21.0 min | 0.096 | i5-1135G7 (4C/8T), 14 GB RAM, CPU only, torch 4 threads |
+| act_cpu_v2_scripted50 | `sdp/train/configs/act_cpu_v2.yaml` | 3000 | 17.1 min | 0.082 | i5-1135G7 (4C/8T), 14 GB RAM, CPU only, torch 4 threads |
 <!-- sdp-report:training:end -->
 
 More tables (dataset, env throughput, seed ranges, pose boxes) and the command behind
@@ -100,8 +109,21 @@ seed-to-seed variance.
 
 ## Where it fails
 
-- **ACT-specific failure modes**: see the taxonomy table above. EVAL-NOTES (filled
-  from the eval results).
+- **The ACT policy never reaches the cube.** Both CPU runs score 0/100, nominal and
+  shifted, on dev and test seeds. 93–100 % of the episodes are `never_reached` and the
+  rest are `collision` (fingers pressed into the table). The policy descends straight
+  down from the home pose instead of first moving over the cube. On its own training
+  frames it reproduces the descend, close, lift and carry actions. But its first x, y
+  and yaw outputs are identical (std 0.00) across 20 training episodes whose cubes sit
+  in different places, while the recorded actions vary (std 0.38 in x, 0.55 in yaw)
+  ([`results/openloop_*.json`](results/)). Swapping in another episode's images barely
+  moves the output, while black images change it a lot. So the network uses the
+  images, but not to find the cube. The 15-D proprioceptive state predicts every
+  phase except the ~10 approach frames per episode, and 3000 steps of batch 8
+  (≈ 4.4 epochs) did not learn that remaining, vision-only part from 96 px images.
+  Run 2's changes (backbone lr 1e-4, CVAE off) did not change this. This is
+  underfitting under the spec'd CPU budget, not distribution shift. The shifted
+  condition says nothing yet, because there is no nominal success to lose.
 - **Only scripted data.** All 50 demos come from one deterministic waypoint expert, so
   every demonstration follows the same path with the same timing. That is the easiest
   data an imitation learner can get. Teleoperated demos are slower, noisier and
@@ -140,6 +162,10 @@ contact-rich task. The longer version, marked as a draft:
 
 ## What I'd do next
 
+- **Make ACT localise the cube** before anything else: train longer than the spec'd
+  3000 CPU steps, or at full size on a free GPU. Alternatively, withhold or delay the
+  proprioceptive state, so it can't stand in for the cube's position, and check that
+  the open-loop image-swap test then moves the approach actions.
 - **Teleoperated data**: keyboard teleop in the gym_hil key layout, then SpaceMouse,
   then the R3 retargeting pipeline as the teleop device. That would give a
   scripted-vs-teleop data comparison on the same eval seeds.

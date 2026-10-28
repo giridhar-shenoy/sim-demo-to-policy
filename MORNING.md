@@ -33,6 +33,17 @@
 7. **Edit `docs/hardware_transfer.md`** (marked DRAFT, first person, no employer names).
 8. **Keyboard teleop demos (SHOULD)**: skipped; needs you at the keyboard.
 
+9. **ACT scores 0/100 on every condition (CHECKPOINT 3).** Both CPU runs learn the
+   state-predictable phases but ignore where the cube is (diagnosis in CHECKPOINTS.md
+   and README "Where it fails"). Options, in my order of preference:
+   (a) approve one more CPU run that departs from the spec'd 3000 steps, e.g. 8000
+   steps ≈ 45 min at run 2's speed (0.34 s/step), which is still inside the 45-min cap;
+   (b) approve a run that withholds the proprioceptive state from the policy (keeps
+   3000 steps; removes the shortcut, which is a dataset-feature change);
+   (c) leave v0.1 at 0 % with the diagnosis and do the full-size run on Colab next week.
+   Recommendation: (a) first, because it changes nothing but the step count. Blocks: a
+   non-zero headline number.
+
 ## DECISIONS MADE OVERNIGHT (review)
 
 - **Action space = DLS IK, not mocap** (the prompt's "ask me before"; overnight rules
