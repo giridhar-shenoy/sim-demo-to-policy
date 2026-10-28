@@ -1,0 +1,29 @@
+# ACT, CPU-sized, second run. Same budget-defining settings as act_cpu.yaml (dim_model
+# 256, 2 enc / 1 dec layers, chunk 20, 96x96, batch 8, 3000 steps). Two changes,
+# chosen from a training-set diagnosis of run 1 (its first-step x/y/yaw outputs had
+# std 0.00 across 20 training episodes, i.e. it ignored where the cube was):
+#   - optimizer_lr_backbone 1e-5 -> 1e-4: let the ImageNet features adapt in 3000 steps;
+#   - use_vae false: the scripted demos are unimodal and deterministic, so the CVAE
+#     latent has nothing to model (the ACT paper motivates it with human demos).
+# A third change, replace_final_stride_with_dilation (6x6 instead of 3x3 feature maps),
+# is not possible: torchvision's ResNet-18 BasicBlock raises "Dilation > 1 not supported".
+policy:
+  type: act
+  device: cpu
+  push_to_hub: false
+  dim_model: 256
+  n_encoder_layers: 2
+  n_decoder_layers: 1
+  chunk_size: 20        # 1 s of actions at 20 Hz
+  n_action_steps: 10    # execute half a chunk (0.5 s), then re-plan
+  optimizer_lr: 1.0e-4
+  optimizer_lr_backbone: 1.0e-4
+  use_vae: false
+batch_size: 8
+steps: 3000
+num_workers: 1          # machine rule after the 03:32 OOM: 0 or 1 dataloader workers
+log_freq: 50
+save_freq: 1000
+seed: 1000
+wandb:
+  enable: false
