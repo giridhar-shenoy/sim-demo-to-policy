@@ -12,10 +12,11 @@ it is removed from the README.
 | `eval_expert.py [--image-size N --out …]` | `results/expert_pickplace.{csv,json}` (or the 128 px check) | 1.5–2 min |
 | `record_demos.sh [out] [image_size]` | 50-episode LeRobot v3.0 dataset + `results/dataset_*.json` | 1 min |
 | `train_cpu.sh [dataset] [out] [config]` | ACT checkpoint + `results/train_*.{csv,json}` | 17–21 min (3000 steps), ~45 min (8000) |
-| `eval_all.sh [run1] … [run5]` | `results/eval_*.{csv,json}`: run 1 on dev + test 1, run 2 on test 1, runs 3–5 on test 2–4 (6 × 200 episodes) | ~30 min |
+| `eval_all.sh [run1] … [run8]` | `results/eval_*.{csv,json}`: run 1 on dev + test 1, run 2 on test 1, runs 3–6 on test 2–5, runs 7 and 8 on test 6 (9 × 200 episodes) | ~35 min |
 | `record_gifs.sh [checkpoint]` | `docs/assets/act_success_failure.gif` | < 1 min |
 | `diagnose_openloop.py --checkpoint <run>` | `results/openloop_<run>.json`: does the first action vary with the cube's position? | 1 min |
 | `package_release_assets.sh` / `download_release_assets.sh` | release tarballs of the dataset and a checkpoint / fetch them | seconds |
+| `package_release_abs.sh` | release tarballs for run 7 @ 6000 and run 8 @ 20000 with their datasets | ~1 min of gzip |
 | `dataset_summary.py <root>` | episode counts and lengths of a dataset | seconds |
 | `fetch_menagerie.sh [dest]` | the pinned Menagerie Panda model | seconds |
 | `probe_render.py` | which MuJoCo GL backends work (used in CI) | seconds |

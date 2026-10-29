@@ -76,10 +76,16 @@ RUNS = {
     "act_cpu_v4_scripted50": ("run 4", "run 2 + proprioceptive state withheld (cameras only)"),
     "act_cpu_v5_scripted50_128px": ("run 5", "run 4 + 128 px cameras (demos re-recorded)"),
     "act_cpu_v6_scripted50": ("run 6", "run 2 + lr 1e-5 and backbone lr 1e-5 (LeRobot defaults)"),
+    "act_cpu_v7_abs": ("run 7", "run 2 + absolute TCP-target actions"),
+    "act_cpu_v8_abs_dart": ("run 8", "run 7 + 200 demos, half with DART noise"),
 }
+# The headline policy, fixed on dev seeds before any test eval (NOTES.md, session 7).
+HEADLINE_RUN = "act_cpu_v8_abs_dart"
 # Dataset each run was trained on (results/dataset_<name>.json).
 RUN_DATASET = {run: "pickplace_scripted_50" for run in RUNS} | {
-    "act_cpu_v5_scripted50_128px": "pickplace_scripted_50_128px"
+    "act_cpu_v5_scripted50_128px": "pickplace_scripted_50_128px",
+    "act_cpu_v7_abs": "pickplace_abs_50",
+    "act_cpu_v8_abs_dart": "pickplace_abs_dart_200",
 }
 
 
@@ -220,11 +226,35 @@ def _rate(c: dict) -> str:
     )
 
 
+def _run_details(results: Path, run: str) -> str:
+    details = []
+    train = results / f"train_{run}.json"
+    if train.with_suffix(".csv").is_file():
+        details.append(
+            f"{int(float(_final_row(train.with_suffix('.csv'))['step']))} training steps"
+        )
+    if train.is_file():
+        details.append(
+            f"{json.loads(train.read_text())['wall_time_s'] / 60:.1f} min on the laptop CPU"
+        )
+    ds = results / f"dataset_{RUN_DATASET.get(run, '')}.json"
+    if ds.is_file():
+        details.append(f"{json.loads(ds.read_text())['episodes']} demonstrations")
+    return f"{RUNS[run][0]} ({RUNS[run][1]}; {', '.join(details)})"
+
+
+def _run_list(runs: list[str]) -> str:
+    nums = [int(RUNS[r][0].split()[-1]) for r in runs]
+    if nums == list(range(nums[0], nums[0] + len(nums))) and len(nums) > 2:
+        return f"runs {nums[0]}–{nums[-1]}"
+    return "runs " + ", ".join(str(n) for n in nums)
+
+
 def headline(results: Path) -> str:
     evals = {r: e for r, e in _test_evals(results).items() if "nominal" in e}
     if not evals:
         return "_ACT evaluation pending._"
-    run = _best_run(evals)
+    run = HEADLINE_RUN if HEADLINE_RUN in evals else _best_run(evals)
     act = evals[run]
     c = act["nominal"]
     if c["successes"] == 0 and all(
@@ -240,28 +270,68 @@ def headline(results: Path) -> str:
             f"held-out nominal test episodes and 0/100 with the cube's start box shifted by "
             f"8 cm ({runs})."
         )
-    train = results / f"train_{run}.json"
-    details = []
-    if train.with_suffix(".csv").is_file():
-        details.append(
-            f"{int(float(_final_row(train.with_suffix('.csv'))['step']))} training steps"
-        )
-    if train.is_file():
-        details.append(
-            f"{json.loads(train.read_text())['wall_time_s'] / 60:.1f} min on the laptop CPU"
-        )
-    details.append("50 scripted demonstrations")
     text = (
-        f"Best of {len(evals)} ACT runs: {RUNS[run][0]} ({RUNS[run][1]}; {', '.join(details)}) "
-        f"succeeds in {_rate(c)} held-out test episodes (seeds {c['seed_min']}–{c['seed_max']})"
+        f"ACT {_run_details(results, run)} succeeds in {_rate(c)} held-out test episodes "
+        f"(seeds {c['seed_min']}–{c['seed_max']})"
     )
     if "shifted" in act:
         text += f", and in {_rate(act['shifted'])} with the cube's start box shifted by 8 cm"
-    others = ", ".join(
-        f"{RUNS[r][0]} {e['nominal']['successes']}/{e['nominal']['trials']}"
+    text += "."
+    same = [
+        r
         for r, e in evals.items()
-    )
-    return text + f". All runs, nominal, on their own test seeds: {others}."
+        if r != run and e["nominal"]["seed_min"] == c["seed_min"] and e["nominal"]["successes"]
+    ]
+    for r in same:
+        e = evals[r]
+        text += (
+            f" On the same seeds, {_run_details(results, r)} succeeds in {_rate(e['nominal'])} "
+            f"nominal and {_rate(e['shifted'])} shifted episodes."
+        )
+    zero = [
+        r
+        for r, e in evals.items()
+        if e["nominal"]["successes"] == 0 and e.get("shifted", {}).get("successes", 0) == 0
+    ]
+    if zero:
+        text += (
+            f" The earlier {_run_list(zero)}, with per-step delta actions, score 0/100 each on "
+            f"their own test seeds."
+        )
+    return text
+
+
+def paired_table(results: Path) -> str:
+    """Per-seed comparison of runs evaluated on exactly the same test seeds."""
+    import csv
+
+    outcomes = {}
+    for run in RUNS:
+        files = sorted(results.glob(f"eval_{run}_s*.csv"))
+        if files:
+            rows = csv.DictReader(files[-1].open())
+            outcomes[run] = {(r["distribution"], r["seed"]): r["success"] == "True" for r in rows}
+    lines = [
+        "| Run A | Run B | Cube poses | Both succeed | Only A | Only B | Neither |",
+        "|---|---|---|---|---|---|---|",
+    ]
+    runs = list(outcomes)
+    for i, a in enumerate(runs):
+        for b in runs[i + 1 :]:
+            if set(outcomes[a]) != set(outcomes[b]):
+                continue
+            if not any(outcomes[a].values()) and not any(outcomes[b].values()):
+                continue
+            for dist in sorted({d for d, _ in outcomes[a]}):
+                keys = [k for k in outcomes[a] if k[0] == dist]
+                both = sum(outcomes[a][k] and outcomes[b][k] for k in keys)
+                only_a = sum(outcomes[a][k] and not outcomes[b][k] for k in keys)
+                only_b = sum(outcomes[b][k] and not outcomes[a][k] for k in keys)
+                lines.append(
+                    f"| {RUNS[a][0]} | {RUNS[b][0]} | {dist} | {both} | {only_a} | {only_b} "
+                    f"| {len(keys) - both - only_a - only_b} |"
+                )
+    return "\n".join(lines)
 
 
 def index_table(results: Path) -> str:
@@ -370,6 +440,7 @@ def timing_table(results: Path) -> str:
 
 
 TABLES = {
+    "paired": paired_table,
     "timing": timing_table,
     "diagnostics": diagnostics_table,
     "headline": headline,
