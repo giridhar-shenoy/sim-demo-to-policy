@@ -16,8 +16,11 @@ torch 2.11, 4 threads), MuJoCo offscreen rendering via EGL on the integrated GPU
 | act_cpu_scripted50 (shifted) | success, seeds 10100–10199 | 0/100 (0 %, Wilson 95 % 0 %–4 %) | `sdp eval --checkpoint outputs/train/act_cpu_scripted50 --condition act_cpu_scripted50 --trials 100 --seed-start 100` |
 | act_cpu_v2_scripted50 (nominal) | success, seeds 10100–10199 | 0/100 (0 %, Wilson 95 % 0 %–4 %) | `sdp eval --checkpoint outputs/train/act_cpu_v2_scripted50 --condition act_cpu_v2_scripted50 --trials 100 --seed-start 100` |
 | act_cpu_v2_scripted50 (shifted) | success, seeds 10100–10199 | 0/100 (0 %, Wilson 95 % 0 %–4 %) | `sdp eval --checkpoint outputs/train/act_cpu_v2_scripted50 --condition act_cpu_v2_scripted50 --trials 100 --seed-start 100` |
+| act_cpu_v3_scripted50 (nominal) | success, seeds 10200–10299 | 0/100 (0 %, Wilson 95 % 0 %–4 %) | `sdp eval --checkpoint outputs/train/act_cpu_v3_scripted50 --condition act_cpu_v3_scripted50 --trials 100 --seed-start 200` |
+| act_cpu_v3_scripted50 (shifted) | success, seeds 10200–10299 | 0/100 (0 %, Wilson 95 % 0 %–4 %) | `sdp eval --checkpoint outputs/train/act_cpu_v3_scripted50 --condition act_cpu_v3_scripted50 --trials 100 --seed-start 200` |
 | Training act_cpu_scripted50 | wall time | 21.0 min | `scripts/train_cpu.sh` |
 | Training act_cpu_v2_scripted50 | wall time | 17.1 min | `scripts/train_cpu.sh` |
+| Training act_cpu_v3_scripted50 | wall time | 45.3 min | `scripts/train_cpu.sh` |
 | Dataset pickplace_scripted_50 | episodes (successful) / mean length | 50 (50) / 110.3 steps | `scripts/record_demos.sh` |
 <!-- sdp-report:index:end -->
 
@@ -28,7 +31,8 @@ torch 2.11, 4 threads), MuJoCo offscreen rendering via EGL on the integrated GPU
 | Demonstrations | 0–999 (the 50 demos use 0–49) | `sdp/seeds.py` `check_demo`, called by the recorder |
 | Evaluation | 10000–19999 | `sdp/seeds.py` `check_eval`, called by `sdp eval` |
 | — dev | 10000–10099: run 1's eval, whose result led to run 2's config | `scripts/eval_all.sh` |
-| — test | 10100–10199: each run evaluated once, after run 2's config was frozen | `scripts/eval_all.sh` |
+| — test 1 | 10100–10199: runs 1 and 2, once each, after run 2's config was frozen | `scripts/eval_all.sh` |
+| — test 2 | 10200–10299: run 3 only; chosen before run 3 was trained, never used for any choice | `scripts/eval_all.sh` |
 | Overlap | none | `tests/test_seed_split.py` |
 
 A seed fully determines the cube's initial pose. Nominal and shifted evals use the
@@ -45,11 +49,13 @@ About 22 % of the shifted box overlaps the nominal box ((7 cm × 7 cm) / (15 cm 
 
 Regenerate with `scripts/eval_all.sh` (ACT) and `python scripts/eval_expert.py` (expert).
 `act_cpu_scripted50` is run 1 (`sdp/train/configs/act_cpu.yaml`); `act_cpu_v2_scripted50`
-is run 2 (`act_cpu_v2.yaml`: backbone lr 1e-4 instead of 1e-5, CVAE off). Run 2 exists
+is run 2 (`act_cpu_v2.yaml`: backbone lr 1e-4 instead of 1e-5, CVAE off);
+`act_cpu_v3_scripted50` is run 3 (`act_cpu_v3.yaml`: run 2 with 8000 steps instead of
+the spec'd 3000, approved by Giri after runs 1 and 2 underfit). Run 2 exists
 because run 1 scored 0/100 on the dev seeds; a training-set check showed its first-step
 x/y/yaw actions did not vary with the cube's position (std ≤ 0.003 over 20 training
-episodes, against 0.38 / 0.04 / 0.55 in the data). The headline uses the test seeds,
-which no configuration choice has seen.
+episodes, against 0.38 / 0.04 / 0.55 in the data). The headline uses run 3 on test 2
+seeds, which no configuration choice has seen.
 
 <!-- sdp-report:success:begin -->
 | Policy / data | Cube poses | Seeds | Trials | Success | Wilson 95 % CI | Mean length, successes (steps) | Per-episode CSV |
@@ -57,12 +63,14 @@ which no configuration choice has seen.
 | expert_demo_seeds | nominal | 0–99 | 100 | 100/100 (100 %) | 96 %–100 % | 109.9 | [`results/expert_pickplace.csv`](../results/expert_pickplace.csv) |
 | expert_eval_seeds | nominal | 10000–10099 | 100 | 100/100 (100 %) | 96 %–100 % | 110.6 | [`results/expert_pickplace.csv`](../results/expert_pickplace.csv) |
 | expert_eval_seeds | shifted | 10000–10099 | 100 | 100/100 (100 %) | 96 %–100 % | 117.2 | [`results/expert_pickplace.csv`](../results/expert_pickplace.csv) |
-| act_cpu_scripted50 | nominal | 10000–10099 | 100 | 0/100 (0 %) | 0 %–4 % | – | [`results/eval_act_cpu_scripted50_s10000.csv`](../results/eval_act_cpu_scripted50_s10000.csv) |
-| act_cpu_scripted50 | shifted | 10000–10099 | 100 | 0/100 (0 %) | 0 %–4 % | – | [`results/eval_act_cpu_scripted50_s10000.csv`](../results/eval_act_cpu_scripted50_s10000.csv) |
-| act_cpu_scripted50 | nominal | 10100–10199 | 100 | 0/100 (0 %) | 0 %–4 % | – | [`results/eval_act_cpu_scripted50_s10100.csv`](../results/eval_act_cpu_scripted50_s10100.csv) |
-| act_cpu_scripted50 | shifted | 10100–10199 | 100 | 0/100 (0 %) | 0 %–4 % | – | [`results/eval_act_cpu_scripted50_s10100.csv`](../results/eval_act_cpu_scripted50_s10100.csv) |
-| act_cpu_v2_scripted50 | nominal | 10100–10199 | 100 | 0/100 (0 %) | 0 %–4 % | – | [`results/eval_act_cpu_v2_scripted50_s10100.csv`](../results/eval_act_cpu_v2_scripted50_s10100.csv) |
-| act_cpu_v2_scripted50 | shifted | 10100–10199 | 100 | 0/100 (0 %) | 0 %–4 % | – | [`results/eval_act_cpu_v2_scripted50_s10100.csv`](../results/eval_act_cpu_v2_scripted50_s10100.csv) |
+| ACT run 1 (`act_cpu_scripted50`) | nominal | 10000–10099 | 100 | 0/100 (0 %) | 0 %–4 % | – | [`results/eval_act_cpu_scripted50_s10000.csv`](../results/eval_act_cpu_scripted50_s10000.csv) |
+| ACT run 1 (`act_cpu_scripted50`) | shifted | 10000–10099 | 100 | 0/100 (0 %) | 0 %–4 % | – | [`results/eval_act_cpu_scripted50_s10000.csv`](../results/eval_act_cpu_scripted50_s10000.csv) |
+| ACT run 1 (`act_cpu_scripted50`) | nominal | 10100–10199 | 100 | 0/100 (0 %) | 0 %–4 % | – | [`results/eval_act_cpu_scripted50_s10100.csv`](../results/eval_act_cpu_scripted50_s10100.csv) |
+| ACT run 1 (`act_cpu_scripted50`) | shifted | 10100–10199 | 100 | 0/100 (0 %) | 0 %–4 % | – | [`results/eval_act_cpu_scripted50_s10100.csv`](../results/eval_act_cpu_scripted50_s10100.csv) |
+| ACT run 2 (`act_cpu_v2_scripted50`) | nominal | 10100–10199 | 100 | 0/100 (0 %) | 0 %–4 % | – | [`results/eval_act_cpu_v2_scripted50_s10100.csv`](../results/eval_act_cpu_v2_scripted50_s10100.csv) |
+| ACT run 2 (`act_cpu_v2_scripted50`) | shifted | 10100–10199 | 100 | 0/100 (0 %) | 0 %–4 % | – | [`results/eval_act_cpu_v2_scripted50_s10100.csv`](../results/eval_act_cpu_v2_scripted50_s10100.csv) |
+| ACT run 3 (`act_cpu_v3_scripted50`) | nominal | 10200–10299 | 100 | 0/100 (0 %) | 0 %–4 % | – | [`results/eval_act_cpu_v3_scripted50_s10200.csv`](../results/eval_act_cpu_v3_scripted50_s10200.csv) |
+| ACT run 3 (`act_cpu_v3_scripted50`) | shifted | 10200–10299 | 100 | 0/100 (0 %) | 0 %–4 % | – | [`results/eval_act_cpu_v3_scripted50_s10200.csv`](../results/eval_act_cpu_v3_scripted50_s10200.csv) |
 <!-- sdp-report:success:end -->
 
 | Policy / data | Config | Success |
@@ -80,6 +88,7 @@ outputs/train/<run>` (`results/trainseeds_<run>.json`).
 |---|---|---|---|---|
 | act_cpu_scripted50 | 0.0001 / 0.0030 / 0.0001 (0.38 / 0.04 / 0.55) | 0.0098 | 0.62 | 0/10 (10 never_reached) |
 | act_cpu_v2_scripted50 | 0.0000 / 0.0005 / 0.0001 (0.38 / 0.04 / 0.55) | 0.0026 | 1.98 | 0/10 (10 never_reached) |
+| act_cpu_v3_scripted50 | 0.0000 / 0.0002 / 0.0000 (0.38 / 0.04 / 0.55) | 0.0020 | 1.99 | 0/10 (9 never_reached, 1 collision) |
 <!-- sdp-report:diagnostics:end -->
 
 ## Failure taxonomy (counts per label)
@@ -92,12 +101,14 @@ Labels and their order are defined in `sdp/eval/taxonomy.py`; each episode gets 
 | expert_demo_seeds | nominal | 100 | 0 | 0 | 0 | 0 | 0 | 0 |
 | expert_eval_seeds | nominal | 100 | 0 | 0 | 0 | 0 | 0 | 0 |
 | expert_eval_seeds | shifted | 100 | 0 | 0 | 0 | 0 | 0 | 0 |
-| act_cpu_scripted50 | nominal | 0 | 3 | 97 | 0 | 0 | 0 | 0 |
-| act_cpu_scripted50 | shifted | 0 | 0 | 100 | 0 | 0 | 0 | 0 |
-| act_cpu_scripted50 | nominal | 0 | 3 | 97 | 0 | 0 | 0 | 0 |
-| act_cpu_scripted50 | shifted | 0 | 0 | 100 | 0 | 0 | 0 | 0 |
-| act_cpu_v2_scripted50 | nominal | 0 | 7 | 93 | 0 | 0 | 0 | 0 |
-| act_cpu_v2_scripted50 | shifted | 0 | 5 | 95 | 0 | 0 | 0 | 0 |
+| ACT run 1 (`act_cpu_scripted50`) | nominal | 0 | 3 | 97 | 0 | 0 | 0 | 0 |
+| ACT run 1 (`act_cpu_scripted50`) | shifted | 0 | 0 | 100 | 0 | 0 | 0 | 0 |
+| ACT run 1 (`act_cpu_scripted50`) | nominal | 0 | 3 | 97 | 0 | 0 | 0 | 0 |
+| ACT run 1 (`act_cpu_scripted50`) | shifted | 0 | 0 | 100 | 0 | 0 | 0 | 0 |
+| ACT run 2 (`act_cpu_v2_scripted50`) | nominal | 0 | 7 | 93 | 0 | 0 | 0 | 0 |
+| ACT run 2 (`act_cpu_v2_scripted50`) | shifted | 0 | 5 | 95 | 0 | 0 | 0 | 0 |
+| ACT run 3 (`act_cpu_v3_scripted50`) | nominal | 0 | 13 | 87 | 0 | 0 | 0 | 0 |
+| ACT run 3 (`act_cpu_v3_scripted50`) | shifted | 0 | 13 | 87 | 0 | 0 | 0 | 0 |
 <!-- sdp-report:taxonomy:end -->
 
 ## Training
@@ -105,11 +116,21 @@ Labels and their order are defined in `sdp/eval/taxonomy.py`; each episode gets 
 Regenerate with `scripts/train_cpu.sh` (the loss curve is in `results/train_*.csv`).
 
 <!-- sdp-report:training:begin -->
-| Run | Config | Steps | Wall time | Final loss | Machine |
+| Run | Change from the spec'd CPU config | Steps | Wall time | Final loss | Config |
 |---|---|---|---|---|---|
-| act_cpu_scripted50 | `sdp/train/configs/act_cpu.yaml` | 3000 | 21.0 min | 0.096 | i5-1135G7 (4C/8T), 14 GB RAM, CPU only, torch 4 threads |
-| act_cpu_v2_scripted50 | `sdp/train/configs/act_cpu_v2.yaml` | 3000 | 17.1 min | 0.082 | i5-1135G7 (4C/8T), 14 GB RAM, CPU only, torch 4 threads |
+| run 1 (`act_cpu_scripted50`) | spec'd config; lr 1e-4, backbone lr 1e-5, CVAE on | 3000 | 21.0 min | 0.096 | `sdp/train/configs/act_cpu.yaml` |
+| run 2 (`act_cpu_v2_scripted50`) | run 1 + backbone lr 1e-4, CVAE off | 3000 | 17.1 min | 0.082 | `sdp/train/configs/act_cpu_v2.yaml` |
+| run 3 (`act_cpu_v3_scripted50`) | run 2 + 8000 steps instead of the spec'd 3000 | 8000 | 45.3 min | 0.063 | `sdp/train/configs/act_cpu_v3.yaml` |
 <!-- sdp-report:training:end -->
+
+Training budget: 45 min per run on the laptop CPU. For run 3 only, Giri raised the cap
+from 45 to 50 min because the laptop was in use. Run 3 took three attempts at the same
+config. Attempt 1 (45-min cap) was stopped at step ~1190 when it projected ~47 min.
+Attempt 2 (50-min cap, laptop busy with another ROS project) was stopped at step ~4065
+when it projected ~55 min. Neither was evaluated; their partial outputs are kept but
+not reported. The run in the tables is attempt 3, from scratch, with only a browser
+running: 45.3 min (2719.1 s) in one continuous segment, inside the 50-min cap
+(0.3 min over the original 45), so the resume-from-checkpoint fallback was not needed.
 
 ## Dataset
 

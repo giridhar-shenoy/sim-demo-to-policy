@@ -220,3 +220,18 @@ $ uv pip install --dry-run -r requirements.lock --index-strategy unsafe-best-mat
 Does Sunday 1 Nov hold? **Yes for v0.1 as specified** (everything in the MUST list is
 in place and CI is green). **No for a non-zero ACT success rate** without Giri's
 decision on a third run (MORNING.md, WAITING FOR GIRI #9).
+
+## Addendum — ACT run 3 (29 Oct 2026, 18:25 IST, approved by Giri)
+
+Run 3 = run 2's config with 8000 steps (the spec'd value is 3000); the cap was raised
+from 45 to 50 min for this run because the laptop was in use. Two attempts were stopped
+on projection (12:17 at ~1190 steps, ~47 min vs 45; 15:34 at ~4065 steps, ~55 min vs 50)
+and are kept aside, not reported. Attempt 3 (17:30, laptop quiet): 2719.1 s = 45.3 min,
+one segment.
+
+| Policy | Cube poses | Seeds | Success | Wilson 95 % | Labels |
+|---|---|---|---|---|---|
+| ACT run 3 | nominal | 10200–10299 (test 2) | 0/100 | 0–4 % | 87 never_reached, 13 collision |
+| ACT run 3 | shifted | 10200–10299 (test 2) | 0/100 | 0–4 % | 87 never_reached, 13 collision |
+
+Open-loop: first-step x/y/yaw std ≤ 0.0002; image swap ≤ 0.002; training seeds 0/10.

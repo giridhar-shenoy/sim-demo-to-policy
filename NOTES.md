@@ -308,3 +308,32 @@ uv pip install --python .venv/bin/python --no-deps -e .
   wait loop instead of acting on the monitor events. Checkpoints 001000–004000 are kept
   in `outputs/train/act_cpu_v3_scripted50/` (loss 0.069 at step 4050). Asked Giri how to
   proceed; nothing evaluated.
+- 17:28 Giri: laptop quiet apart from a browser; run 3 fresh from scratch (option B),
+  cap 50 min, on over-cap stop and resume from the latest checkpoint (report segments).
+  The 15:07 attempt was moved aside with its checkpoints:
+  `outputs/train/act_cpu_v3_scripted50_aborted_1534{,.log}` (checkpoints 1000–4000).
+- 17:28:54 re-probe (150 steps, `outputs/probe_v3b`): 0.28–0.32 s/step, startup ~55 s
+  (cold cache) → ~42 min projected.
+- 17:30:54 run 3 attempt 3 started. A guard ran as its own background job
+  (`/tmp/r4/guard_v3.sh`, log `/tmp/r4/guard_v3.log`). Every 30 s it projected from the
+  INFO timestamps (elapsed + remaining × last-1000-step rate). It would have stopped the
+  run after the next checkpoint if the projection exceeded 50 min, independent of my
+  waits. Projections rose from 41.3 min (step 600) to 45.3 min (step 7550) as the rate
+  drifted from 0.308 to 0.348 s/step. The CPU reported 2.4 GHz (base clock, no turbo),
+  consistent with a power/thermal limit; the same drift appears in every long run.
+- **18:16:15 run 3 finished in one segment: 2719.1 s = 45.3 min** (inside the 50-min
+  cap, 0.3 min over the original 45). Final loss 0.063 (L1 only), epoch 11.61. The
+  resume fallback was not needed.
+- 18:16–18:22 post-run (`/tmp/r4/run_post_v3.sh`, heavy+build `flock -o`):
+  `sdp eval … --seed-start 200` → nominal **0/100** (87 never_reached, 13 collision),
+  shifted **0/100** (87 never_reached, 13 collision; different seeds from nominal's 13,
+  so the matching counts are a coincidence), Wilson 95 % 0–4 % each. Policy compute: mean
+  2.4 ms per step, re-plan max 37–52 ms. Open loop: first-step d_x/d_y/d_yaw std
+  0.0000/0.0002/0.0000, image swap ≤ 0.002, black images up to 2.0. Training seeds 0–9:
+  0/10 (9 never_reached, 1 collision). GIF regenerated with run 3 (expert reference vs
+  ACT run 3 on seed 10200, 0.59 MB).
+- Conclusion change: with 2.7× the steps the policy is just as blind to the cube, so
+  "underfitting under the spec'd budget" was too narrow. It is a proprioceptive-state
+  shortcut that more training at this scale does not remove. README "Where it fails"
+  and "What I'd do next" are updated accordingly.
+- Release tarballs now include `act_cpu_v3_scripted50.tar.gz` (62 MB).

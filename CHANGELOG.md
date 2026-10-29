@@ -29,6 +29,10 @@ All notable changes to this project are documented here. The format follows
 - Diagnostics: open-loop check with image swap (`scripts/diagnose_openloop.py`) and
   training-seed rollouts (`scripts/diagnose_train_seeds.py`); both runs ignore the
   cube's position.
+- ACT run 3 (`act_cpu_v3.yaml`: run 2 with 8000 steps instead of the spec'd 3000,
+  approved by Giri; cap raised from 45 to 50 min for this run because the laptop was in
+  use): 45.3 min, 0/100 nominal and 0/100 shifted on fresh test seeds 10200–10299
+  (Wilson 95 % 0–4 %). The open-loop check shows it still ignores the cube's position.
 - README GIF: scripted expert (reference) beside an ACT failure on the same seed.
 - CI: 50-step training smoke and 3-episode eval smoke (37 tests, ~40 s).
 

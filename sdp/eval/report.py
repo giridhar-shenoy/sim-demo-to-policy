@@ -210,7 +210,7 @@ def headline(results: Path) -> str:
         )
     if train.is_file():
         details.append(
-            f"{json.loads(train.read_text())['wall_time_s'] / 60:.0f} min on the laptop CPU"
+            f"{json.loads(train.read_text())['wall_time_s'] / 60:.1f} min on the laptop CPU"
         )
     details.append("50 scripted demonstrations")
     text = (
