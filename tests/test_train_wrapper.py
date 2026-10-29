@@ -65,3 +65,20 @@ def test_rows_rebuild_rounded_steps():
     rows = rows_from_lines(lines, log_freq=50)
     assert [r["step"] for r in rows] == [50, 100, 150]
     assert [r["step_printed"] for r in rows] == [950, 1000, 1000]
+
+
+def test_input_features_pass_through_as_json():
+    import json
+
+    feats = {"observation.images.front": {"type": "VISUAL", "shape": [3, 96, 96]}}
+    flat = flatten({"policy": {"type": "act", "input_features": feats}})
+    assert flat["policy.type"] == "act"
+    assert json.loads(flat["policy.input_features"]) == feats
+
+
+def test_run4_config_withholds_only_the_state():
+    v2 = yaml.safe_load((CONFIG.parent / "act_cpu_v2.yaml").read_text())
+    v4 = yaml.safe_load((CONFIG.parent / "act_cpu_v4.yaml").read_text())
+    feats = v4["policy"].pop("input_features")
+    assert v4 == v2
+    assert set(feats) == {"observation.images.front", "observation.images.wrist"}

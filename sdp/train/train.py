@@ -29,11 +29,18 @@ _LOG_FIELD = re.compile(r"(?<![\w/.])([a-z_][a-z0-9_]*):(-?[\d.]+(?:e[-+]?\d+)?[
 _SCALE = {"K": 1e3, "M": 1e6, "B": 1e9}
 
 
+# Dict-valued config entries passed to lerobot-train as one JSON argument instead of
+# being flattened (their keys contain dots, e.g. "observation.images.front").
+JSON_LEAVES = {"input_features", "output_features"}
+
+
 def flatten(cfg: dict, prefix: str = "") -> dict[str, object]:
     out: dict[str, object] = {}
     for key, value in cfg.items():
         path = f"{prefix}{key}"
-        if isinstance(value, dict):
+        if key in JSON_LEAVES:
+            out[path] = json.dumps(value, separators=(",", ":"))
+        elif isinstance(value, dict):
             out.update(flatten(value, f"{path}."))
         else:
             out[path] = value

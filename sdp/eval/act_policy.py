@@ -13,6 +13,8 @@ from pathlib import Path
 
 import numpy as np
 
+from sdp.record.lerobot_writer import STATE_NAMES
+
 
 def resolve_checkpoint(path: str | Path) -> Path:
     """Accept a run dir, a checkpoints/<step> dir, or the pretrained_model dir itself."""
@@ -52,9 +54,9 @@ class ACTPolicyAdapter:
     def _warm_up(self) -> None:
         """One forward pass on a blank observation, so the first episode's timing does
         not include torch's lazy initialisation (~0.6 s on the laptop)."""
-        state_dim = self.policy.config.input_features["observation.state"].shape[0]
         blank = np.zeros((96, 96, 3), dtype=np.uint8)
-        self.act({"front": blank, "wrist": blank, "state": np.zeros(state_dim, np.float32)})
+        state = np.zeros(len(STATE_NAMES), np.float32)  # ignored if the policy has no state input
+        self.act({"front": blank, "wrist": blank, "state": state})
         self.reset()
 
     def reset(self) -> None:
