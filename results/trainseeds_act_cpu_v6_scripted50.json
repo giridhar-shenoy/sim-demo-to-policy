@@ -1,0 +1,21 @@
+{
+  "checkpoint": "outputs/train/act_cpu_v6_scripted50/checkpoints/last/pretrained_model",
+  "note": "diagnostic on training (demo) seeds; not an evaluation",
+  "seeds": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9
+  ],
+  "successes": 0,
+  "labels": {
+    "never_reached": 9,
+    "collision": 1
+  }
+}

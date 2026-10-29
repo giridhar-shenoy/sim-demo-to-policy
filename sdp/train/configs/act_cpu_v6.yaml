@@ -1,0 +1,29 @@
+# ACT, CPU-sized, sixth run. Identical to act_cpu_v2.yaml (96 px, state + both cameras,
+# CVAE off, 3000 steps, batch 8, chunk 20 / exec 10, save every 1000) except the learning
+# rates: optimizer_lr 1e-5 and optimizer_lr_backbone 1e-5 (LeRobot's ACT defaults).
+# Hypothesis under test: all five earlier runs used transformer lr 1e-4, and that caused
+# the collapse to one constant action chunk. physical-ai-studio issue #998 reports the
+# same collapse on a similar dataset at lr 1e-4, fixed by these defaults.
+# Pass criterion, fixed before training (same as runs 4-5): swapping images moves the
+# first-step d_x or d_yaw by >= 0.1, AND the first-step d_x or d_yaw std across 20
+# training episodes is >= 0.1 (scripts/diagnose_openloop.py). Approved by Giri, 30 Oct.
+policy:
+  type: act
+  device: cpu
+  push_to_hub: false
+  dim_model: 256
+  n_encoder_layers: 2
+  n_decoder_layers: 1
+  chunk_size: 20        # 1 s of actions at 20 Hz
+  n_action_steps: 10    # execute half a chunk (0.5 s), then re-plan
+  optimizer_lr: 1.0e-5            # run 2: 1e-4
+  optimizer_lr_backbone: 1.0e-5   # run 2: 1e-4
+  use_vae: false
+batch_size: 8
+steps: 3000
+num_workers: 1          # machine rule after the 03:32 OOM: 0 or 1 dataloader workers
+log_freq: 50
+save_freq: 1000
+seed: 1000
+wandb:
+  enable: false
