@@ -22,6 +22,7 @@ def _record(args: argparse.Namespace) -> int:
         ExpertPolicy(),
         demo_seeds(args.episodes, start=args.seed_start),
         source=args.source,
+        image_size=args.image_size,
     )
     ok = sum(r["success"] for r in records)
     print(f"wrote {len(records)} episodes to {args.out} ({ok} successful)")
@@ -30,14 +31,16 @@ def _record(args: argparse.Namespace) -> int:
 
 def _eval(args: argparse.Namespace, argv: list[str] | None = None) -> int:
     import platform
+    import time
 
     from sdp.envs import PandaPickPlaceEnv
     from sdp.eval.act_policy import ACTPolicyAdapter
     from sdp.eval.harness import run_condition, summarize, write_csv, write_summary
     from sdp.seeds import eval_seeds
 
+    t0 = time.perf_counter()
     policy = ACTPolicyAdapter(args.checkpoint, n_action_steps=args.n_action_steps)
-    env = PandaPickPlaceEnv()
+    env = PandaPickPlaceEnv(image_size=policy.image_size)
     seeds = eval_seeds(args.trials, start=args.seed_start)
     rows, summaries = [], []
     try:
@@ -60,6 +63,8 @@ def _eval(args: argparse.Namespace, argv: list[str] | None = None) -> int:
         "checkpoint": str(policy.path),
         "n_action_steps": policy.policy.config.n_action_steps,
         "chunk_size": policy.policy.config.chunk_size,
+        "image_size": policy.image_size,
+        "wall_time_s": round(time.perf_counter() - t0, 1),
         "python": platform.python_version(),
     }
     write_summary(summaries, f"{out}.json", meta=meta)
@@ -85,6 +90,7 @@ def build_parser() -> argparse.ArgumentParser:
     rec.add_argument("--source", default="scripted", choices=["scripted", "teleop"])
     rec.add_argument("--out", required=True, help="dataset root directory (must not exist)")
     rec.add_argument("--repo-id", default="local/sdp_pickplace_scripted")
+    rec.add_argument("--image-size", type=int, default=96, help="camera resolution (square)")
     rec.set_defaults(func=_record)
 
     ev = sub.add_parser("eval", help="evaluate an ACT checkpoint on held-out eval seeds")

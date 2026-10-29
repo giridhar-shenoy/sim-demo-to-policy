@@ -71,7 +71,9 @@ def main() -> None:
 
     picked = pick_seeds(args.csv)
     policy = ACTPolicyAdapter(args.checkpoint)
-    env = PandaPickPlaceEnv(render_mode="rgb_array", render_size=PANEL_HW)
+    env = PandaPickPlaceEnv(
+        render_mode="rgb_array", render_size=PANEL_HW, image_size=policy.image_size
+    )
     panels = []
     try:
         if "success" not in picked and "failure" in picked:

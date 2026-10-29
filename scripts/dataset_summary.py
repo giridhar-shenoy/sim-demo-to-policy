@@ -26,8 +26,12 @@ def main(root: str) -> None:
         "mean_episode_length_steps": float(lengths.mean()),
         "min_max_episode_length_steps": [int(lengths.min()), int(lengths.max())],
         "seeds": [min(r["seed"] for r in side), max(r["seed"] for r in side)],
+        "image_size": info["features"]["observation.images.front"]["shape"][0],
         "features": sorted(info["features"]),
     }
+    timing = root_p / "meta" / "sdp_recording.json"
+    if timing.is_file():
+        summary["recording_wall_time_s"] = json.loads(timing.read_text())["wall_time_s"]
     print(json.dumps(summary, indent=2))
     out = Path("results") / f"dataset_{root_p.name}.json"
     out.parent.mkdir(exist_ok=True)

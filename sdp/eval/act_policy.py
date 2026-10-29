@@ -51,10 +51,15 @@ class ACTPolicyAdapter:
         )
         self._warm_up()
 
+    @property
+    def image_size(self) -> int:
+        """Camera resolution the checkpoint was trained on (square images)."""
+        return int(self.policy.config.image_features["observation.images.front"].shape[-1])
+
     def _warm_up(self) -> None:
         """One forward pass on a blank observation, so the first episode's timing does
         not include torch's lazy initialisation (~0.6 s on the laptop)."""
-        blank = np.zeros((96, 96, 3), dtype=np.uint8)
+        blank = np.zeros((self.image_size, self.image_size, 3), dtype=np.uint8)
         state = np.zeros(len(STATE_NAMES), np.float32)  # ignored if the policy has no state input
         self.act({"front": blank, "wrist": blank, "state": state})
         self.reset()

@@ -128,3 +128,10 @@ def test_render_rgb_array(make_env):
     frame = env.render()
     assert frame.shape == (240, 320, 3) and frame.dtype == np.uint8
     assert frame.std() > 5  # not a blank image
+
+
+def test_image_size_is_configurable(make_env):
+    env = make_env(image_size=128)
+    obs, _ = env.reset(seed=0)
+    assert obs["front"].shape == obs["wrist"].shape == (128, 128, 3)
+    assert env.observation_space["front"].shape == (128, 128, 3)

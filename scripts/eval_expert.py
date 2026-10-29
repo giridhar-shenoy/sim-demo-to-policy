@@ -18,9 +18,18 @@ def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--n", type=int, default=100)
     ap.add_argument("--out", default="results/expert_pickplace")
+    ap.add_argument(
+        "--image-size",
+        type=int,
+        default=None,
+        help="also render both cameras at this size (the expert itself never reads them)",
+    )
     args = ap.parse_args()
 
-    env = PandaPickPlaceEnv(render_obs=False)
+    if args.image_size is None:
+        env = PandaPickPlaceEnv(render_obs=False)
+    else:
+        env = PandaPickPlaceEnv(render_obs=True, image_size=args.image_size)
     policy = ExpertPolicy()
     runs = [
         ("expert_demo_seeds", "nominal", demo_seeds(args.n)),
@@ -40,7 +49,8 @@ def main() -> None:
             f"mean length {s['mean_steps']:.1f} steps, labels {s['labels']}"
         )
     write_csv(rows, f"{args.out}.csv")
-    write_summary(summaries, f"{args.out}.json", meta={"python": platform.python_version()})
+    meta = {"python": platform.python_version(), "image_size": args.image_size}
+    write_summary(summaries, f"{args.out}.json", meta=meta)
     env.close()
 
 

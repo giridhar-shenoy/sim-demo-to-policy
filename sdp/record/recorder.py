@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import time
 from pathlib import Path
 
@@ -40,14 +41,20 @@ def record_dataset(
     source: str,
     distribution: str = "nominal",
     max_episode_steps: int | None = None,
+    image_size: int = 96,
     log=print,
 ) -> list[dict]:
-    """Record one episode per seed (demo seeds only) and finalize the dataset."""
+    """Record one episode per seed (demo seeds only) and finalize the dataset.
+
+    The total wall time goes to ``meta/sdp_recording.json`` next to the sidecar.
+    """
     check_demo(seeds)
-    env = PandaPickPlaceEnv(distribution=distribution)
+    env = PandaPickPlaceEnv(distribution=distribution, image_size=image_size)
     if max_episode_steps is not None:
         env.max_episode_steps = max_episode_steps
-    writer = LeRobotWriter(root, repo_id, fps=env.control_hz, task=env.task_description)
+    writer = LeRobotWriter(
+        root, repo_id, fps=env.control_hz, task=env.task_description, image_size=image_size
+    )
     records = []
     t0 = time.perf_counter()
     try:
@@ -64,4 +71,11 @@ def record_dataset(
     finally:
         writer.finalize()
         env.close()
+    timing = {
+        "wall_time_s": round(time.perf_counter() - t0, 1),
+        "episodes": len(records),
+        "image_size": image_size,
+        "source": source,
+    }
+    (Path(root) / "meta" / "sdp_recording.json").write_text(json.dumps(timing, indent=2) + "\n")
     return records
