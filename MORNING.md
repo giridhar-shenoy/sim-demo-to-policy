@@ -1,8 +1,40 @@
 # MORNING — sim-demo-to-policy
 
-## STATUS
+## STATUS (06:05 IST, 29 Oct)
 
-(written at the end of the night)
+**v0.1 MUST list: done. CI: green. ACT success rate: 0/100 on every condition. It is
+diagnosed, and the fix needs your decision (#9 below).**
+
+Done (commits on `main`, all pushed):
+
+| What | Commit(s) |
+|---|---|
+| Skeleton (license, Dockerfile, devcontainer, CI, pre-commit, docs stubs) | 6cf6118 … ba38e80 |
+| PandaPickPlace-v0 env (DLS IK, 500/20 Hz, two 96 px cameras, 448 steps/s) | 9a315fa |
+| Scripted expert, 100/100 on demo + eval seeds | bdd4b6b, 80dfb12 |
+| Eval harness, taxonomy, seed split, Wilson | 479624b, 7d1fbb1, 75f3295 |
+| LeRobot v3.0 recorder + 50 scripted demos | 713a7aa, 4e9bc9e |
+| Training wrapper + ACT CPU config (bundled commit, see #3) | d8bde37 |
+| ACT run 1 (21.0 min) / run 2 (17.1 min) + results: 0/100 everywhere | 3c8851e, 6796baf, 06794f7 |
+| Diagnostics (open loop, image swap, training seeds) | 57535a3, 768d54e, 5f4ed0f |
+| GIF (expert reference vs ACT failure), README, docs | fbd15c4, 75e8500 |
+| CHECKPOINT 4 | 281e1f3 |
+
+CI: latest run green, 37 passed in 40.74 s, job ~3 min:
+<https://github.com/giridhar-shenoy/sim-demo-to-policy/actions/runs/40794185957>
+
+Blocked (decisions below): a non-zero ACT number (#9), release upload (#4), topics and
+branch protection (#1, #2), hardware-transfer draft (#7).
+
+Next three steps:
+
+1. Decide #9. With (a), run `scripts/train_cpu.sh … act_cpu_v3.yaml` at 8000 steps
+   (~45 min), then `sdp eval … --seed-start 200` on fresh test seeds 10200–10299, and
+   `sdp report`.
+2. Upload the release (`gh release create v0.1.0 outputs/release/*.tar.gz`), then add
+   the download-only run path to the README.
+3. Edit `docs/hardware_transfer.md` and the README's hardware paragraph in your voice;
+   then make R1/R2 public so the README links resolve.
 
 ## WAITING FOR GIRI
 
