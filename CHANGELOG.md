@@ -23,3 +23,16 @@ All notable changes to this project are documented here. The format follows
   per-episode policy timing; `sdp eval`, `sdp report` (generated doc tables) and the
   GIF script.
 - Docs: architecture (Mermaid), results, tasks, hardware-transfer draft.
+- Two ACT CPU training runs (21.0 and 17.1 min) and their evaluation: 0/100 nominal and
+  0/100 shifted for both, on dev seeds 10000–10099 (run 1) and test seeds 10100–10199
+  (both runs); combined results in `results/eval_act_pickplace.{csv,json}`.
+- Diagnostics: open-loop check with image swap (`scripts/diagnose_openloop.py`) and
+  training-seed rollouts (`scripts/diagnose_train_seeds.py`); both runs ignore the
+  cube's position.
+- README GIF: scripted expert (reference) beside an ACT failure on the same seed.
+- CI: 50-step training smoke and 3-episode eval smoke (37 tests, ~40 s).
+
+### Fixed
+
+- Training CSV step column (lerobot prints `step:2K`); Wilson bounds exactly 0/1 at
+  0/n and n/n; ACT adapter warm-up so latency excludes torch initialisation.

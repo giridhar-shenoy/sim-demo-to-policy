@@ -47,8 +47,9 @@ Regenerate with `scripts/eval_all.sh` (ACT) and `python scripts/eval_expert.py` 
 `act_cpu_scripted50` is run 1 (`sdp/train/configs/act_cpu.yaml`); `act_cpu_v2_scripted50`
 is run 2 (`act_cpu_v2.yaml`: backbone lr 1e-4 instead of 1e-5, CVAE off). Run 2 exists
 because run 1 scored 0/100 on the dev seeds; a training-set check showed its first-step
-x/y/yaw actions did not vary at all with the cube's position (std 0.00 over 20 training
-episodes). The headline uses the test seeds, which no configuration choice has seen.
+x/y/yaw actions did not vary with the cube's position (std ≤ 0.003 over 20 training
+episodes, against 0.38 / 0.04 / 0.55 in the data). The headline uses the test seeds,
+which no configuration choice has seen.
 
 <!-- sdp-report:success:begin -->
 | Policy / data | Cube poses | Seeds | Trials | Success | Wilson 95 % CI | Mean length, successes (steps) | Per-episode CSV |
@@ -66,6 +67,19 @@ episodes). The headline uses the test seeds, which no configuration choice has s
 
 Full-config rows (LeRobot defaults, 100k steps on a free GPU) are **not run**: the
 Colab/Kaggle notebook is deferred to "What's next", so there are no full-config numbers.
+
+## Diagnostics (not evaluations)
+
+Regenerate with `python scripts/diagnose_openloop.py --checkpoint outputs/train/<run>`
+(`results/openloop_<run>.json`) and `python scripts/diagnose_train_seeds.py --checkpoint
+outputs/train/<run>` (`results/trainseeds_<run>.json`).
+
+<!-- sdp-report:diagnostics:begin -->
+| Run | First-step d_x / d_y / d_yaw std, policy (data) | Max change, images swapped | Max change, black images | Own demo seeds 0–9 |
+|---|---|---|---|---|
+| act_cpu_scripted50 | 0.0001 / 0.0030 / 0.0001 (0.38 / 0.04 / 0.55) | 0.0098 | 0.62 | 0/10 (10 never_reached) |
+| act_cpu_v2_scripted50 | 0.0000 / 0.0005 / 0.0001 (0.38 / 0.04 / 0.55) | 0.0026 | 1.98 | 0/10 (10 never_reached) |
+<!-- sdp-report:diagnostics:end -->
 
 ## Failure taxonomy (counts per label)
 

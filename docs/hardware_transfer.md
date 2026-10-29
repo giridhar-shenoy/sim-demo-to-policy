@@ -5,7 +5,8 @@
 > the hardware paragraphs are claims for Giri to confirm or cut.
 
 This repo trains an imitation policy entirely in simulation. Nothing here has run on a
-robot. This page is my list of what I would expect to carry over to a real arm, what
+robot, and the CPU-sized ACT policy does not yet solve the task even in simulation
+(0/100; see the README's "Where it fails"). This page is my list of what I would expect to carry over to a real arm, what
 would break first, and why, so that the success rates in the README are read as
 simulation numbers and nothing more.
 

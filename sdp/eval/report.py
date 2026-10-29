@@ -227,7 +227,33 @@ def index_table(results: Path) -> str:
     return "\n".join(lines)
 
 
+def diagnostics_table(results: Path) -> str:
+    lines = [
+        "| Run | First-step d_x / d_y / d_yaw std, policy (data) | Max change, images swapped "
+        "| Max change, black images | Own demo seeds 0–9 |",
+        "|---|---|---|---|---|",
+    ]
+    for path in sorted(results.glob("openloop_*.json")):
+        run = path.stem.removeprefix("openloop_")
+        d = json.loads(path.read_text())
+        f = d["first_action_across_episodes"]
+        dims = ("d_x", "d_y", "d_yaw")
+        pred = " / ".join(f"{f[k]['pred_std']:.4f}" for k in dims)
+        data = " / ".join(f"{f[k]['data_std']:.2f}" for k in dims)
+        swap = max(d.get("image_swap_max_abs_change", {"-": float("nan")}).values())
+        black = max(d.get("black_images_abs_change", {"-": float("nan")}).values())
+        seeds = results / f"trainseeds_{run}.json"
+        own = "–"
+        if seeds.is_file():
+            t = json.loads(seeds.read_text())
+            labels = ", ".join(f"{v} {k}" for k, v in t["labels"].items())
+            own = f"{t['successes']}/{len(t['seeds'])} ({labels})"
+        lines.append(f"| {run} | {pred} ({data}) | {swap:.4f} | {black:.2f} | {own} |")
+    return "\n".join(lines)
+
+
 TABLES = {
+    "diagnostics": diagnostics_table,
     "headline": headline,
     "index": index_table,
     "success": success_table,
