@@ -1,0 +1,31 @@
+# ACT, CPU-sized, fourth run. Identical to act_cpu_v2.yaml (3000 steps, backbone lr 1e-4,
+# CVAE off) except that the robot's proprioceptive state is withheld from the policy.
+# Runs 1-3 fitted every phase that the 15-D state predicts and ignored where the cube
+# was (first-step x/y/yaw did not vary across episodes, image swaps did not move them),
+# so run 4 removes the state input to force the policy to use the cameras. Approved by
+# Giri on 29 Oct 2026. The dataset is unchanged; the state is still recorded.
+policy:
+  type: act
+  device: cpu
+  push_to_hub: false
+  dim_model: 256
+  n_encoder_layers: 2
+  n_decoder_layers: 1
+  chunk_size: 20        # 1 s of actions at 20 Hz
+  n_action_steps: 10    # execute half a chunk (0.5 s), then re-plan
+  optimizer_lr: 1.0e-4
+  optimizer_lr_backbone: 1.0e-4
+  use_vae: false
+  # The one change from run 2: only the two cameras are policy inputs. Without this
+  # key LeRobot also feeds observation.state (TCP pose, finger gap, joint angles).
+  input_features:
+    observation.images.front: {type: VISUAL, shape: [3, 96, 96]}
+    observation.images.wrist: {type: VISUAL, shape: [3, 96, 96]}
+batch_size: 8
+steps: 3000
+num_workers: 1          # machine rule after the 03:32 OOM: 0 or 1 dataloader workers
+log_freq: 50
+save_freq: 1000
+seed: 1000
+wandb:
+  enable: false

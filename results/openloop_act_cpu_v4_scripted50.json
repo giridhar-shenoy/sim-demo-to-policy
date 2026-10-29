@@ -1,0 +1,70 @@
+{
+  "checkpoint": "outputs/train/act_cpu_v4_scripted50/checkpoints/last/pretrained_model",
+  "dataset": "datasets/pickplace_scripted_50",
+  "frame": 2,
+  "episodes": 20,
+  "first_action_across_episodes": {
+    "d_x": {
+      "data_std": 0.3762822449207306,
+      "pred_std": 1.1677860129566398e-05,
+      "corr": 0.3541124280690347
+    },
+    "d_y": {
+      "data_std": 0.04458639398217201,
+      "pred_std": 0.00018172484124079347,
+      "corr": -0.694317403503888
+    },
+    "d_z": {
+      "data_std": 5.960464477539063e-08,
+      "pred_std": 0.0002016247162828222,
+      "corr": null
+    },
+    "d_roll": {
+      "data_std": 0.0,
+      "pred_std": 0.0,
+      "corr": null
+    },
+    "d_pitch": {
+      "data_std": 0.0,
+      "pred_std": 0.0,
+      "corr": null
+    },
+    "d_yaw": {
+      "data_std": 0.5516501069068909,
+      "pred_std": 3.384160663699731e-05,
+      "corr": -0.12493476937644211
+    },
+    "gripper": {
+      "data_std": 0.0,
+      "pred_std": 0.0014931982150301337,
+      "corr": null
+    }
+  },
+  "image_swap_max_abs_change": {
+    "d_x": 0.0,
+    "d_y": 0.000699999975040555,
+    "d_z": 0.0005000000237487257,
+    "d_roll": 0.0,
+    "d_pitch": 0.0,
+    "d_yaw": 9.999999747378752e-05,
+    "gripper": 0.005499999970197678
+  },
+  "black_images_abs_change": {
+    "d_x": 0.00039999998989515007,
+    "d_y": 0.31130000948905945,
+    "d_z": 0.682200014591217,
+    "d_roll": 0.0,
+    "d_pitch": 0.0,
+    "d_yaw": 9.999999747378752e-05,
+    "gripper": 1.7441999912261963
+  },
+  "episode0_mean_abs_err": {
+    "d_x": 0.04540000110864639,
+    "d_y": 0.18459999561309814,
+    "d_z": 0.07090000063180923,
+    "d_roll": 0.0,
+    "d_pitch": 0.0,
+    "d_yaw": 0.12049999833106995,
+    "gripper": 0.009700000286102295
+  }
+}
