@@ -32,7 +32,17 @@ SIDECAR = "meta/sdp_episodes.jsonl"
 os.environ.setdefault("SVT_LOG", "1")
 
 
-def build_features(image_size: int = 96) -> dict:
+def action_names(action_mode: str = "delta") -> list[str]:
+    """Action feature names: the 7-D delta (env-native) or the 5-D absolute TCP target."""
+    from sdp.envs.abs_target import ABS_ACTION_NAMES, ACTION_MODES
+
+    if action_mode not in ACTION_MODES:
+        raise ValueError(f"unknown action mode {action_mode!r}; expected one of {ACTION_MODES}")
+    return list(ACTION_NAMES) if action_mode == "delta" else list(ABS_ACTION_NAMES)
+
+
+def build_features(image_size: int = 96, action_mode: str = "delta") -> dict:
+    names = action_names(action_mode)
     img = {
         "dtype": "video",
         "shape": (image_size, image_size, 3),
@@ -46,7 +56,7 @@ def build_features(image_size: int = 96) -> dict:
             "shape": (len(STATE_NAMES),),
             "names": STATE_NAMES,
         },
-        "action": {"dtype": "float32", "shape": (len(ACTION_NAMES),), "names": ACTION_NAMES},
+        "action": {"dtype": "float32", "shape": (len(names),), "names": names},
         "next.reward": {"dtype": "float32", "shape": (1,), "names": None},
         "next.done": {"dtype": "bool", "shape": (1,), "names": None},
         "next.success": {"dtype": "bool", "shape": (1,), "names": None},
@@ -73,6 +83,7 @@ class LeRobotWriter:
         fps: int,
         task: str,
         image_size: int = 96,
+        action_mode: str = "delta",
         robot_type: str = "franka_panda_sim",
         image_writer_threads: int = 4,
     ):
@@ -85,7 +96,7 @@ class LeRobotWriter:
         self.dataset = LeRobotDataset.create(
             repo_id=repo_id,
             fps=fps,
-            features=build_features(image_size),
+            features=build_features(image_size, action_mode),
             root=self.root,
             robot_type=robot_type,
             use_videos=True,

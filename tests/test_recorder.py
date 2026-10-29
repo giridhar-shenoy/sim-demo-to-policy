@@ -77,3 +77,26 @@ def test_load_back_matches_what_was_recorded(tiny_dataset):
         ref = frames[i]["observation.images.front"].astype(np.float32) / 255.0
         assert img.shape == (96, 96, 3)
         assert np.abs(img - ref).mean() < 0.05
+
+
+def test_abs_target_mode_records_5d_named_targets(tmp_path):
+    from sdp.envs.abs_target import ABS_ACTION_NAMES
+
+    root = tmp_path / "abs"
+    record_dataset(
+        root,
+        "local/sdp_test_abs",
+        ExpertPolicy(),
+        seeds=[5],
+        source="scripted",
+        max_episode_steps=MAX_STEPS,
+        action_mode="abs_target",
+        log=None,
+    )
+    info = json.loads((root / "meta" / "info.json").read_text())
+    assert info["features"]["action"]["shape"] == [5]
+    assert info["features"]["action"]["names"] == ABS_ACTION_NAMES
+    assert read_sidecar(root)[0]["action_mode"] == "abs_target"
+    assert json.loads((root / "meta" / "sdp_recording.json").read_text())["action_mode"] == (
+        "abs_target"
+    )
