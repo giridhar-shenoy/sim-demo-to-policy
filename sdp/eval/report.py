@@ -299,11 +299,16 @@ def index_table(results: Path) -> str:
     return "\n".join(lines)
 
 
-def criterion_met(d: dict, threshold: float = 0.1) -> bool:
+def criterion_met(d: dict, threshold: float = 0.1) -> bool | None:
     """The pass criterion fixed before runs 4-6: swapping images moves the first-step
-    d_x or d_yaw by >= 0.1, and their std across training episodes is >= 0.1."""
-    swap = d.get("image_swap_max_abs_change", {})
+    d_x or d_yaw by >= 0.1, and their std across training episodes is >= 0.1.
+
+    Defined on normalised delta actions only; returns None for other action modes.
+    """
     first = d["first_action_across_episodes"]
+    if "d_x" not in first:
+        return None
+    swap = d.get("image_swap_max_abs_change", {})
     moved = max(swap.get("d_x", 0.0), swap.get("d_yaw", 0.0)) >= threshold
     varies = max(first["d_x"]["pred_std"], first["d_yaw"]["pred_std"]) >= threshold
     return moved and varies
@@ -320,11 +325,11 @@ def diagnostics_table(results: Path) -> str:
         run = path.stem.removeprefix("openloop_")
         d = json.loads(path.read_text())
         f = d["first_action_across_episodes"]
-        dims = ("d_x", "d_y", "d_yaw")
+        dims = ("d_x", "d_y", "d_yaw") if "d_x" in f else ("target_x", "target_y", "target_yaw")
         pred = " / ".join(f"{f[k]['pred_std']:.4f}" for k in dims)
         data = " / ".join(f"{f[k]['data_std']:.2f}" for k in dims)
         swap = d.get("image_swap_max_abs_change")
-        swap_txt = f"{swap['d_x']:.4f} / {swap['d_yaw']:.4f}" if swap else "–"
+        swap_txt = f"{swap[dims[0]]:.4f} / {swap[dims[2]]:.4f}" if swap else "–"
         black = d.get("black_images_abs_change")
         black_txt = f"{max(black.values()):.2f}" if black else "–"
         seeds = results / f"trainseeds_{run}.json"
@@ -333,7 +338,8 @@ def diagnostics_table(results: Path) -> str:
             t = json.loads(seeds.read_text())
             labels = ", ".join(f"{v} {k}" for k, v in t["labels"].items())
             own = f"{t['successes']}/{len(t['seeds'])} ({labels})"
-        verdict = ("met" if criterion_met(d) else "not met") if swap else "–"
+        met = criterion_met(d) if swap else None
+        verdict = "–" if met is None else ("met" if met else "not met")
         lines.append(f"| {run} | {pred} ({data}) | {swap_txt} | {black_txt} | {own} | {verdict} |")
     return "\n".join(lines)
 

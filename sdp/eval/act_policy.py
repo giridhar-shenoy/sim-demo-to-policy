@@ -9,11 +9,15 @@ from the checkpoint config), cleared by ``reset()`` at the start of every episod
 
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 import numpy as np
 
 from sdp.record.lerobot_writer import STATE_NAMES
+
+# Action dimension -> action mode (see sdp.envs.abs_target).
+ACTION_MODE_BY_DIM = {7: "delta", 5: "abs_target"}
 
 
 def resolve_checkpoint(path: str | Path) -> Path:
@@ -27,6 +31,20 @@ def resolve_checkpoint(path: str | Path) -> Path:
         if (candidate / "config.json").is_file() and (candidate / "model.safetensors").is_file():
             return candidate
     raise FileNotFoundError(f"no LeRobot pretrained_model under {path}")
+
+
+def action_mode_from_shape(shape) -> str:
+    """'delta' for the env's 7-D action, 'abs_target' for the 5-D absolute TCP target."""
+    dim = int(shape[-1]) if hasattr(shape, "__len__") else int(shape)
+    if dim not in ACTION_MODE_BY_DIM:
+        raise ValueError(f"cannot infer the action mode from an action of dimension {dim}")
+    return ACTION_MODE_BY_DIM[dim]
+
+
+def action_mode_from_config(pretrained_dir: str | Path) -> str:
+    """Read the action mode from a checkpoint's ``config.json`` (output_features.action)."""
+    config = json.loads((Path(pretrained_dir) / "config.json").read_text())
+    return action_mode_from_shape(config["output_features"]["action"]["shape"])
 
 
 class ACTPolicyAdapter:
@@ -50,6 +68,19 @@ class ACTPolicyAdapter:
             preprocessor_overrides={"device_processor": {"device": device}},
         )
         self._warm_up()
+
+    @property
+    def action_mode(self) -> str:
+        """'delta' or 'abs_target', from the checkpoint's action shape."""
+        return action_mode_from_shape(self.policy.config.output_features["action"].shape)
+
+    def wrap_env(self, env):
+        """The env to run this policy in: wrapped for absolute-target checkpoints."""
+        if self.action_mode == "abs_target":
+            from sdp.envs.abs_target import AbsoluteTargetWrapper
+
+            return AbsoluteTargetWrapper(env)
+        return env
 
     @property
     def image_size(self) -> int:

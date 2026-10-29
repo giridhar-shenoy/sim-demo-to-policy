@@ -25,7 +25,7 @@ def main() -> None:
     args = ap.parse_args()
 
     policy = ACTPolicyAdapter(args.checkpoint)
-    env = PandaPickPlaceEnv(image_size=policy.image_size)
+    env = policy.wrap_env(PandaPickPlaceEnv(image_size=policy.image_size))
     try:
         results = [
             run_episode(env, policy, s, "nominal", "train_seed_diagnostic").result

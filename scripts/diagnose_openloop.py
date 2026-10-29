@@ -22,7 +22,7 @@ import numpy as np
 from lerobot.datasets.lerobot_dataset import LeRobotDataset
 
 from sdp.eval.act_policy import ACTPolicyAdapter
-from sdp.record.lerobot_writer import ACTION_NAMES, read_sidecar
+from sdp.record.lerobot_writer import read_sidecar
 
 
 def to_obs(item) -> dict:
@@ -46,6 +46,8 @@ def main() -> None:
 
     root = Path(args.dataset)
     ds = LeRobotDataset(f"local/{root.name}", root=root)
+    # Action names come from the dataset: 7-D delta or 5-D absolute target.
+    names = json.loads((root / "meta" / "info.json").read_text())["features"]["action"]["names"]
     policy = ACTPolicyAdapter(args.checkpoint)
     lengths = [r["length"] for r in read_sidecar(root)]
     starts = np.concatenate([[0], np.cumsum(lengths)[:-1]]).astype(int)
@@ -59,7 +61,7 @@ def main() -> None:
     pred, data = np.array(pred), np.array(data)
 
     per_dim = {}
-    for k, name in enumerate(ACTION_NAMES):
+    for k, name in enumerate(names):
         p_std, d_std = float(pred[:, k].std()), float(data[:, k].std())
         varies = p_std > 1e-6 and d_std > 1e-6
         corr = float(np.corrcoef(pred[:, k], data[:, k])[0, 1]) if varies else None
@@ -90,13 +92,13 @@ def main() -> None:
         "episodes": args.episodes,
         "first_action_across_episodes": per_dim,
         "image_swap_max_abs_change": dict(
-            zip(ACTION_NAMES, np.max(swaps, axis=0).round(4).tolist(), strict=True)
+            zip(names, np.max(swaps, axis=0).round(4).tolist(), strict=True)
         ),
         "black_images_abs_change": dict(
-            zip(ACTION_NAMES, np.abs(a_blank - a_base).round(4).tolist(), strict=True)
+            zip(names, np.abs(a_blank - a_base).round(4).tolist(), strict=True)
         ),
         "episode0_mean_abs_err": dict(
-            zip(ACTION_NAMES, np.mean(err, axis=0).round(4).tolist(), strict=True)
+            zip(names, np.mean(err, axis=0).round(4).tolist(), strict=True)
         ),
     }
     ckpt = Path(args.checkpoint)
@@ -108,7 +110,8 @@ def main() -> None:
         run = ckpt.name
     path = Path("results") / f"openloop_{run}.json"
     path.write_text(json.dumps(out, indent=2) + "\n")
-    for name in ("d_x", "d_y", "d_yaw"):
+    shown = ("d_x", "d_y", "d_yaw") if "d_x" in names else ("target_x", "target_y", "target_yaw")
+    for name in shown:
         d = per_dim[name]
         print(
             f"{run} {name}: data std {d['data_std']:.2f}, pred std {d['pred_std']:.4f}, "

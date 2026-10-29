@@ -23,6 +23,7 @@ def _record(args: argparse.Namespace) -> int:
         demo_seeds(args.episodes, start=args.seed_start),
         source=args.source,
         image_size=args.image_size,
+        action_mode=args.action_mode,
     )
     ok = sum(r["success"] for r in records)
     print(f"wrote {len(records)} episodes to {args.out} ({ok} successful)")
@@ -40,7 +41,7 @@ def _eval(args: argparse.Namespace, argv: list[str] | None = None) -> int:
 
     t0 = time.perf_counter()
     policy = ACTPolicyAdapter(args.checkpoint, n_action_steps=args.n_action_steps)
-    env = PandaPickPlaceEnv(image_size=policy.image_size)
+    env = policy.wrap_env(PandaPickPlaceEnv(image_size=policy.image_size))
     seeds = eval_seeds(args.trials, start=args.seed_start)
     rows, summaries = [], []
     try:
@@ -64,6 +65,7 @@ def _eval(args: argparse.Namespace, argv: list[str] | None = None) -> int:
         "n_action_steps": policy.policy.config.n_action_steps,
         "chunk_size": policy.policy.config.chunk_size,
         "image_size": policy.image_size,
+        "action_mode": policy.action_mode,
         "wall_time_s": round(time.perf_counter() - t0, 1),
         "python": platform.python_version(),
     }
@@ -91,6 +93,12 @@ def build_parser() -> argparse.ArgumentParser:
     rec.add_argument("--out", required=True, help="dataset root directory (must not exist)")
     rec.add_argument("--repo-id", default="local/sdp_pickplace_scripted")
     rec.add_argument("--image-size", type=int, default=96, help="camera resolution (square)")
+    rec.add_argument(
+        "--action-mode",
+        default="delta",
+        choices=["delta", "abs_target"],
+        help="record the 7-D delta (env-native) or the 5-D absolute TCP target",
+    )
     rec.set_defaults(func=_record)
 
     ev = sub.add_parser("eval", help="evaluate an ACT checkpoint on held-out eval seeds")

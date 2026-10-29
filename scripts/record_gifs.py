@@ -87,7 +87,7 @@ def main() -> None:
             if key not in picked:
                 continue
             seed, dist, csv_label = picked[key]
-            frames, info = rollout(env, policy, seed, dist)
+            frames, info = rollout(policy.wrap_env(env), policy, seed, dist)
             label = label_episode(info["episode"], info)
             if label != csv_label:
                 raise RuntimeError(f"seed {seed}: replay gave {label}, CSV says {csv_label}")
