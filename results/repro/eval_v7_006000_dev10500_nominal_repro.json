@@ -1,0 +1,40 @@
+{
+  "meta": {
+    "command": "sdp eval --checkpoint experiments/privileged/run7/train/act_cpu_v7_abs/checkpoints/006000 --condition v7_006000_dev10500_repro --trials 50 --seed-start 500 --distributions nominal --out results/repro/eval_v7_006000_dev10500_nominal_repro",
+    "checkpoint": "experiments/privileged/run7/train/act_cpu_v7_abs/checkpoints/006000/pretrained_model",
+    "n_action_steps": 10,
+    "chunk_size": 20,
+    "image_size": 96,
+    "action_mode": "abs_target",
+    "wall_time_s": 46.1,
+    "python": "3.12.16"
+  },
+  "conditions": [
+    {
+      "condition": "v7_006000_dev10500_repro",
+      "distribution": "nominal",
+      "trials": 50,
+      "successes": 31,
+      "success_rate": 0.62,
+      "wilson95": [
+        0.4815044682285895,
+        0.741372107728543
+      ],
+      "mean_steps": 164.68,
+      "mean_steps_success": 112.38709677419355,
+      "labels": {
+        "success": 31,
+        "collision": 0,
+        "never_reached": 3,
+        "grasp_missed": 11,
+        "dropped": 3,
+        "placed_outside": 2,
+        "timeout": 0
+      },
+      "seed_min": 10500,
+      "seed_max": 10549,
+      "policy_ms_mean": 2.3941,
+      "policy_ms_max": 33.812
+    }
+  ]
+}

@@ -499,3 +499,34 @@ Open questions:
   (converted delta within 1e-5 of the expert's, same length, success), yaw wrapping
   across ±π, adapter mode detection from shape and from config.json, and an abs-mode
   recorder round trip. Worktree suite: 50 passed (training smoke left to CI).
+
+## Session 7 — 30 Oct 2026, 03:46: runs 7 and 8 into the repo
+
+- Merged `feat/abs-actions` into main by fast-forward (2cfecdd; CI green on the branch,
+  run 40941080915) and pushed. Removed the `../r4-abs` worktree and deleted the branch
+  locally and on GitHub.
+- **Repro check (before any test seed):** `sdp eval --checkpoint
+  experiments/privileged/run7/train/act_cpu_v7_abs/checkpoints/006000 --condition
+  v7_006000_dev10500_repro --trials 50 --seed-start 500 --distributions nominal --out
+  results/repro/eval_v7_006000_dev10500_nominal_repro` gives 31/50 (Wilson 48–74 %),
+  identical episode by episode to `experiments/privileged/run7/results/
+  eval_v7_006000_dev10500_nominal.csv`: same success, label, step count and final cube
+  offset on all 50 seeds. The repo's adapter auto-detected the 5-D action and wrapped the
+  env.
+
+### Runs 7 and 8: pre-registered test plan (written 03:49, before any test eval)
+
+- **Headline policy: run 8 @ 20k** (`experiments/privileged/run8/train/
+  act_cpu_v8_abs_dart/checkpoints/020000`), chosen on dev seeds 10500–10549 before
+  testing by a rule fixed in advance. **Run 7 @ 6k** (`experiments/privileged/run7/train/
+  act_cpu_v7_abs/checkpoints/006000`) is reported alongside as the minimal change (run 2
+  with absolute targets).
+- **Test seeds: 10700–10799, 100 nominal + 100 shifted, the same seeds for both
+  policies** (a paired comparison). This replaces the earlier ledger plan (10700 for run
+  7, 10800 for run 8).
+- **Reserved:** 10800–10899 for the smallbc official eval; 11000+ untouched for a final
+  check.
+- **Rule:** each number is reported as it comes, with no re-runs and no checkpoint swaps
+  after seeing test results.
+- Order: run 8 nominal, run 8 shifted, run 7 nominal, run 7 shifted, all with `sdp eval`
+  under heavy+build `flock -o`, `nice -n 10`, after the 5 GB memory wait.
