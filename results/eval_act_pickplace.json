@@ -1,0 +1,171 @@
+{
+  "sources": [
+    "eval_act_cpu_scripted50_s10000.json",
+    "eval_act_cpu_scripted50_s10100.json",
+    "eval_act_cpu_v2_scripted50_s10100.json"
+  ],
+  "conditions": [
+    {
+      "condition": "act_cpu_scripted50",
+      "distribution": "nominal",
+      "trials": 100,
+      "successes": 0,
+      "success_rate": 0.0,
+      "wilson95": [
+        0.0,
+        0.03699349876899627
+      ],
+      "mean_steps": 250.0,
+      "mean_steps_success": null,
+      "labels": {
+        "success": 0,
+        "collision": 3,
+        "never_reached": 97,
+        "grasp_missed": 0,
+        "dropped": 0,
+        "placed_outside": 0,
+        "timeout": 0
+      },
+      "seed_min": 10000,
+      "seed_max": 10099,
+      "policy_ms_mean": 3.02325,
+      "policy_ms_max": 211.628,
+      "source": "eval_act_cpu_scripted50_s10000.json"
+    },
+    {
+      "condition": "act_cpu_scripted50",
+      "distribution": "shifted",
+      "trials": 100,
+      "successes": 0,
+      "success_rate": 0.0,
+      "wilson95": [
+        0.0,
+        0.03699349876899627
+      ],
+      "mean_steps": 250.0,
+      "mean_steps_success": null,
+      "labels": {
+        "success": 0,
+        "collision": 0,
+        "never_reached": 100,
+        "grasp_missed": 0,
+        "dropped": 0,
+        "placed_outside": 0,
+        "timeout": 0
+      },
+      "seed_min": 10000,
+      "seed_max": 10099,
+      "policy_ms_mean": 2.765389999999999,
+      "policy_ms_max": 42.14,
+      "source": "eval_act_cpu_scripted50_s10000.json"
+    },
+    {
+      "condition": "act_cpu_scripted50",
+      "distribution": "nominal",
+      "trials": 100,
+      "successes": 0,
+      "success_rate": 0.0,
+      "wilson95": [
+        0.0,
+        0.03699349876899627
+      ],
+      "mean_steps": 250.0,
+      "mean_steps_success": null,
+      "labels": {
+        "success": 0,
+        "collision": 3,
+        "never_reached": 97,
+        "grasp_missed": 0,
+        "dropped": 0,
+        "placed_outside": 0,
+        "timeout": 0
+      },
+      "seed_min": 10100,
+      "seed_max": 10199,
+      "policy_ms_mean": 3.94272,
+      "policy_ms_max": 261.209,
+      "source": "eval_act_cpu_scripted50_s10100.json"
+    },
+    {
+      "condition": "act_cpu_scripted50",
+      "distribution": "shifted",
+      "trials": 100,
+      "successes": 0,
+      "success_rate": 0.0,
+      "wilson95": [
+        0.0,
+        0.03699349876899627
+      ],
+      "mean_steps": 250.0,
+      "mean_steps_success": null,
+      "labels": {
+        "success": 0,
+        "collision": 0,
+        "never_reached": 100,
+        "grasp_missed": 0,
+        "dropped": 0,
+        "placed_outside": 0,
+        "timeout": 0
+      },
+      "seed_min": 10100,
+      "seed_max": 10199,
+      "policy_ms_mean": 3.7352600000000007,
+      "policy_ms_max": 272.501,
+      "source": "eval_act_cpu_scripted50_s10100.json"
+    },
+    {
+      "condition": "act_cpu_v2_scripted50",
+      "distribution": "nominal",
+      "trials": 100,
+      "successes": 0,
+      "success_rate": 0.0,
+      "wilson95": [
+        0.0,
+        0.03699349876899627
+      ],
+      "mean_steps": 250.0,
+      "mean_steps_success": null,
+      "labels": {
+        "success": 0,
+        "collision": 7,
+        "never_reached": 93,
+        "grasp_missed": 0,
+        "dropped": 0,
+        "placed_outside": 0,
+        "timeout": 0
+      },
+      "seed_min": 10100,
+      "seed_max": 10199,
+      "policy_ms_mean": 3.06035,
+      "policy_ms_max": 219.661,
+      "source": "eval_act_cpu_v2_scripted50_s10100.json"
+    },
+    {
+      "condition": "act_cpu_v2_scripted50",
+      "distribution": "shifted",
+      "trials": 100,
+      "successes": 0,
+      "success_rate": 0.0,
+      "wilson95": [
+        0.0,
+        0.03699349876899627
+      ],
+      "mean_steps": 250.0,
+      "mean_steps_success": null,
+      "labels": {
+        "success": 0,
+        "collision": 5,
+        "never_reached": 95,
+        "grasp_missed": 0,
+        "dropped": 0,
+        "placed_outside": 0,
+        "timeout": 0
+      },
+      "seed_min": 10100,
+      "seed_max": 10199,
+      "policy_ms_mean": 2.74682,
+      "policy_ms_max": 197.039,
+      "source": "eval_act_cpu_v2_scripted50_s10100.json"
+    }
+  ]
+}

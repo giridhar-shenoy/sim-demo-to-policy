@@ -28,9 +28,34 @@ SOURCES = {
 }
 
 
+COMBINED = "eval_act_pickplace"
+
+
 def _eval_files(results: Path) -> list[Path]:
-    files = [results / "expert_pickplace.json"] + sorted(results.glob("eval_*.json"))
+    """The expert file plus every per-call ``sdp eval`` output (not the combined file)."""
+    evals = [f for f in sorted(results.glob("eval_*.json")) if f.stem != COMBINED]
+    files = [results / "expert_pickplace.json"] + evals
     return [f for f in files if f.is_file()]
+
+
+def write_combined(results: Path) -> None:
+    """results/eval_act_pickplace.{csv,json}: every ACT episode row and summary in one place."""
+    per_call = [f for f in _eval_files(results) if f.stem.startswith("eval_act_")]
+    if not per_call:
+        return
+    rows = []
+    for f in per_call:
+        rows += f.with_suffix(".csv").read_text().splitlines()[(1 if rows else 0) :]
+    (results / f"{COMBINED}.csv").write_text("\n".join(rows) + "\n")
+    summary = {
+        "sources": [f.name for f in per_call],
+        "conditions": [
+            {**c, "source": f.name}
+            for f in per_call
+            for c in json.loads(f.read_text())["conditions"]
+        ],
+    }
+    (results / f"{COMBINED}.json").write_text(json.dumps(summary, indent=2) + "\n")
 
 
 def source_command(path: Path) -> str:
@@ -227,6 +252,7 @@ def render(text: str, results: Path) -> str:
 
 def update_docs(results: str | Path, targets: list[str]) -> None:
     results = Path(results)
+    write_combined(results)
     for target in targets:
         path = Path(target)
         if not path.is_file():
