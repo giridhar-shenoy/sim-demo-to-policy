@@ -295,3 +295,16 @@ uv pip install --python .venv/bin/python --no-deps -e .
   continued; asked Giri. The partial run is in `outputs/train/act_cpu_v3_scripted50/`
   (checkpoint 001000), untouched. (The tail-of-log projection watcher was useless:
   the log flushes only at newlines, so its step readings lag; use INFO timestamps.)
+- 15:07 Giri chose option (c): restart run 3 from scratch with the cap raised to 50 min
+  for this run only, laptop in normal use. The 12:17 partial run was moved aside, not
+  deleted: `outputs/train/act_cpu_v3_scripted50_aborted_1217{,.log}`.
+- 15:07:53 run 3 restarted (same config, same locks, `flock -o`, ≥ 5 GB free). Projections
+  from INFO timestamps: 45.7 min at step 1050 (15:14), then the desktop load rose (Giri's
+  `piper_teleop` ROS nodes + RViz, ~140 % CPU; load average 7.4). Recent-rate projection:
+  52.0 min at step 2650 (15:24:30, first OVER-CAP), 53.7 at 3100, 55.7 at 3500, 54.8 at
+  4050 (last-1000-step rate 0.40–0.45 s/step).
+- **15:34 run 3 stopped at step ~4065 of 8000 (26.0 min), projected ~55 min > 50.**
+  I noticed the first over-cap flag ~10 min late (15:24:30 → 15:34): I was in a blocking
+  wait loop instead of acting on the monitor events. Checkpoints 001000–004000 are kept
+  in `outputs/train/act_cpu_v3_scripted50/` (loss 0.069 at step 4050). Asked Giri how to
+  proceed; nothing evaluated.
