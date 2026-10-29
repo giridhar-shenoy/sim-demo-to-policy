@@ -21,3 +21,14 @@ third_party/
 # Editors
 .vscode/
 .idea/
+
+# experiments/: code, configs, reports and small JSON/CSV results are committed;
+# datasets, training outputs (checkpoints), raw logs and frame dumps are not.
+experiments/**/datasets/
+experiments/**/train/
+experiments/**/logs/
+experiments/smallbc/data/
+experiments/smallbc/runs/
+experiments/smallbc/logs/
+experiments/**/*.npz
+experiments/integrity/*.png

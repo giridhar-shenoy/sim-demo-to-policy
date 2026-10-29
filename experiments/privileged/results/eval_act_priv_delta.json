@@ -1,0 +1,64 @@
+{
+  "meta": {
+    "command": "experiments/privileged/eval_privileged.py --checkpoint experiments/privileged/train/act_priv_delta/checkpoints/last --mode delta --name act_priv_delta",
+    "checkpoint": "experiments/privileged/train/act_priv_delta/checkpoints/last/pretrained_model",
+    "mode": "delta",
+    "n_action_steps": 10,
+    "chunk_size": 20,
+    "wall_time_s": 26.6
+  },
+  "conditions": [
+    {
+      "condition": "act_priv_delta_s10500",
+      "distribution": "nominal",
+      "trials": 50,
+      "successes": 0,
+      "success_rate": 0.0,
+      "wilson95": [
+        0.0,
+        0.07134760017861413
+      ],
+      "mean_steps": 250.0,
+      "mean_steps_success": null,
+      "labels": {
+        "success": 0,
+        "collision": 0,
+        "never_reached": 50,
+        "grasp_missed": 0,
+        "dropped": 0,
+        "placed_outside": 0,
+        "timeout": 0
+      },
+      "seed_min": 10500,
+      "seed_max": 10549,
+      "policy_ms_mean": 0.4932599999999999,
+      "policy_ms_max": 10.62
+    },
+    {
+      "condition": "act_priv_delta_demo0",
+      "distribution": "nominal",
+      "trials": 10,
+      "successes": 0,
+      "success_rate": 0.0,
+      "wilson95": [
+        0.0,
+        0.2775328030260577
+      ],
+      "mean_steps": 250.0,
+      "mean_steps_success": null,
+      "labels": {
+        "success": 0,
+        "collision": 0,
+        "never_reached": 10,
+        "grasp_missed": 0,
+        "dropped": 0,
+        "placed_outside": 0,
+        "timeout": 0
+      },
+      "seed_min": 0,
+      "seed_max": 9,
+      "policy_ms_mean": 0.48179999999999995,
+      "policy_ms_max": 3.956
+    }
+  ]
+}

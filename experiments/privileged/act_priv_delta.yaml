@@ -1,0 +1,27 @@
+# Privileged-state ACT (delta actions). Run 2's architecture (act_cpu_v2.yaml) with no
+# cameras: inputs are the 15-D robot state and the 5-D cube pose (environment_state).
+# normalization_mapping (adding ENV: MEAN_STD) is passed with --set, because LeRobot's
+# ACT default maps only VISUAL/STATE/ACTION and would leave environment_state raw.
+policy:
+  type: act
+  device: cpu
+  push_to_hub: false
+  dim_model: 256
+  n_encoder_layers: 2
+  n_decoder_layers: 1
+  chunk_size: 20
+  n_action_steps: 10
+  optimizer_lr: 1.0e-4
+  optimizer_lr_backbone: 1.0e-4
+  use_vae: false
+  input_features:
+    observation.state: {type: STATE, shape: [15]}
+    observation.environment_state: {type: ENV, shape: [5]}
+batch_size: 32
+steps: 200
+num_workers: 1
+log_freq: 50
+save_freq: 1000
+seed: 1000
+wandb:
+  enable: false

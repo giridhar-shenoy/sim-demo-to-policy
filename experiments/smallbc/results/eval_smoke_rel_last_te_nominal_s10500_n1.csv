@@ -1,0 +1,2 @@
+condition,distribution,seed,success,label,steps,init_x,init_y,init_yaw,final_dx,final_dy,policy_ms_mean,policy_ms_max,wall_s
+smallbc_smoke_rel,nominal,10500,False,collision,250,0.56065,-0.06591,-0.33879,0.01065,-0.21591,6.458,12.848,3.036

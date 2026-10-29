@@ -1,0 +1,231 @@
+{
+  "dataset": "experiments/privileged/run7/datasets/pickplace_abs_50",
+  "frame": 2,
+  "episodes": 20,
+  "checkpoints": {
+    "008000": {
+      "checkpoint": "experiments/privileged/run8/train/act_cpu_v8_abs_dart/checkpoints/008000/pretrained_model",
+      "swap_max_change_raw": {
+        "x": 0.027,
+        "y": 0.0108,
+        "yaw": 0.0551
+      },
+      "swap_max_change_delta": {
+        "x": 1.1227,
+        "y": 0.4054,
+        "yaw": 0.5511
+      },
+      "swap_mean_change_delta": {
+        "x": 0.5147,
+        "y": 0.2247,
+        "yaw": 0.3114
+      },
+      "first_step_std_raw": {
+        "pred": {
+          "x": 0.026,
+          "y": 0.0052,
+          "yaw": 0.1499
+        },
+        "data": {
+          "x": 0.0272,
+          "y": 0.0009,
+          "yaw": 0.1701
+        }
+      },
+      "first_step_std_delta": {
+        "pred": {
+          "x": 0.3803,
+          "y": 0.1881,
+          "yaw": 0.3833
+        },
+        "data": {
+          "x": 0.3763,
+          "y": 0.0446,
+          "yaw": 0.5516
+        }
+      },
+      "first_step_corr_raw": {
+        "x": 0.9885,
+        "y": 0.2786,
+        "yaw": 0.9879
+      },
+      "black_images_change_delta": {
+        "x": 0.3455,
+        "y": 0.7007,
+        "yaw": 0.8441
+      },
+      "black_images_change_raw_z_grip": [
+        0.2157,
+        1.3975
+      ]
+    },
+    "012000": {
+      "checkpoint": "experiments/privileged/run8/train/act_cpu_v8_abs_dart/checkpoints/012000/pretrained_model",
+      "swap_max_change_raw": {
+        "x": 0.0255,
+        "y": 0.0113,
+        "yaw": 0.0705
+      },
+      "swap_max_change_delta": {
+        "x": 0.9939,
+        "y": 0.363,
+        "yaw": 0.705
+      },
+      "swap_mean_change_delta": {
+        "x": 0.5321,
+        "y": 0.1878,
+        "yaw": 0.3206
+      },
+      "first_step_std_raw": {
+        "pred": {
+          "x": 0.0242,
+          "y": 0.0073,
+          "yaw": 0.1435
+        },
+        "data": {
+          "x": 0.0272,
+          "y": 0.0009,
+          "yaw": 0.1701
+        }
+      },
+      "first_step_std_delta": {
+        "pred": {
+          "x": 0.2982,
+          "y": 0.1824,
+          "yaw": 0.3391
+        },
+        "data": {
+          "x": 0.3763,
+          "y": 0.0446,
+          "yaw": 0.5516
+        }
+      },
+      "first_step_corr_raw": {
+        "x": 0.9935,
+        "y": 0.3145,
+        "yaw": 0.9859
+      },
+      "black_images_change_delta": {
+        "x": 0.35,
+        "y": 1.1044,
+        "yaw": 0.5844
+      },
+      "black_images_change_raw_z_grip": [
+        0.1958,
+        1.233
+      ]
+    },
+    "016000": {
+      "checkpoint": "experiments/privileged/run8/train/act_cpu_v8_abs_dart/checkpoints/016000/pretrained_model",
+      "swap_max_change_raw": {
+        "x": 0.0274,
+        "y": 0.0166,
+        "yaw": 0.1535
+      },
+      "swap_max_change_delta": {
+        "x": 1.0527,
+        "y": 0.8295,
+        "yaw": 1.4023
+      },
+      "swap_mean_change_delta": {
+        "x": 0.646,
+        "y": 0.423,
+        "yaw": 1.0779
+      },
+      "first_step_std_raw": {
+        "pred": {
+          "x": 0.0257,
+          "y": 0.0029,
+          "yaw": 0.1797
+        },
+        "data": {
+          "x": 0.0272,
+          "y": 0.0009,
+          "yaw": 0.1701
+        }
+      },
+      "first_step_std_delta": {
+        "pred": {
+          "x": 0.3824,
+          "y": 0.1438,
+          "yaw": 0.5794
+        },
+        "data": {
+          "x": 0.3763,
+          "y": 0.0446,
+          "yaw": 0.5516
+        }
+      },
+      "first_step_corr_raw": {
+        "x": 0.9922,
+        "y": 0.1842,
+        "yaw": 0.9602
+      },
+      "black_images_change_delta": {
+        "x": 0.1348,
+        "y": 0.5612,
+        "yaw": 0.0
+      },
+      "black_images_change_raw_z_grip": [
+        0.1004,
+        0.7564
+      ]
+    },
+    "020000": {
+      "checkpoint": "experiments/privileged/run8/train/act_cpu_v8_abs_dart/checkpoints/020000/pretrained_model",
+      "swap_max_change_raw": {
+        "x": 0.0268,
+        "y": 0.0139,
+        "yaw": 0.1918
+      },
+      "swap_max_change_delta": {
+        "x": 1.0145,
+        "y": 0.6963,
+        "yaw": 1.8452
+      },
+      "swap_mean_change_delta": {
+        "x": 0.6357,
+        "y": 0.3879,
+        "yaw": 0.9928
+      },
+      "first_step_std_raw": {
+        "pred": {
+          "x": 0.0245,
+          "y": 0.0027,
+          "yaw": 0.1677
+        },
+        "data": {
+          "x": 0.0272,
+          "y": 0.0009,
+          "yaw": 0.1701
+        }
+      },
+      "first_step_std_delta": {
+        "pred": {
+          "x": 0.3257,
+          "y": 0.1368,
+          "yaw": 0.5724
+        },
+        "data": {
+          "x": 0.3763,
+          "y": 0.0446,
+          "yaw": 0.5516
+        }
+      },
+      "first_step_corr_raw": {
+        "x": 0.9931,
+        "y": 0.3352,
+        "yaw": 0.9791
+      },
+      "black_images_change_delta": {
+        "x": 0.1438,
+        "y": 0.8811,
+        "yaw": 0.1548
+      },
+      "black_images_change_raw_z_grip": [
+        0.1283,
+        1.0624
+      ]
+    }
+  }
+}

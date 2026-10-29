@@ -1,0 +1,41 @@
+{
+  "meta": {
+    "checkpoint": "experiments/smallbc/runs/smoke_rel/last.pt",
+    "checkpoint_step": 10,
+    "target_mode": "rel",
+    "chunk": 16,
+    "n_exec": 8,
+    "temporal_ensemble": true,
+    "te_m": 0.01,
+    "binarize_gripper": true,
+    "wall_s": 3.0
+  },
+  "conditions": [
+    {
+      "condition": "smallbc_smoke_rel",
+      "distribution": "nominal",
+      "trials": 1,
+      "successes": 0,
+      "success_rate": 0.0,
+      "wilson95": [
+        0.0,
+        0.7934506882081973
+      ],
+      "mean_steps": 250.0,
+      "mean_steps_success": null,
+      "labels": {
+        "success": 0,
+        "collision": 1,
+        "never_reached": 0,
+        "grasp_missed": 0,
+        "dropped": 0,
+        "placed_outside": 0,
+        "timeout": 0
+      },
+      "seed_min": 10500,
+      "seed_max": 10500,
+      "policy_ms_mean": 6.458,
+      "policy_ms_max": 12.848
+    }
+  ]
+}

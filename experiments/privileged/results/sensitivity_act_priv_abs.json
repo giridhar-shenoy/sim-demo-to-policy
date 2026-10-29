@@ -1,0 +1,53 @@
+{
+  "checkpoint": "experiments/privileged/train/act_priv_abs/checkpoints/last/pretrained_model",
+  "mode": "abs",
+  "frame": 2,
+  "episodes": 20,
+  "first_action_across_episodes": {
+    "x": {
+      "data_std": 0.02715781144797802,
+      "pred_std": 0.03052562102675438,
+      "corr": 0.9971242840174778,
+      "mean_abs_err": 0.003421542001888156
+    },
+    "y": {
+      "data_std": 0.0008917277446016669,
+      "pred_std": 0.004558675456792116,
+      "corr": 0.3463098160250483,
+      "mean_abs_err": 0.007318116724491119
+    },
+    "yaw": {
+      "data_std": 0.17009849846363068,
+      "pred_std": 0.1860835701227188,
+      "corr": 0.9739002757873375,
+      "mean_abs_err": 0.034851353615522385
+    }
+  },
+  "env_state_swap_max_abs_change": {
+    "x": 0.038638949394226074,
+    "y": 0.012794721871614456,
+    "yaw": 0.35848408937454224
+  },
+  "env_state_swap_mean_abs_change": {
+    "x": 0.02160279080271721,
+    "y": 0.007531288545578718,
+    "yaw": 0.1731082797050476
+  },
+  "as_wrapper_delta": {
+    "env_state_swap_max_abs_change": {
+      "x": 1.072,
+      "y": 0.6246,
+      "yaw": 1.4956
+    },
+    "pred_std": {
+      "x": 0.5437,
+      "y": 0.1509,
+      "yaw": 0.706
+    },
+    "data_std": {
+      "x": 0.3763,
+      "y": 0.0446,
+      "yaw": 0.5516
+    }
+  }
+}

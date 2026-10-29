@@ -1,0 +1,64 @@
+{
+  "meta": {
+    "command": "experiments/privileged/eval_privileged.py --checkpoint experiments/privileged/train/act_priv_abs/checkpoints/last --mode abs --name act_priv_abs",
+    "checkpoint": "experiments/privileged/train/act_priv_abs/checkpoints/last/pretrained_model",
+    "mode": "abs",
+    "n_action_steps": 10,
+    "chunk_size": 20,
+    "wall_time_s": 28.7
+  },
+  "conditions": [
+    {
+      "condition": "act_priv_abs_s10500",
+      "distribution": "nominal",
+      "trials": 50,
+      "successes": 50,
+      "success_rate": 1.0,
+      "wilson95": [
+        0.9286523998213857,
+        1.0
+      ],
+      "mean_steps": 107.72,
+      "mean_steps_success": 107.72,
+      "labels": {
+        "success": 50,
+        "collision": 0,
+        "never_reached": 0,
+        "grasp_missed": 0,
+        "dropped": 0,
+        "placed_outside": 0,
+        "timeout": 0
+      },
+      "seed_min": 10500,
+      "seed_max": 10549,
+      "policy_ms_mean": 0.52882,
+      "policy_ms_max": 4.609
+    },
+    {
+      "condition": "act_priv_abs_demo0",
+      "distribution": "nominal",
+      "trials": 10,
+      "successes": 10,
+      "success_rate": 1.0,
+      "wilson95": [
+        0.7224671969739421,
+        1.0
+      ],
+      "mean_steps": 109.0,
+      "mean_steps_success": 109.0,
+      "labels": {
+        "success": 10,
+        "collision": 0,
+        "never_reached": 0,
+        "grasp_missed": 0,
+        "dropped": 0,
+        "placed_outside": 0,
+        "timeout": 0
+      },
+      "seed_min": 0,
+      "seed_max": 9,
+      "policy_ms_mean": 0.4934000000000001,
+      "policy_ms_max": 3.628
+    }
+  ]
+}

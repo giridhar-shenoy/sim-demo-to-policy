@@ -1,0 +1,29 @@
+# Run 8: run 7 (run7/act_cpu_v7_abs.yaml) scaled up: 200 demos (DART noise on odd seeds,
+# clean-intent labels), 20000 steps, save_freq 4000. Same architecture, optimiser, batch 8
+# and inputs (both 96 px cameras + 15-D state, image normalisation left at the default);
+# the dataset's action is [target_x, target_y,
+# target_z, target_yaw, gripper], executed through AbsoluteTargetWrapper at eval.
+policy:
+  type: act
+  device: cpu
+  push_to_hub: false
+  dim_model: 256
+  n_encoder_layers: 2
+  n_decoder_layers: 1
+  chunk_size: 20
+  n_action_steps: 10
+  optimizer_lr: 1.0e-4
+  optimizer_lr_backbone: 1.0e-4
+  use_vae: false
+  input_features:
+    observation.state: {type: STATE, shape: [15]}
+    observation.images.front: {type: VISUAL, shape: [3, 96, 96]}
+    observation.images.wrist: {type: VISUAL, shape: [3, 96, 96]}
+batch_size: 8
+steps: 20000
+num_workers: 1
+log_freq: 50
+save_freq: 4000
+seed: 1000
+wandb:
+  enable: false

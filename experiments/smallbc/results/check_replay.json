@@ -1,0 +1,283 @@
+{
+  "pass": true,
+  "episodes": 25,
+  "successes": 25,
+  "max_action_diff": 2e-06,
+  "rows": [
+    {
+      "mode": "abs",
+      "n_exec": 1,
+      "temporal_ensemble": false,
+      "seed": 0,
+      "success": true,
+      "label": "success",
+      "steps": 113,
+      "recorded_steps": 113,
+      "max_action_diff": 1e-06
+    },
+    {
+      "mode": "abs",
+      "n_exec": 1,
+      "temporal_ensemble": false,
+      "seed": 1,
+      "success": true,
+      "label": "success",
+      "steps": 105,
+      "recorded_steps": 105,
+      "max_action_diff": 1e-06
+    },
+    {
+      "mode": "abs",
+      "n_exec": 1,
+      "temporal_ensemble": false,
+      "seed": 2,
+      "success": true,
+      "label": "success",
+      "steps": 113,
+      "recorded_steps": 113,
+      "max_action_diff": 2e-06
+    },
+    {
+      "mode": "abs",
+      "n_exec": 1,
+      "temporal_ensemble": false,
+      "seed": 3,
+      "success": true,
+      "label": "success",
+      "steps": 114,
+      "recorded_steps": 114,
+      "max_action_diff": 2e-06
+    },
+    {
+      "mode": "abs",
+      "n_exec": 1,
+      "temporal_ensemble": false,
+      "seed": 4,
+      "success": true,
+      "label": "success",
+      "steps": 110,
+      "recorded_steps": 110,
+      "max_action_diff": 2e-06
+    },
+    {
+      "mode": "abs",
+      "n_exec": 8,
+      "temporal_ensemble": false,
+      "seed": 0,
+      "success": true,
+      "label": "success",
+      "steps": 113,
+      "recorded_steps": 113,
+      "max_action_diff": 1e-06
+    },
+    {
+      "mode": "abs",
+      "n_exec": 8,
+      "temporal_ensemble": false,
+      "seed": 1,
+      "success": true,
+      "label": "success",
+      "steps": 105,
+      "recorded_steps": 105,
+      "max_action_diff": 1e-06
+    },
+    {
+      "mode": "abs",
+      "n_exec": 8,
+      "temporal_ensemble": false,
+      "seed": 2,
+      "success": true,
+      "label": "success",
+      "steps": 113,
+      "recorded_steps": 113,
+      "max_action_diff": 2e-06
+    },
+    {
+      "mode": "abs",
+      "n_exec": 8,
+      "temporal_ensemble": false,
+      "seed": 3,
+      "success": true,
+      "label": "success",
+      "steps": 114,
+      "recorded_steps": 114,
+      "max_action_diff": 2e-06
+    },
+    {
+      "mode": "abs",
+      "n_exec": 8,
+      "temporal_ensemble": false,
+      "seed": 4,
+      "success": true,
+      "label": "success",
+      "steps": 110,
+      "recorded_steps": 110,
+      "max_action_diff": 2e-06
+    },
+    {
+      "mode": "rel",
+      "n_exec": 8,
+      "temporal_ensemble": false,
+      "seed": 0,
+      "success": true,
+      "label": "success",
+      "steps": 113,
+      "recorded_steps": 113,
+      "max_action_diff": 2e-06
+    },
+    {
+      "mode": "rel",
+      "n_exec": 8,
+      "temporal_ensemble": false,
+      "seed": 1,
+      "success": true,
+      "label": "success",
+      "steps": 105,
+      "recorded_steps": 105,
+      "max_action_diff": 2e-06
+    },
+    {
+      "mode": "rel",
+      "n_exec": 8,
+      "temporal_ensemble": false,
+      "seed": 2,
+      "success": true,
+      "label": "success",
+      "steps": 113,
+      "recorded_steps": 113,
+      "max_action_diff": 2e-06
+    },
+    {
+      "mode": "rel",
+      "n_exec": 8,
+      "temporal_ensemble": false,
+      "seed": 3,
+      "success": true,
+      "label": "success",
+      "steps": 114,
+      "recorded_steps": 114,
+      "max_action_diff": 2e-06
+    },
+    {
+      "mode": "rel",
+      "n_exec": 8,
+      "temporal_ensemble": false,
+      "seed": 4,
+      "success": true,
+      "label": "success",
+      "steps": 110,
+      "recorded_steps": 110,
+      "max_action_diff": 2e-06
+    },
+    {
+      "mode": "abs",
+      "n_exec": 1,
+      "temporal_ensemble": true,
+      "seed": 0,
+      "success": true,
+      "label": "success",
+      "steps": 113,
+      "recorded_steps": 113,
+      "max_action_diff": 1e-06
+    },
+    {
+      "mode": "abs",
+      "n_exec": 1,
+      "temporal_ensemble": true,
+      "seed": 1,
+      "success": true,
+      "label": "success",
+      "steps": 105,
+      "recorded_steps": 105,
+      "max_action_diff": 1e-06
+    },
+    {
+      "mode": "abs",
+      "n_exec": 1,
+      "temporal_ensemble": true,
+      "seed": 2,
+      "success": true,
+      "label": "success",
+      "steps": 113,
+      "recorded_steps": 113,
+      "max_action_diff": 2e-06
+    },
+    {
+      "mode": "abs",
+      "n_exec": 1,
+      "temporal_ensemble": true,
+      "seed": 3,
+      "success": true,
+      "label": "success",
+      "steps": 114,
+      "recorded_steps": 114,
+      "max_action_diff": 2e-06
+    },
+    {
+      "mode": "abs",
+      "n_exec": 1,
+      "temporal_ensemble": true,
+      "seed": 4,
+      "success": true,
+      "label": "success",
+      "steps": 110,
+      "recorded_steps": 110,
+      "max_action_diff": 2e-06
+    },
+    {
+      "mode": "rel",
+      "n_exec": 1,
+      "temporal_ensemble": true,
+      "seed": 0,
+      "success": true,
+      "label": "success",
+      "steps": 113,
+      "recorded_steps": 113,
+      "max_action_diff": 1e-06
+    },
+    {
+      "mode": "rel",
+      "n_exec": 1,
+      "temporal_ensemble": true,
+      "seed": 1,
+      "success": true,
+      "label": "success",
+      "steps": 105,
+      "recorded_steps": 105,
+      "max_action_diff": 1e-06
+    },
+    {
+      "mode": "rel",
+      "n_exec": 1,
+      "temporal_ensemble": true,
+      "seed": 2,
+      "success": true,
+      "label": "success",
+      "steps": 113,
+      "recorded_steps": 113,
+      "max_action_diff": 2e-06
+    },
+    {
+      "mode": "rel",
+      "n_exec": 1,
+      "temporal_ensemble": true,
+      "seed": 3,
+      "success": true,
+      "label": "success",
+      "steps": 114,
+      "recorded_steps": 114,
+      "max_action_diff": 2e-06
+    },
+    {
+      "mode": "rel",
+      "n_exec": 1,
+      "temporal_ensemble": true,
+      "seed": 4,
+      "success": true,
+      "label": "success",
+      "steps": 110,
+      "recorded_steps": 110,
+      "max_action_diff": 2e-06
+    }
+  ]
+}

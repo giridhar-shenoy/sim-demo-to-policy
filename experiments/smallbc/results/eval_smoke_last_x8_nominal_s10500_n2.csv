@@ -1,0 +1,3 @@
+condition,distribution,seed,success,label,steps,init_x,init_y,init_yaw,final_dx,final_dy,policy_ms_mean,policy_ms_max,wall_s
+smallbc_smoke,nominal,10500,False,never_reached,250,0.56065,-0.06591,-0.33879,0.01065,-0.21591,0.999,11.901,1.813
+smallbc_smoke,nominal,10501,False,never_reached,250,0.51376,-0.07756,0.55835,-0.03624,-0.22756,0.969,9.908,1.562

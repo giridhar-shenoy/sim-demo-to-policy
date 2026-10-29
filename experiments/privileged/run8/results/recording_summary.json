@@ -1,0 +1,26 @@
+{
+  "groups": {
+    "clean": {
+      "attempted": 100,
+      "successes": 100,
+      "labels": {
+        "success": 100
+      },
+      "frames_kept": 11020
+    },
+    "dart": {
+      "attempted": 100,
+      "successes": 98,
+      "labels": {
+        "success": 98,
+        "dropped": 1,
+        "collision": 1
+      },
+      "frames_kept": 11157
+    }
+  },
+  "episodes_kept": 198,
+  "frames_kept": 22177,
+  "max_label_err_clean_vs_env_target": 2.9802322387695312e-08,
+  "wall_time_s": 205.5
+}

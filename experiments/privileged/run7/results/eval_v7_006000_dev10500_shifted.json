@@ -1,0 +1,35 @@
+{
+  "meta": {
+    "command": "experiments/privileged/run7/eval_run7.py --checkpoint experiments/privileged/run7/train/act_cpu_v7_abs/checkpoints/006000 --name v7_006000 --seeds dev --distribution shifted",
+    "checkpoint": "experiments/privileged/run7/train/act_cpu_v7_abs/checkpoints/006000/pretrained_model",
+    "wall_time_s": 59.8
+  },
+  "conditions": [
+    {
+      "condition": "v7_006000_dev10500",
+      "distribution": "shifted",
+      "trials": 50,
+      "successes": 11,
+      "success_rate": 0.22,
+      "wilson95": [
+        0.1275391591451957,
+        0.35241549695482816
+      ],
+      "mean_steps": 221.86,
+      "mean_steps_success": 122.0909090909091,
+      "labels": {
+        "success": 11,
+        "collision": 0,
+        "never_reached": 35,
+        "grasp_missed": 3,
+        "dropped": 1,
+        "placed_outside": 0,
+        "timeout": 0
+      },
+      "seed_min": 10500,
+      "seed_max": 10549,
+      "policy_ms_mean": 2.35196,
+      "policy_ms_max": 39.744
+    }
+  ]
+}

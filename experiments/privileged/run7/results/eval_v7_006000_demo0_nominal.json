@@ -1,0 +1,35 @@
+{
+  "meta": {
+    "command": "experiments/privileged/run7/eval_run7.py --checkpoint experiments/privileged/run7/train/act_cpu_v7_abs/checkpoints/006000 --name v7_006000 --seeds demo",
+    "checkpoint": "experiments/privileged/run7/train/act_cpu_v7_abs/checkpoints/006000/pretrained_model",
+    "wall_time_s": 10.9
+  },
+  "conditions": [
+    {
+      "condition": "v7_006000_demo0",
+      "distribution": "nominal",
+      "trials": 10,
+      "successes": 7,
+      "success_rate": 0.7,
+      "wilson95": [
+        0.3967781453459709,
+        0.892208733443606
+      ],
+      "mean_steps": 154.6,
+      "mean_steps_success": 113.71428571428571,
+      "labels": {
+        "success": 7,
+        "collision": 0,
+        "never_reached": 1,
+        "grasp_missed": 1,
+        "dropped": 1,
+        "placed_outside": 0,
+        "timeout": 0
+      },
+      "seed_min": 0,
+      "seed_max": 9,
+      "policy_ms_mean": 2.3627000000000002,
+      "policy_ms_max": 25.788
+    }
+  ]
+}

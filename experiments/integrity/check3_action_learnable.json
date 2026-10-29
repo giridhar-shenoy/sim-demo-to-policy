@@ -1,0 +1,307 @@
+{
+ "approach": {
+  "validation_reconstructed_vs_true_seeds0-9": {
+   "0": [
+    15,
+    15
+   ],
+   "1": [
+    13,
+    13
+   ],
+   "2": [
+    14,
+    14
+   ],
+   "3": [
+    15,
+    15
+   ],
+   "4": [
+    16,
+    16
+   ],
+   "5": [
+    8,
+    8
+   ],
+   "6": [
+    14,
+    14
+   ],
+   "7": [
+    10,
+    10
+   ],
+   "8": [
+    8,
+    8
+   ],
+   "9": [
+    15,
+    15
+   ]
+  },
+  "validation_exact_matches": 10,
+  "per_episode": [
+   15,
+   13,
+   14,
+   15,
+   16,
+   8,
+   14,
+   10,
+   8,
+   15,
+   16,
+   12,
+   11,
+   11,
+   14,
+   8,
+   14,
+   16,
+   9,
+   9,
+   13,
+   11,
+   16,
+   13,
+   13,
+   18,
+   15,
+   14,
+   10,
+   12,
+   14,
+   17,
+   11,
+   14,
+   12,
+   15,
+   14,
+   15,
+   15,
+   13,
+   15,
+   13,
+   13,
+   18,
+   15,
+   11,
+   17,
+   9,
+   11,
+   11
+  ],
+  "mean": 13.12,
+  "min": 8,
+  "max": 18,
+  "approach_frames_total": 656,
+  "fraction_of_all_frames": 0.119
+ },
+ "saturation_|a|>=0.6": {
+  "all_frames": {
+   "d_x": 0.05,
+   "d_y": 0.262,
+   "d_yaw": 0.058,
+   "d_z": 0.562
+  },
+  "approach_frames": {
+   "d_x": 0.213,
+   "d_y": 0.622,
+   "d_yaw": 0.491,
+   "d_z": 1.0
+  },
+  "approach_x_or_yaw_values_saturated": 0.352,
+  "max_abs_action_any_dim": 0.6000000238418579,
+  "frames_with_|d_x|or|d_yaw|>0.05_fraction": 0.1056
+ },
+ "regression_heldout_r2": {
+  "d_x": {
+   "data_std_frames0-5": 0.373,
+   "linear": {
+    "per_frame_t0..t5": [
+     0.732,
+     0.785,
+     0.793,
+     0.737,
+     0.632,
+     0.548
+    ],
+    "pooled_with_t": 0.675
+   },
+   "poly2": {
+    "per_frame_t0..t5": [
+     0.865,
+     0.932,
+     0.832,
+     0.608,
+     0.617,
+     0.761
+    ],
+    "pooled_with_t": 0.753
+   },
+   "poly3": {
+    "per_frame_t0..t5": [
+     0.663,
+     0.842,
+     0.744,
+     0.651,
+     -0.22,
+     0.174
+    ],
+    "pooled_with_t": 0.853
+   },
+   "knn3": {
+    "per_frame_t0..t5": [
+     0.711,
+     0.757,
+     0.703,
+     0.726,
+     0.611,
+     0.663
+    ],
+    "pooled_with_t": 0.714
+   },
+   "knn3_matching_coord_only": {
+    "per_frame_t0..t5": [
+     0.995,
+     0.995,
+     0.973,
+     0.994,
+     0.985,
+     0.993
+    ],
+    "pooled_with_t": 0.99
+   }
+  },
+  "d_y": {
+   "data_std_frames0-5": 0.151,
+   "linear": {
+    "per_frame_t0..t5": [
+     NaN,
+     NaN,
+     -0.158,
+     0.24,
+     0.411,
+     0.572
+    ],
+    "pooled_with_t": 0.293
+   },
+   "poly2": {
+    "per_frame_t0..t5": [
+     NaN,
+     NaN,
+     -0.426,
+     0.552,
+     0.703,
+     0.789
+    ],
+    "pooled_with_t": 0.625
+   },
+   "poly3": {
+    "per_frame_t0..t5": [
+     NaN,
+     NaN,
+     -1.024,
+     0.734,
+     0.739,
+     0.839
+    ],
+    "pooled_with_t": 0.765
+   },
+   "knn3": {
+    "per_frame_t0..t5": [
+     NaN,
+     NaN,
+     -0.474,
+     0.689,
+     0.835,
+     0.828
+    ],
+    "pooled_with_t": 0.778
+   },
+   "knn3_matching_coord_only": {
+    "per_frame_t0..t5": [
+     NaN,
+     NaN,
+     -0.247,
+     0.953,
+     0.977,
+     0.963
+    ],
+    "pooled_with_t": 0.963
+   }
+  },
+  "d_yaw": {
+   "data_std_frames0-5": 0.535,
+   "linear": {
+    "per_frame_t0..t5": [
+     0.84,
+     0.864,
+     0.899,
+     0.915,
+     0.918,
+     0.913
+    ],
+    "pooled_with_t": 0.886
+   },
+   "poly2": {
+    "per_frame_t0..t5": [
+     0.8,
+     0.837,
+     0.882,
+     0.874,
+     0.892,
+     0.886
+    ],
+    "pooled_with_t": 0.869
+   },
+   "poly3": {
+    "per_frame_t0..t5": [
+     0.828,
+     0.896,
+     0.939,
+     0.912,
+     0.916,
+     0.892
+    ],
+    "pooled_with_t": 0.926
+   },
+   "knn3": {
+    "per_frame_t0..t5": [
+     0.887,
+     0.896,
+     0.881,
+     0.903,
+     0.89,
+     0.821
+    ],
+    "pooled_with_t": 0.858
+   },
+   "knn3_matching_coord_only": {
+    "per_frame_t0..t5": [
+     0.956,
+     0.989,
+     0.991,
+     0.979,
+     0.997,
+     0.975
+    ],
+    "pooled_with_t": 0.98
+   }
+  }
+ },
+ "frame0_d_x_closed_form": {
+  "r2": 1.0,
+  "max_abs_err": 1.4615741577017616e-06,
+  "fraction_saturated": 0.8
+ },
+ "frame0_action_std": {
+  "d_x": 0.522,
+  "d_y": 0.0,
+  "d_yaw": 0.582
+ }
+}

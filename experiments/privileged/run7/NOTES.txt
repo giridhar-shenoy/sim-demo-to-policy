@@ -1,0 +1,143 @@
+RUN 7 - pixel ACT with absolute-target actions (run 2 + action representation change)
+=====================================================================================
+Date: 30 Oct 2026, 00:58-01:37 IST (about 39 min wall, of which 32.4 min training).
+Everything is under ~/work/r4/experiments/privileged/run7/. No tracked file touched,
+nothing committed or deleted. Every train/eval/diagnostic command ran inside
+"flock -o ~/work/.locks/heavy.lock flock -o ~/work/.locks/build.lock" after waiting for
+5 GB MemAvailable. num_workers 1. No processes left running.
+
+HEADLINE
+--------
+First non-zero pixel ACT result in the repo. Run 2's exact inputs, architecture,
+optimiser and batch, with only the action changed from the 7-D delta to the 5-D
+absolute TCP target [x, y, z, yaw, gripper]:
+  6k checkpoint: 31/50 nominal on dev seeds 10500-10549 = 62 % (Wilson 95 % 48.2-74.1 %)
+  For comparison, run 2 (delta actions) scored 0/100 (0-4 %).
+
+WHAT WAS BUILT
+--------------
+record_run7.py   Records demo seeds 0-49 with the scripted expert, 96 px front + wrist
+                 cameras as LeRobot video (use_videos=True, AV1, the repo's settings),
+                 the 15-D observation.state, and the action [target_x, target_y,
+                 target_z, target_yaw, gripper] read from env.target_pose() after the
+                 expert's step. It reuses the repo's LeRobotWriter and make_frame
+                 unchanged and swaps only the action feature, by replacing
+                 lerobot_writer.build_features inside this process (the tracked file
+                 is untouched). The video path worked first try (44.2 s for 50
+                 episodes, so no lossless fallback was needed).
+                 Check: 50/50 expert successes, 5513 frames. observation.state is
+                 bit-identical (max |diff| 0.0) to datasets/pickplace_scripted_50
+                 (run 2's data), so only the action column differs.
+../verify_replay.py (now takes --abs-root/--delta-root/--out)
+                 Replays the absolute actions through AbsoluteTargetWrapper on all 50
+                 seeds: 50/50 succeed, every episode the recorded length, and the
+                 converted delta matches the expert's recorded delta to 2.3e-6
+                 (results/replay_abs_wrapper.json).
+act_cpu_v7_abs.yaml  Run 2's config (act_cpu_v2.yaml): dim_model 256, 2 encoder / 1
+                 decoder layers, chunk 20, n_action_steps 10, lr 1e-4, backbone lr
+                 1e-4, use_vae false, batch 8, seed 1000. input_features =
+                 observation.state + both 96 px cameras. normalization_mapping is the
+                 default (VISUAL/STATE/ACTION MEAN_STD). 6000 steps, save_freq 2000.
+diagnose_swap.py The repo-style open-loop image-swap test (scripts/diagnose_openloop.py
+                 logic), using the repo's ACTPolicyAdapter unchanged.
+eval_run7.py     Repo ACTPolicyAdapter (unchanged) + PandaPickPlaceEnv(image_size=96)
+                 wrapped in AbsoluteTargetWrapper (../priv_common.py), run through
+                 the repo harness (run_condition/summarize/write_csv) and taxonomy.
+run_post.sh      Diagnostics on 2k/4k/6k, then nominal dev eval of 4k and 6k, then
+                 demo and shifted eval of the best checkpoint. The best-checkpoint
+                 rule was fixed before any result: more nominal dev successes wins,
+                 and a tie goes to 6k.
+
+TRAINING
+--------
+Probe: 200 steps, batch 8, 75.3 s wall (including startup), updt_s 0.29-0.37, i.e.
+  about 3 steps/s. That projected about 33-37 min for 6000 steps, under the 45-min cap,
+  so steps were NOT cut.
+Full run: 6000 steps, batch 8, 48k samples = 8.7 epochs, 1942.3 s = 32.4 min,
+  about 3.1 steps/s.
+  Loss at steps 1k-6k: 0.115, 0.089, 0.075, 0.072, 0.066, 0.065.
+  (Not comparable to run 2's 0.082 at 3k, because the action normalisation differs.)
+Checkpoints: train/act_cpu_v7_abs/checkpoints/{002000,004000,006000,last}.
+The full lerobot-train command line is the first line of train/act_cpu_v7_abs.log.
+
+EVALUATION (seeds: dev 10500-10549, demo 0-9; nothing else used)
+--------------------------------------------------------------------
+checkpoint  seeds            dist     success  Wilson 95 %    labels                                                       mean len (succ)  wall
+4k          10500-10549      nominal  12/50    14.3-37.4 %    success 12, never_reached 11, grasp_missed 25, dropped 1, placed_outside 1   107.6   57.3 s
+6k (best)   10500-10549      nominal  31/50    48.2-74.1 %    success 31, never_reached 3, grasp_missed 11, dropped 3, placed_outside 2    112.4   47.1 s
+6k          0-9 (demo)       nominal   7/10    39.7-89.2 %    success 7, never_reached 1, grasp_missed 1, dropped 1                        113.7   10.9 s
+6k          10500-10549      shifted  11/50    12.8-35.2 %    success 11, never_reached 35, grasp_missed 3, dropped 1                      122.1   59.8 s
+No collisions anywhere. Policy compute is about 2.4 ms per step. The expert's successful
+episodes average about 110 steps.
+Per-episode CSVs: results/eval_v7_*.csv; summaries: results/eval_v7_*.json.
+
+IMAGE-SWAP SENSITIVITY (results/swap_sensitivity.json)
+------------------------------------------------------
+Setup: frame 2 of the first 20 training episodes. Episode 0's state is kept and the other
+episodes' front + wrist images are swapped in. "delta" = the normalised [-1, 1] delta
+the wrapper would send (current target = the dataset's action at frame 1), the same
+scale as the repo's delta runs. A delta change can exceed 1 because each delta lies in
+[-1, 1]. The repo's pre-registered pass criterion is a change >= 0.1 and a std >= 0.1
+in x or yaw.
+
+ckpt  swap max change (raw)            swap max change (delta)   first-step std, delta (pred / data)       corr pred-vs-data (raw)
+2k    x 0.058 m,  yaw 0.245 rad        x 1.07, yaw 0.21          x 0.78 / 0.38,  yaw 0.95 / 0.55           x 0.978, yaw 0.847
+4k    x 0.030 m,  yaw 0.209 rad        x 0.77, yaw 1.88          x 0.30 / 0.38,  yaw 0.54 / 0.55           x 0.987, yaw 0.973
+6k    x 0.037 m,  yaw 0.357 rad        x 1.15, yaw 1.98          x 0.46 / 0.38,  yaw 0.84 / 0.55           x 0.990, yaw 0.930
+Raw first-step std (pred / data): x 0.044/0.027 m (2k), 0.026/0.027 (4k), 0.031/0.027 (6k);
+yaw 0.30/0.17 rad (2k), 0.18/0.17 (4k), 0.23/0.17 (6k).
+For comparison, runs 4 and 5 (delta actions) moved by 0.0000-0.0001 under the same swap,
+with first-step std <= 0.003. All three run-7 checkpoints pass the criterion by about
+10x. Black images change the delta by x 0.75 / yaw 1.01 at 6k.
+(y at frame 2 is saturated in the data, data std 0.0009 m raw, so its correlation is
+not meaningful.)
+
+INTERPRETATION
+--------------
+- The action representation was the blocker. With the same images, state, network,
+  optimiser and budget, absolute targets turn 0/100 into 31/50. The policy's approach
+  outputs now depend on the images (swap test passes at every checkpoint), which run 2
+  and runs 4-5 never achieved.
+- The policy is still improving: 24 % at 4k, 62 % at 6k, with loss still falling. At 4k
+  most failures are grasp_missed (25/50), i.e. it reaches but mis-aligns the grasp. At
+  6k grasp_missed drops to 11. More steps look worthwhile (the run is only 8.7 epochs).
+- Shifted cube box: 22 % (11/50), with 35/50 never_reached. With the cube's start
+  box moved by (+8, -8) cm, the policy mostly fails to reach the cube, consistent with
+  it not extrapolating outside the 50-demo training box (about 22 % of the shifted box
+  overlaps the training box). The paired nominal-vs-shifted drop, 62 % -> 22 %, is now
+  measurable because there is a nominal success to lose.
+- Demo seeds 0-9: 7/10, about the same as the dev rate, so there is no sign of
+  memorisation beyond what 10 trials can show.
+
+CAVEATS
+-------
+- One training seed. 50 trials give about +/-13 points around 62 %.
+- Seeds 10500-10549 were also used for the privileged-state experiment (another
+  policy) and are now the dev seeds, as the coordinator specified. The coordinator's
+  message also said not to use 10000-10699 ("spent"). I followed the explicit
+  instruction to use 10500-10549 as dev seeds, so these numbers are dev numbers, not a
+  final test. Seeds 11000+ were not touched.
+- The 6k checkpoint was chosen on these same dev seeds (by the rule fixed in advance),
+  so 62 % is slightly optimistic as an estimate for unseen seeds.
+- Sim assets come from ~/work/menagerie (SDP_MENAGERIE_DIR), as in the earlier
+  experiment.
+
+EXACT COMMANDS (from ~/work/r4)
+-------------------------------
+export SDP_MENAGERIE_DIR=$HOME/work/menagerie MUJOCO_GL=egl PATH=$PWD/.venv/bin:$PATH
+P=experiments/privileged/run7
+L="flock -o $HOME/work/.locks/heavy.lock flock -o $HOME/work/.locks/build.lock"
+$L timeout 900 python $P/record_run7.py
+$L timeout 300 python experiments/privileged/verify_replay.py --abs-root $P/datasets/pickplace_abs_50 \
+     --delta-root experiments/privileged/datasets/priv_delta_50 --out $P/results/replay_abs_wrapper.json
+$L timeout 900 python -m sdp.train.train --config $P/act_cpu_v7_abs.yaml \
+     --dataset $P/datasets/pickplace_abs_50 --output-dir $P/train/probe_v7 --steps 200 --set save_checkpoint=false
+$L timeout 3000 python -m sdp.train.train --config $P/act_cpu_v7_abs.yaml \
+     --dataset $P/datasets/pickplace_abs_50 --output-dir $P/train/act_cpu_v7_abs
+$P/run_post.sh
+  # = diagnose_swap.py --checkpoints .../002000 .../004000 .../006000
+  #   eval_run7.py --checkpoint .../004000 --name v7_004000 --seeds dev
+  #   eval_run7.py --checkpoint .../006000 --name v7_006000 --seeds dev
+  #   eval_run7.py --checkpoint .../006000 --name v7_006000 --seeds demo
+  #   eval_run7.py --checkpoint .../006000 --name v7_006000 --seeds dev --distribution shifted
+Logs: $P/logs/*.out.

@@ -1,0 +1,133 @@
+RUN 8 - scaled-up recipe: pixel ACT, absolute targets, 200 demos with DART, 20k steps
+======================================================================================
+Date: 30 Oct 2026, from 01:40 IST. Everything is under ~/work/r4/experiments/privileged/run8/
+(plus a backward-compatible --results-dir option added to run7/eval_run7.py). No tracked
+file touched, nothing committed or deleted. Every record/train/eval/diagnostic command
+ran inside "flock -o ~/work/.locks/heavy.lock flock -o ~/work/.locks/build.lock" after
+waiting for 5 GB MemAvailable. num_workers 1.
+
+HEADLINE
+--------
+Best checkpoint (20k): 36/50 nominal on dev 10500-10549 = 72 % (Wilson 95 % 58.3-82.5 %).
+Run 7 (50 clean demos, 6k steps) scored 31/50 = 62 % (48.2-74.1 %) on the same seeds.
+The +10 points is inside the noise: the intervals overlap almost entirely, and 12k and
+16k scored BELOW run 7 (44 %, 42 %). Shifted is unchanged (20 % vs 22 %). So 4x data +
+DART + 3.3x steps did not give a clear gain at this budget. The checkpoint-to-checkpoint
+spread (42 % -> 72 % between 16k and 20k) is as large as any effect here.
+
+RESULTS
+-------
+Eval (repo harness/taxonomy; dev seeds 10500-10549, demo seeds 0-9; no other seeds):
+ckpt  seeds           dist     success  Wilson 95 %   labels                                              mean len (succ)  wall
+12k   10500-10549     nominal  22/50    31.2-57.7 %   success 22, never_reached 7, grasp_missed 21          114.0   52.7 s
+16k   10500-10549     nominal  21/50    29.4-55.8 %   success 21, never_reached 1, grasp_missed 27, dropped 1  118.0   53.4 s
+20k   10500-10549     nominal  36/50    58.3-82.5 %   success 36, grasp_missed 10, dropped 4                114.1   43.9 s   <- best
+20k   10500-10549     shifted  10/50    11.2-33.0 %   success 10, never_reached 31, grasp_missed 6, dropped 3  118.3   60.7 s
+20k   0-9 (demo)      nominal   5/10    23.7-76.3 %   success 5, grasp_missed 3, dropped 2                  106.6   12.3 s
+No collisions. Policy compute is about 2.4 ms per step. Best = 20k by the rule fixed in
+advance (most nominal dev successes, ties to the later checkpoint). There was no tie.
+Per-episode CSVs: results/eval_v8_*.csv; summaries: results/eval_v8_*.json.
+
+Image swap (results/swap_sensitivity.json; run 7's clean dataset, frame 2, episodes 0-19,
+episode 0's state kept, other episodes' images swapped in; delta = the wrapper's
+normalised delta; data std as delta: x 0.376, yaw 0.552):
+ckpt  swap max change raw        swap max change delta   mean change delta   first-step std delta (pred)   corr raw x / yaw
+8k    x 0.027 m, yaw 0.055 rad   x 1.12, yaw 0.55        x 0.51, yaw 0.31    x 0.38, yaw 0.38              0.989 / 0.988
+12k   x 0.026 m, yaw 0.071 rad   x 0.99, yaw 0.71        x 0.53, yaw 0.32    x 0.30, yaw 0.34              0.994 / 0.986
+16k   x 0.027 m, yaw 0.154 rad   x 1.05, yaw 1.40        x 0.65, yaw 1.08    x 0.38, yaw 0.58              0.992 / 0.960
+20k   x 0.027 m, yaw 0.192 rad   x 1.01, yaw 1.85        x 0.64, yaw 0.99    x 0.33, yaw 0.57              0.993 / 0.979
+All four pass the repo's criterion (>= 0.1 change and >= 0.1 std in x or yaw) by about
+10x. Run 7 for comparison: 2k/4k/6k swap delta x 1.07/0.77/1.15, yaw 0.21/1.88/1.98.
+The predicted first-step std now matches the data closely (raw x 0.024-0.026 m vs data
+0.027). Black images move the 20k first-step delta by x 0.14, y 0.88, yaw 0.15.
+
+Interpretation:
+- The approach is solved: never_reached is 0 at 20k on nominal (run 7 at 6k: 3). The
+  remaining nominal failures are grasping (grasp_missed 10, dropped 4), i.e.
+  fine alignment/closing, not localisation.
+- Shifted 20 %: 31/50 never_reached. The policy still does not extrapolate to cube poses
+  outside the training box. DART noise (std 0.3, about 6 mm per step) widens the state
+  distribution around the demo trajectories but does not add new cube positions. To
+  move this number, the training pose box would have to grow.
+- The loss is still falling (0.084 at 12k, 0.07 at 20k), and the dev rate is noisy
+  across checkpoints, so "best checkpoint" selection on 50 dev episodes is itself
+  noisy. A larger dev set, or averaging over checkpoints/seeds, would be needed to tell
+  run 7 and run 8 apart.
+- Demo seeds 0-9: 5/10, lower than dev but n=10 (23.7-76.3 %), so not meaningful.
+
+Caveats: one training seed. The 20k checkpoint was chosen on the same dev seeds (so 72 %
+is slightly optimistic). Dev seeds 10500-10549 have now been evaluated on many policies
+and should not serve as a final test (seeds 11000+ are untouched).
+
+DATA (record_run8.py)
+---------------------
+- 200 scripted-expert episodes on demo seeds 0-199, nominal pose box. 96 px front + wrist
+  as LeRobot video (repo LeRobotWriter, use_videos=True), 15-D observation.state, and the
+  5-D absolute-target action [target_x, target_y, target_z, target_yaw, gripper]. Same
+  features as run 7.
+- DART on every odd seed (100 episodes): Gaussian noise with std 0.3 (normalised action
+  units) added to the EXECUTED delta on dims x, y, z, yaw only (indices 0, 1, 2, 5),
+  then clipped to [-1, 1]. Roll, pitch and the gripper are untouched. Noise RNG is
+  np.random.default_rng(1_000_000 + seed). The expert keeps reading the env and corrects.
+- Label = the CLEAN expert intent at every step: the target the expert's own action
+  would produce from the current integrated target, mirroring env._integrate_target:
+  pos = clip(cur + a[:3]*0.02, workspace), yaw = clip(wrap(cur_yaw + a[5]*0.1), +-pi/2),
+  plus the expert's gripper command. On clean episodes this label equals
+  env.target_pose() after the step to 3.0e-8 (checked on every frame).
+- Only successful episodes are written. Per group:
+    clean (even seeds): 100/100 success, 11020 frames kept
+    DART  (odd seeds):   98/100 success (1 dropped, seed 143; 1 collision, seed 175),
+                         11157 frames kept
+  Total 198 episodes, 22177 frames (4.0x run 7's 5513). Recording wall 205.5 s.
+  Per-attempt log: results/attempts.jsonl; summary: results/recording_summary.json.
+- Clean-label replay through AbsoluteTargetWrapper on the 100 un-noised seeds
+  (verify_replay8.py): 100/100 success, every episode the recorded length
+  (results/replay_clean_labels.json).
+
+TRAINING (act_cpu_v8_abs_dart.yaml)
+-----------------------------------
+Run 7's config (run 2's architecture: dim_model 256, 2 encoder / 1 decoder layers,
+chunk 20, n_action_steps 10, lr 1e-4, backbone lr 1e-4, use_vae false, batch 8, seed
+1000; inputs = state + both 96 px cameras, default normalisation), except steps 20000
+and save_freq 4000.
+Probe: 200 steps, 67.8 s wall (including startup), updt_s 0.27-0.34, about 3 steps/s.
+That projected about 100-110 min, under the 130-min cap, so steps were NOT cut.
+Full run: 20000 steps, batch 8, 160k samples = 7.2 epochs over 22177 frames,
+  6804.0 s = 113.4 min (01:45:50-03:38:48), about 2.9 steps/s (0.34 s/step).
+  Loss (every 2k): 0.128, 0.110, 0.103, 0.091, 0.086, 0.084, 0.085, 0.079, 0.080, 0.070.
+Checkpoints: train/act_cpu_v8_abs_dart/checkpoints/{004000,...,020000,last}.
+
+WALL TIMES
+----------
+record 205.5 s (200 episodes, video) + clean-label replay check about 20 s;
+probe 67.8 s; training 113.4 min; diagnostics (4 checkpoints) about 10 s;
+evals 52.7 + 53.4 + 43.9 s (nominal), 60.7 s (shifted), 12.3 s (demo). The post-training
+chain took 4.1 min. Total 01:40-03:43, about 2 h 03 min.
+
+DIAGNOSTICS AND EVAL SETUP
+--------------------------
+- Image-swap test: run7/diagnose_swap.py on checkpoints 8k/12k/16k/20k, run on run 7's
+  clean 50-demo dataset (frame 2 of episodes 0-19, i.e. seeds 0-19 without noise), so
+  the numbers compare 1:1 with run 7's. Episode 0's state is kept and the other
+  episodes' images are swapped in. Changes are reported as the raw target and as the
+  wrapper's normalised delta.
+- Eval: run7/eval_run7.py (repo ACTPolicyAdapter unchanged + AbsoluteTargetWrapper +
+  repo harness/taxonomy). 50 nominal on dev 10500-10549 for 12k, 16k and 20k. Best =
+  most nominal dev successes, ties to the later checkpoint (rule fixed before training).
+  The best then gets 50 shifted on 10500-10549 and 10 nominal on demo seeds 0-9.
+  No other seeds were used.
+
+EXACT COMMANDS (from ~/work/r4)
+-------------------------------
+export SDP_MENAGERIE_DIR=$HOME/work/menagerie MUJOCO_GL=egl PATH=$PWD/.venv/bin:$PATH
+P=experiments/privileged/run8
+L="flock -o $HOME/work/.locks/heavy.lock flock -o $HOME/work/.locks/build.lock"
+$L timeout 1500 python $P/record_run8.py
+$L timeout 600 python $P/verify_replay8.py
+$L timeout 900 python -m sdp.train.train --config $P/act_cpu_v8_abs_dart.yaml \
+     --dataset $P/datasets/pickplace_abs_dart_200 --output-dir $P/train/probe_v8 --steps 200 --set save_checkpoint=false
+$L timeout 9000 python -m sdp.train.train --config $P/act_cpu_v8_abs_dart.yaml \
+     --dataset $P/datasets/pickplace_abs_dart_200 --output-dir $P/train/act_cpu_v8_abs_dart
+$P/run_post.sh     # diagnostics + evals, each under the locks
+The full lerobot-train command line is the first line of train/act_cpu_v8_abs_dart.log.
+Logs: logs/*.out. Results: results/.

@@ -1,0 +1,444 @@
+{
+ "run5": {
+  "preprocessor_steps": [
+   "rename_observations_processor",
+   "to_batch_processor",
+   "device_processor",
+   "normalizer_processor"
+  ],
+  "postprocessor_steps": [
+   "unnormalizer_processor",
+   "device_processor"
+  ],
+  "norm_map": {
+   "VISUAL": "MEAN_STD",
+   "STATE": "MEAN_STD",
+   "ACTION": "MEAN_STD"
+  },
+  "normalised_features": {
+   "observation.images.front": "VISUAL",
+   "observation.images.wrist": "VISUAL",
+   "action": "ACTION"
+  },
+  "image_mean": {
+   "observation.images.front": [
+    0.485,
+    0.456,
+    0.406
+   ],
+   "observation.images.wrist": [
+    0.485,
+    0.456,
+    0.406
+   ]
+  },
+  "image_std": {
+   "observation.images.front": [
+    0.229,
+    0.224,
+    0.225
+   ],
+   "observation.images.wrist": [
+    0.229,
+    0.224,
+    0.225
+   ]
+  },
+  "action_mean": {
+   "d_x": -0.002,
+   "d_y": 0.068,
+   "d_z": -0.1902,
+   "d_roll": 0.0,
+   "d_pitch": 0.0,
+   "d_yaw": -0.0052,
+   "gripper": 0.0339
+  },
+  "action_std": {
+   "d_x": 0.1409,
+   "d_y": 0.3028,
+   "d_z": 0.4134,
+   "d_roll": 0.0,
+   "d_pitch": 0.0,
+   "d_yaw": 0.1491,
+   "gripper": 0.9994
+  },
+  "post_action_stats_equal_pre": true,
+  "state": "not a policy input (not normalised; ACT ignores the key)",
+  "action_stats_equal_dataset_stats_json": true,
+  "dataset_image_stats_not_used_example_front_mean": [
+   0.6084,
+   0.5502,
+   0.4634
+  ],
+  "train_vs_adapter": {
+   "index_0": {
+    "pre_norm_input_max_abs_diff": {
+     "observation.images.front": 0.0,
+     "observation.images.wrist": 0.0
+    },
+    "adapter_input_dtype_shape_range": {
+     "observation.images.front": [
+      "torch.float32",
+      [
+       1,
+       3,
+       128,
+       128
+      ],
+      0.0,
+      1.0
+     ],
+     "observation.images.wrist": [
+      "torch.float32",
+      [
+       1,
+       3,
+       128,
+       128
+      ],
+      0.012,
+      1.0
+     ]
+    },
+    "training_raw_batch": {
+     "observation.images.front": {
+      "dtype": "torch.uint8",
+      "shape": [
+       1,
+       3,
+       128,
+       128
+      ]
+     },
+     "observation.images.wrist": {
+      "dtype": "torch.uint8",
+      "shape": [
+       1,
+       3,
+       128,
+       128
+      ]
+     },
+     "observation.state": {
+      "dtype": "torch.float32",
+      "shape": [
+       1,
+       15
+      ]
+     }
+    },
+    "preprocessed_max_abs_diff": {
+     "observation.images.front": 0.0,
+     "observation.images.wrist": 0.0,
+     "observation.state": 0.0
+    },
+    "keys_only_in_one_path": []
+   },
+   "index_57": {
+    "pre_norm_input_max_abs_diff": {
+     "observation.images.front": 0.0,
+     "observation.images.wrist": 0.0
+    },
+    "adapter_input_dtype_shape_range": {
+     "observation.images.front": [
+      "torch.float32",
+      [
+       1,
+       3,
+       128,
+       128
+      ],
+      0.008,
+      1.0
+     ],
+     "observation.images.wrist": [
+      "torch.float32",
+      [
+       1,
+       3,
+       128,
+       128
+      ],
+      0.008,
+      1.0
+     ]
+    },
+    "training_raw_batch": {
+     "observation.images.front": {
+      "dtype": "torch.uint8",
+      "shape": [
+       1,
+       3,
+       128,
+       128
+      ]
+     },
+     "observation.images.wrist": {
+      "dtype": "torch.uint8",
+      "shape": [
+       1,
+       3,
+       128,
+       128
+      ]
+     },
+     "observation.state": {
+      "dtype": "torch.float32",
+      "shape": [
+       1,
+       15
+      ]
+     }
+    },
+    "preprocessed_max_abs_diff": {
+     "observation.images.front": 0.0,
+     "observation.images.wrist": 0.0,
+     "observation.state": 0.0
+    },
+    "keys_only_in_one_path": []
+   }
+  },
+  "delta_timestamps": {
+   "action": 20
+  },
+  "checkpoint_image_shape": 128
+ },
+ "run2": {
+  "preprocessor_steps": [
+   "rename_observations_processor",
+   "to_batch_processor",
+   "device_processor",
+   "normalizer_processor"
+  ],
+  "postprocessor_steps": [
+   "unnormalizer_processor",
+   "device_processor"
+  ],
+  "norm_map": {
+   "VISUAL": "MEAN_STD",
+   "STATE": "MEAN_STD",
+   "ACTION": "MEAN_STD"
+  },
+  "normalised_features": {
+   "observation.images.front": "VISUAL",
+   "observation.images.wrist": "VISUAL",
+   "observation.state": "STATE",
+   "action": "ACTION"
+  },
+  "image_mean": {
+   "observation.images.front": [
+    0.485,
+    0.456,
+    0.406
+   ],
+   "observation.images.wrist": [
+    0.485,
+    0.456,
+    0.406
+   ]
+  },
+  "image_std": {
+   "observation.images.front": [
+    0.229,
+    0.224,
+    0.225
+   ],
+   "observation.images.wrist": [
+    0.229,
+    0.224,
+    0.225
+   ]
+  },
+  "action_mean": {
+   "d_x": -0.002,
+   "d_y": 0.068,
+   "d_z": -0.1902,
+   "d_roll": 0.0,
+   "d_pitch": 0.0,
+   "d_yaw": -0.0052,
+   "gripper": 0.0339
+  },
+  "action_std": {
+   "d_x": 0.1409,
+   "d_y": 0.3028,
+   "d_z": 0.4134,
+   "d_roll": 0.0,
+   "d_pitch": 0.0,
+   "d_yaw": 0.1491,
+   "gripper": 0.9994
+  },
+  "post_action_stats_equal_pre": true,
+  "state_mean": {
+   "tcp_x": 0.5391,
+   "tcp_y": -0.0183,
+   "tcp_z": 0.1575,
+   "tcp_qw": -0.0002,
+   "tcp_qx": 0.7078,
+   "tcp_qy": 0.6704,
+   "tcp_qz": -0.0002,
+   "gripper_gap": 0.0605,
+   "joint1": -0.009,
+   "joint2": 0.3181,
+   "joint3": -0.0273,
+   "joint4": -2.1339,
+   "joint5": 0.006,
+   "joint6": 2.449,
+   "joint7": -0.7731
+  },
+  "state_std": {
+   "tcp_x": 0.031668,
+   "tcp_y": 0.10955,
+   "tcp_z": 0.142307,
+   "tcp_qw": 0.000259,
+   "tcp_qx": 0.155045,
+   "tcp_qy": 0.159857,
+   "tcp_qz": 0.000255,
+   "gripper_gap": 0.019273,
+   "joint1": 0.17829,
+   "joint2": 0.231057,
+   "joint3": 0.089264,
+   "joint4": 0.184429,
+   "joint5": 0.079485,
+   "joint6": 0.330845,
+   "joint7": 0.459373
+  },
+  "action_stats_equal_dataset_stats_json": true,
+  "dataset_image_stats_not_used_example_front_mean": [
+   0.6092,
+   0.5492,
+   0.4634
+  ],
+  "train_vs_adapter": {
+   "index_0": {
+    "pre_norm_input_max_abs_diff": {
+     "observation.images.front": 0.0,
+     "observation.images.wrist": 0.0
+    },
+    "adapter_input_dtype_shape_range": {
+     "observation.images.front": [
+      "torch.float32",
+      [
+       1,
+       3,
+       96,
+       96
+      ],
+      0.012,
+      1.0
+     ],
+     "observation.images.wrist": [
+      "torch.float32",
+      [
+       1,
+       3,
+       96,
+       96
+      ],
+      0.051,
+      1.0
+     ]
+    },
+    "training_raw_batch": {
+     "observation.images.front": {
+      "dtype": "torch.uint8",
+      "shape": [
+       1,
+       3,
+       96,
+       96
+      ]
+     },
+     "observation.images.wrist": {
+      "dtype": "torch.uint8",
+      "shape": [
+       1,
+       3,
+       96,
+       96
+      ]
+     },
+     "observation.state": {
+      "dtype": "torch.float32",
+      "shape": [
+       1,
+       15
+      ]
+     }
+    },
+    "preprocessed_max_abs_diff": {
+     "observation.images.front": 0.0,
+     "observation.images.wrist": 0.0,
+     "observation.state": 0.0
+    },
+    "keys_only_in_one_path": []
+   },
+   "index_57": {
+    "pre_norm_input_max_abs_diff": {
+     "observation.images.front": 0.0,
+     "observation.images.wrist": 0.0
+    },
+    "adapter_input_dtype_shape_range": {
+     "observation.images.front": [
+      "torch.float32",
+      [
+       1,
+       3,
+       96,
+       96
+      ],
+      0.0,
+      1.0
+     ],
+     "observation.images.wrist": [
+      "torch.float32",
+      [
+       1,
+       3,
+       96,
+       96
+      ],
+      0.027,
+      1.0
+     ]
+    },
+    "training_raw_batch": {
+     "observation.images.front": {
+      "dtype": "torch.uint8",
+      "shape": [
+       1,
+       3,
+       96,
+       96
+      ]
+     },
+     "observation.images.wrist": {
+      "dtype": "torch.uint8",
+      "shape": [
+       1,
+       3,
+       96,
+       96
+      ]
+     },
+     "observation.state": {
+      "dtype": "torch.float32",
+      "shape": [
+       1,
+       15
+      ]
+     }
+    },
+    "preprocessed_max_abs_diff": {
+     "observation.images.front": 0.0,
+     "observation.images.wrist": 0.0,
+     "observation.state": 0.0
+    },
+    "keys_only_in_one_path": []
+   }
+  },
+  "delta_timestamps": {
+   "action": 20
+  },
+  "checkpoint_image_shape": 96
+ }
+}

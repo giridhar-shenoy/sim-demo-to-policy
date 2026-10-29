@@ -1,0 +1,175 @@
+{
+  "dataset": "/home/giri/work/r4/experiments/privileged/run7/datasets/pickplace_abs_50",
+  "frame": 2,
+  "episodes": 20,
+  "checkpoints": {
+    "002000": {
+      "checkpoint": "experiments/privileged/run7/train/act_cpu_v7_abs/checkpoints/002000/pretrained_model",
+      "swap_max_change_raw": {
+        "x": 0.0579,
+        "y": 0.0409,
+        "yaw": 0.2449
+      },
+      "swap_max_change_delta": {
+        "x": 1.0664,
+        "y": 1.5168,
+        "yaw": 0.2081
+      },
+      "swap_mean_change_delta": {
+        "x": 0.6949,
+        "y": 0.5979,
+        "yaw": 0.011
+      },
+      "first_step_std_raw": {
+        "pred": {
+          "x": 0.0443,
+          "y": 0.0174,
+          "yaw": 0.2987
+        },
+        "data": {
+          "x": 0.0272,
+          "y": 0.0009,
+          "yaw": 0.1701
+        }
+      },
+      "first_step_std_delta": {
+        "pred": {
+          "x": 0.7766,
+          "y": 0.494,
+          "yaw": 0.9539
+        },
+        "data": {
+          "x": 0.3763,
+          "y": 0.0446,
+          "yaw": 0.5516
+        }
+      },
+      "first_step_corr_raw": {
+        "x": 0.9779,
+        "y": 0.3008,
+        "yaw": 0.8474
+      },
+      "black_images_change_delta": {
+        "x": 1.0664,
+        "y": 0.8544,
+        "yaw": 0.0
+      },
+      "black_images_change_raw_z_grip": [
+        0.0056,
+        0.13
+      ]
+    },
+    "004000": {
+      "checkpoint": "experiments/privileged/run7/train/act_cpu_v7_abs/checkpoints/004000/pretrained_model",
+      "swap_max_change_raw": {
+        "x": 0.0298,
+        "y": 0.0133,
+        "yaw": 0.2093
+      },
+      "swap_max_change_delta": {
+        "x": 0.7655,
+        "y": 0.0,
+        "yaw": 1.8826
+      },
+      "swap_mean_change_delta": {
+        "x": 0.4313,
+        "y": 0.0,
+        "yaw": 1.2717
+      },
+      "first_step_std_raw": {
+        "pred": {
+          "x": 0.0263,
+          "y": 0.0051,
+          "yaw": 0.1807
+        },
+        "data": {
+          "x": 0.0272,
+          "y": 0.0009,
+          "yaw": 0.1701
+        }
+      },
+      "first_step_std_delta": {
+        "pred": {
+          "x": 0.3008,
+          "y": 0.0014,
+          "yaw": 0.5396
+        },
+        "data": {
+          "x": 0.3763,
+          "y": 0.0446,
+          "yaw": 0.5516
+        }
+      },
+      "first_step_corr_raw": {
+        "x": 0.9872,
+        "y": 0.1581,
+        "yaw": 0.9734
+      },
+      "black_images_change_delta": {
+        "x": 0.6152,
+        "y": 0.0,
+        "yaw": 0.6845
+      },
+      "black_images_change_raw_z_grip": [
+        0.0044,
+        0.0796
+      ]
+    },
+    "006000": {
+      "checkpoint": "experiments/privileged/run7/train/act_cpu_v7_abs/checkpoints/006000/pretrained_model",
+      "swap_max_change_raw": {
+        "x": 0.037,
+        "y": 0.012,
+        "yaw": 0.3568
+      },
+      "swap_max_change_delta": {
+        "x": 1.1522,
+        "y": 0.5993,
+        "yaw": 1.9799
+      },
+      "swap_mean_change_delta": {
+        "x": 0.5972,
+        "y": 0.1837,
+        "yaw": 1.3324
+      },
+      "first_step_std_raw": {
+        "pred": {
+          "x": 0.0308,
+          "y": 0.0045,
+          "yaw": 0.2277
+        },
+        "data": {
+          "x": 0.0272,
+          "y": 0.0009,
+          "yaw": 0.1701
+        }
+      },
+      "first_step_std_delta": {
+        "pred": {
+          "x": 0.4628,
+          "y": 0.1865,
+          "yaw": 0.8417
+        },
+        "data": {
+          "x": 0.3763,
+          "y": 0.0446,
+          "yaw": 0.5516
+        }
+      },
+      "first_step_corr_raw": {
+        "x": 0.9903,
+        "y": -0.18,
+        "yaw": 0.9295
+      },
+      "black_images_change_delta": {
+        "x": 0.747,
+        "y": 0.1266,
+        "yaw": 1.0104
+      },
+      "black_images_change_raw_z_grip": [
+        0.0239,
+        0.2392
+      ]
+    }
+  }
+}

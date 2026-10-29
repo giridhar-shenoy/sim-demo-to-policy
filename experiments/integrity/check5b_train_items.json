@@ -1,0 +1,441 @@
+{
+ "run5": {
+  "all_ok": true,
+  "rows": [
+   {
+    "episode": 0,
+    "frame": 0,
+    "images_equal_plain": true,
+    "chunk_equals_parquet": true,
+    "pad_flags_ok": true,
+    "episode_frame_index_ok": true,
+    "n_pad": 0
+   },
+   {
+    "episode": 0,
+    "frame": 5,
+    "images_equal_plain": true,
+    "chunk_equals_parquet": true,
+    "pad_flags_ok": true,
+    "episode_frame_index_ok": true,
+    "n_pad": 0
+   },
+   {
+    "episode": 1,
+    "frame": 0,
+    "images_equal_plain": true,
+    "chunk_equals_parquet": true,
+    "pad_flags_ok": true,
+    "episode_frame_index_ok": true,
+    "n_pad": 0
+   },
+   {
+    "episode": 1,
+    "frame": 5,
+    "images_equal_plain": true,
+    "chunk_equals_parquet": true,
+    "pad_flags_ok": true,
+    "episode_frame_index_ok": true,
+    "n_pad": 0
+   },
+   {
+    "episode": 25,
+    "frame": 0,
+    "images_equal_plain": true,
+    "chunk_equals_parquet": true,
+    "pad_flags_ok": true,
+    "episode_frame_index_ok": true,
+    "n_pad": 0
+   },
+   {
+    "episode": 25,
+    "frame": 5,
+    "images_equal_plain": true,
+    "chunk_equals_parquet": true,
+    "pad_flags_ok": true,
+    "episode_frame_index_ok": true,
+    "n_pad": 0
+   },
+   {
+    "episode": 49,
+    "frame": 0,
+    "images_equal_plain": true,
+    "chunk_equals_parquet": true,
+    "pad_flags_ok": true,
+    "episode_frame_index_ok": true,
+    "n_pad": 0
+   },
+   {
+    "episode": 49,
+    "frame": 5,
+    "images_equal_plain": true,
+    "chunk_equals_parquet": true,
+    "pad_flags_ok": true,
+    "episode_frame_index_ok": true,
+    "n_pad": 0
+   },
+   {
+    "episode": 0,
+    "frame": 112,
+    "images_equal_plain": true,
+    "chunk_equals_parquet": true,
+    "pad_flags_ok": true,
+    "episode_frame_index_ok": true,
+    "n_pad": 19
+   },
+   {
+    "episode": 49,
+    "frame": 99,
+    "images_equal_plain": true,
+    "chunk_equals_parquet": true,
+    "pad_flags_ok": true,
+    "episode_frame_index_ok": true,
+    "n_pad": 10
+   }
+  ],
+  "action_chunk_len": 20,
+  "ep0_f0_chunk": {
+   "d_x": {
+    "pred": [
+     -0.0,
+     -0.0,
+     -0.0,
+     -0.0,
+     -0.0,
+     -0.0,
+     -0.0,
+     -0.0,
+     -0.0,
+     -0.0,
+     -0.0,
+     -0.0,
+     -0.0,
+     -0.0,
+     -0.0,
+     -0.0,
+     -0.0,
+     -0.0,
+     -0.0,
+     -0.0
+    ],
+    "recorded": [
+     -0.4480000138282776,
+     -0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     -0.0,
+     -0.0,
+     -0.0,
+     -0.0,
+     -0.0,
+     -0.0
+    ]
+   },
+   "d_y": {
+    "pred": [
+     -0.004999999888241291,
+     -0.004999999888241291,
+     -0.004999999888241291,
+     -0.004999999888241291,
+     -0.004999999888241291,
+     -0.004999999888241291,
+     -0.004999999888241291,
+     -0.004999999888241291,
+     -0.004999999888241291,
+     -0.004999999888241291,
+     -0.004999999888241291,
+     -0.004999999888241291,
+     -0.004999999888241291,
+     -0.004999999888241291,
+     -0.004999999888241291,
+     -0.004999999888241291,
+     -0.004999999888241291,
+     -0.004999999888241291,
+     -0.004000000189989805,
+     -0.004000000189989805
+    ],
+    "recorded": [
+     -0.6000000238418579,
+     -0.6000000238418579,
+     -0.6000000238418579,
+     -0.6000000238418579,
+     -0.6000000238418579,
+     -0.6000000238418579,
+     -0.6000000238418579,
+     -0.6000000238418579,
+     -0.6000000238418579,
+     -0.6000000238418579,
+     -0.6000000238418579,
+     -0.37700000405311584,
+     -0.0,
+     -0.0,
+     -0.0,
+     -0.0,
+     -0.0,
+     -0.0,
+     -0.0,
+     -0.0
+    ]
+   },
+   "d_z": {
+    "pred": [
+     -0.6060000061988831,
+     -0.6060000061988831,
+     -0.6060000061988831,
+     -0.6060000061988831,
+     -0.6060000061988831,
+     -0.6060000061988831,
+     -0.6060000061988831,
+     -0.6060000061988831,
+     -0.6060000061988831,
+     -0.6060000061988831,
+     -0.6069999933242798,
+     -0.6069999933242798,
+     -0.6069999933242798,
+     -0.6069999933242798,
+     -0.6069999933242798,
+     -0.6069999933242798,
+     -0.6069999933242798,
+     -0.6069999933242798,
+     -0.6069999933242798,
+     -0.6069999933242798
+    ],
+    "recorded": [
+     -0.6000000238418579,
+     -0.6000000238418579,
+     -0.6000000238418579,
+     -0.6000000238418579,
+     -0.6000000238418579,
+     -0.6000000238418579,
+     -0.6000000238418579,
+     -0.6000000238418579,
+     -0.6000000238418579,
+     -0.6000000238418579,
+     -0.6000000238418579,
+     -0.6000000238418579,
+     -0.6000000238418579,
+     -0.6000000238418579,
+     -0.6000000238418579,
+     -0.6000000238418579,
+     -0.6000000238418579,
+     -0.6000000238418579,
+     -0.6000000238418579,
+     -0.6000000238418579
+    ]
+   },
+   "d_yaw": {
+    "pred": [
+     -0.0,
+     -0.0,
+     -0.0,
+     -0.0,
+     -0.0,
+     -0.0,
+     -0.0,
+     -0.0,
+     -0.0,
+     -0.0,
+     -0.0,
+     -0.0,
+     -0.0,
+     -0.0,
+     -0.0,
+     -0.0,
+     -0.0,
+     -0.0,
+     -0.0,
+     -0.0
+    ],
+    "recorded": [
+     -0.6000000238418579,
+     -0.6000000238418579,
+     -0.6000000238418579,
+     -0.6000000238418579,
+     -0.6000000238418579,
+     -0.6000000238418579,
+     -0.6000000238418579,
+     -0.6000000238418579,
+     -0.6000000238418579,
+     -0.6000000238418579,
+     -0.6000000238418579,
+     -0.6000000238418579,
+     -0.008999999612569809,
+     0.0,
+     -0.0,
+     -0.0,
+     -0.0,
+     -0.0,
+     -0.0,
+     -0.0
+    ]
+   },
+   "gripper": {
+    "pred": [
+     1.0049999952316284,
+     1.0049999952316284,
+     1.0049999952316284,
+     1.0049999952316284,
+     1.0049999952316284,
+     1.0049999952316284,
+     1.0049999952316284,
+     1.0049999952316284,
+     1.0049999952316284,
+     1.0049999952316284,
+     1.0049999952316284,
+     1.0049999952316284,
+     1.0049999952316284,
+     1.0049999952316284,
+     1.0049999952316284,
+     1.00600004196167,
+     1.0049999952316284,
+     1.0049999952316284,
+     1.0049999952316284,
+     1.00600004196167
+    ],
+    "recorded": [
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0
+    ]
+   }
+  },
+  "frame0_d_y_pred_eps0-9": [
+   -0.005,
+   -0.0043,
+   -0.0049,
+   -0.0049,
+   -0.0048,
+   -0.0045,
+   -0.0049,
+   -0.0045,
+   -0.0042,
+   -0.0051
+  ],
+  "frame0_d_y_recorded_all50": [
+   -0.6000000238418579
+  ]
+ },
+ "run2": {
+  "all_ok": true,
+  "rows": [
+   {
+    "episode": 0,
+    "frame": 0,
+    "images_equal_plain": true,
+    "chunk_equals_parquet": true,
+    "pad_flags_ok": true,
+    "episode_frame_index_ok": true,
+    "n_pad": 0
+   },
+   {
+    "episode": 0,
+    "frame": 5,
+    "images_equal_plain": true,
+    "chunk_equals_parquet": true,
+    "pad_flags_ok": true,
+    "episode_frame_index_ok": true,
+    "n_pad": 0
+   },
+   {
+    "episode": 1,
+    "frame": 0,
+    "images_equal_plain": true,
+    "chunk_equals_parquet": true,
+    "pad_flags_ok": true,
+    "episode_frame_index_ok": true,
+    "n_pad": 0
+   },
+   {
+    "episode": 1,
+    "frame": 5,
+    "images_equal_plain": true,
+    "chunk_equals_parquet": true,
+    "pad_flags_ok": true,
+    "episode_frame_index_ok": true,
+    "n_pad": 0
+   },
+   {
+    "episode": 25,
+    "frame": 0,
+    "images_equal_plain": true,
+    "chunk_equals_parquet": true,
+    "pad_flags_ok": true,
+    "episode_frame_index_ok": true,
+    "n_pad": 0
+   },
+   {
+    "episode": 25,
+    "frame": 5,
+    "images_equal_plain": true,
+    "chunk_equals_parquet": true,
+    "pad_flags_ok": true,
+    "episode_frame_index_ok": true,
+    "n_pad": 0
+   },
+   {
+    "episode": 49,
+    "frame": 0,
+    "images_equal_plain": true,
+    "chunk_equals_parquet": true,
+    "pad_flags_ok": true,
+    "episode_frame_index_ok": true,
+    "n_pad": 0
+   },
+   {
+    "episode": 49,
+    "frame": 5,
+    "images_equal_plain": true,
+    "chunk_equals_parquet": true,
+    "pad_flags_ok": true,
+    "episode_frame_index_ok": true,
+    "n_pad": 0
+   },
+   {
+    "episode": 0,
+    "frame": 112,
+    "images_equal_plain": true,
+    "chunk_equals_parquet": true,
+    "pad_flags_ok": true,
+    "episode_frame_index_ok": true,
+    "n_pad": 19
+   },
+   {
+    "episode": 49,
+    "frame": 99,
+    "images_equal_plain": true,
+    "chunk_equals_parquet": true,
+    "pad_flags_ok": true,
+    "episode_frame_index_ok": true,
+    "n_pad": 10
+   }
+  ],
+  "action_chunk_len": 20
+ }
+}

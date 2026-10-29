@@ -1,0 +1,123 @@
+{
+ "targets": "initial cube (x, y) in metres",
+ "cube_xy_std_cm": [
+  4.1,
+  3.98
+ ],
+ "96px": {
+  "front": {
+   "r2_in_sample": [
+    0.9973,
+    0.9982
+   ],
+   "r2_loo": [
+    0.9969,
+    0.9979
+   ],
+   "rmse_loo_cm": [
+    0.229,
+    0.182
+   ],
+   "episodes_with_cube_visible": 50,
+   "red_px_min_mean_max": [
+    37,
+    53.3,
+    66
+   ],
+   "u_range": [
+    27.6,
+    48.8
+   ],
+   "v_range": [
+    33.9,
+    49.7
+   ]
+  },
+  "wrist": {
+   "r2_in_sample": [
+    0.9961,
+    0.9945
+   ],
+   "r2_loo": [
+    0.9955,
+    0.9937
+   ],
+   "rmse_loo_cm": [
+    0.273,
+    0.317
+   ],
+   "episodes_with_cube_visible": 50,
+   "red_px_min_mean_max": [
+    8,
+    18.6,
+    28
+   ],
+   "u_range": [
+    36.1,
+    51.6
+   ],
+   "v_range": [
+    29.1,
+    44.9
+   ]
+  }
+ },
+ "128px": {
+  "front": {
+   "r2_in_sample": [
+    0.9987,
+    0.9983
+   ],
+   "r2_loo": [
+    0.9985,
+    0.998
+   ],
+   "rmse_loo_cm": [
+    0.158,
+    0.179
+   ],
+   "episodes_with_cube_visible": 50,
+   "red_px_min_mean_max": [
+    79,
+    95.5,
+    109
+   ],
+   "u_range": [
+    36.8,
+    65.6
+   ],
+   "v_range": [
+    45.4,
+    66.0
+   ]
+  },
+  "wrist": {
+   "r2_in_sample": [
+    0.9977,
+    0.9978
+   ],
+   "r2_loo": [
+    0.9974,
+    0.9975
+   ],
+   "rmse_loo_cm": [
+    0.211,
+    0.2
+   ],
+   "episodes_with_cube_visible": 50,
+   "red_px_min_mean_max": [
+    25,
+    36.4,
+    44
+   ],
+   "u_range": [
+    48.1,
+    69.1
+   ],
+   "v_range": [
+    39.5,
+    60.1
+   ]
+  }
+ }
+}

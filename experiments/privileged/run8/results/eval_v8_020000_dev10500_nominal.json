@@ -1,0 +1,35 @@
+{
+  "meta": {
+    "command": "experiments/privileged/run7/eval_run7.py --checkpoint experiments/privileged/run8/train/act_cpu_v8_abs_dart/checkpoints/020000 --name v8_020000 --seeds dev --results-dir experiments/privileged/run8/results",
+    "checkpoint": "experiments/privileged/run8/train/act_cpu_v8_abs_dart/checkpoints/020000/pretrained_model",
+    "wall_time_s": 43.9
+  },
+  "conditions": [
+    {
+      "condition": "v8_020000_dev10500",
+      "distribution": "nominal",
+      "trials": 50,
+      "successes": 36,
+      "success_rate": 0.72,
+      "wilson95": [
+        0.5833487619095525,
+        0.8252582940118571
+      ],
+      "mean_steps": 152.18,
+      "mean_steps_success": 114.13888888888889,
+      "labels": {
+        "success": 36,
+        "collision": 0,
+        "never_reached": 0,
+        "grasp_missed": 10,
+        "dropped": 4,
+        "placed_outside": 0,
+        "timeout": 0
+      },
+      "seed_min": 10500,
+      "seed_max": 10549,
+      "policy_ms_mean": 2.40442,
+      "policy_ms_max": 32.481
+    }
+  ]
+}
