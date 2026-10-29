@@ -109,9 +109,9 @@ What is left: training wrapper + ACT CPU run (≤ 45 min), ACT eval (CP3), GIF, 
 
 Does Sunday 1 Nov hold? **Yes.**
 
-## CHECKPOINT 3 — CPU-config eval table — 29 Oct 2026 05:35 IST
+## CHECKPOINT 3 — CPU-config eval table — 29 Oct 2026 05:30 IST
 
-Wall-clock so far: 2 h 53 min (02:42 → 05:35), incl. ~30 min lost to the 03:32 OOM
+Wall-clock so far: 2 h 48 min (02:42 → 05:30), incl. ~30 min lost to the 03:32 OOM
 kill and ~45 min waiting on locks held by R1/R2.
 
 **Result: both ACT CPU runs succeed in 0/100 episodes, nominal and shifted, on dev and
