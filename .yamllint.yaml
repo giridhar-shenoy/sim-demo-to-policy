@@ -1,4 +1,6 @@
 extends: default
+ignore: |
+  experiments/
 rules:
   document-start: disable
   line-length:

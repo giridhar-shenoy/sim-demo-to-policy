@@ -9,3 +9,4 @@ ignores:
   - "third_party/**"
   - "outputs/**"
   - "datasets/**"
+  - "experiments/**"   # archived research write-ups, kept as written

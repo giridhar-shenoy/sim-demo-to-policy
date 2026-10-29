@@ -34,7 +34,10 @@ include = ["sdp*"]
 [tool.ruff]
 line-length = 100
 target-version = "py312"
-extend-exclude = ["third_party", "outputs", "datasets"]
+# experiments/ holds archived research scripts with their own conventions (sys.path
+# imports, notebook-style layout); the package, scripts and tests are linted in full.
+extend-exclude = ["third_party", "outputs", "datasets", "experiments"]
+force-exclude = true  # also honour the excludes when pre-commit passes file names
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "B", "UP", "NPY"]
