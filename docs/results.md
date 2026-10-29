@@ -24,12 +24,20 @@ torch 2.11, 4 threads), MuJoCo offscreen rendering via EGL on the integrated GPU
 | act_cpu_v5_scripted50_128px (shifted) | success, seeds 10400–10499 | 0/100 (0 %, Wilson 95 % 0 %–4 %) | `sdp eval --checkpoint outputs/train/act_cpu_v5_scripted50_128px --condition act_cpu_v5_scripted50_128px --trials 100 --seed-start 400` |
 | act_cpu_v6_scripted50 (nominal) | success, seeds 10600–10699 | 0/100 (0 %, Wilson 95 % 0 %–4 %) | `sdp eval --checkpoint outputs/train/act_cpu_v6_scripted50 --condition act_cpu_v6_scripted50 --trials 100 --seed-start 600` |
 | act_cpu_v6_scripted50 (shifted) | success, seeds 10600–10699 | 0/100 (0 %, Wilson 95 % 0 %–4 %) | `sdp eval --checkpoint outputs/train/act_cpu_v6_scripted50 --condition act_cpu_v6_scripted50 --trials 100 --seed-start 600` |
+| act_cpu_v7_abs (nominal) | success, seeds 10700–10799 | 57/100 (57 %, Wilson 95 % 47 %–66 %) | `sdp eval --checkpoint experiments/privileged/run7/train/act_cpu_v7_abs/checkpoints/006000 --condition act_cpu_v7_abs --trials 100 --seed-start 700 --distributions nominal shifted` |
+| act_cpu_v7_abs (shifted) | success, seeds 10700–10799 | 19/100 (19 %, Wilson 95 % 13 %–28 %) | `sdp eval --checkpoint experiments/privileged/run7/train/act_cpu_v7_abs/checkpoints/006000 --condition act_cpu_v7_abs --trials 100 --seed-start 700 --distributions nominal shifted` |
+| act_cpu_v8_abs_dart (nominal) | success, seeds 10700–10799 | 63/100 (63 %, Wilson 95 % 53 %–72 %) | `sdp eval --checkpoint experiments/privileged/run8/train/act_cpu_v8_abs_dart/checkpoints/020000 --condition act_cpu_v8_abs_dart --trials 100 --seed-start 700 --distributions nominal shifted` |
+| act_cpu_v8_abs_dart (shifted) | success, seeds 10700–10799 | 16/100 (16 %, Wilson 95 % 10 %–24 %) | `sdp eval --checkpoint experiments/privileged/run8/train/act_cpu_v8_abs_dart/checkpoints/020000 --condition act_cpu_v8_abs_dart --trials 100 --seed-start 700 --distributions nominal shifted` |
 | Training act_cpu_scripted50 | wall time | 21.0 min | `scripts/train_cpu.sh` |
 | Training act_cpu_v2_scripted50 | wall time | 17.1 min | `scripts/train_cpu.sh` |
 | Training act_cpu_v3_scripted50 | wall time | 45.3 min | `scripts/train_cpu.sh` |
 | Training act_cpu_v4_scripted50 | wall time | 17.2 min | `scripts/train_cpu.sh` |
 | Training act_cpu_v5_scripted50_128px | wall time | 21.5 min | `scripts/train_cpu.sh` |
 | Training act_cpu_v6_scripted50 | wall time | 16.3 min | `scripts/train_cpu.sh` |
+| Training act_cpu_v7_abs | wall time | 32.4 min | `scripts/train_cpu.sh` |
+| Training act_cpu_v8_abs_dart | wall time | 113.4 min | `scripts/train_cpu.sh` |
+| Dataset pickplace_abs_50 | episodes (successful) / mean length | 50 (50) / 110.3 steps | `scripts/record_demos.sh` |
+| Dataset pickplace_abs_dart_200 | episodes (successful) / mean length | 198 (198) / 112.0 steps | `scripts/record_demos.sh` |
 | Dataset pickplace_scripted_50 | episodes (successful) / mean length | 50 (50) / 110.3 steps | `scripts/record_demos.sh` |
 | Dataset pickplace_scripted_50_128px | episodes (successful) / mean length | 50 (50) / 110.3 steps | `scripts/record_demos.sh` |
 <!-- sdp-report:index:end -->
@@ -45,8 +53,10 @@ torch 2.11, 4 threads), MuJoCo offscreen rendering via EGL on the integrated GPU
 | — test 2 | 10200–10299: run 3 only; chosen before run 3 was trained, never used for any choice | `scripts/eval_all.sh` |
 | — test 3 | 10300–10399: run 4 only; chosen before run 4 was trained, never used for any choice | `scripts/eval_all.sh` |
 | — test 4 | 10400–10499: run 5 only; chosen before run 5 was trained, never used for any choice | `scripts/eval_all.sh` |
-| — reserved | 10500–10599: dev seeds for the follow-up experiments (not in these tables) | – |
+| — dev (experiments) | 10500–10599: the follow-up experiments' dev seeds; 10500–10549 picked the run 7 and run 8 checkpoints (not in these tables) | `experiments/` |
 | — test 5 | 10600–10699: run 6 only; chosen before run 6 was trained, never used for any choice | `scripts/eval_all.sh` |
+| — test 6 | 10700–10799: runs 7 and 8, the same seeds for both (paired); policies and seeds fixed in NOTES.md before any test eval | `scripts/eval_all.sh` |
+| — reserved | 10800–10899: the smallbc official eval; 11000+: untouched final check | – |
 | Overlap | none | `tests/test_seed_split.py` |
 
 A seed fully determines the cube's initial pose. Nominal and shifted evals use the
@@ -67,7 +77,13 @@ is run 2 (`act_cpu_v2.yaml`: backbone lr 1e-4 instead of 1e-5, CVAE off);
 `act_cpu_v3_scripted50` is run 3 (`act_cpu_v3.yaml`: run 2 with 8000 steps instead of
 the spec'd 3000, approved by Giri after runs 1 and 2 underfit); `act_cpu_v4_scripted50`
 is run 4 (`act_cpu_v4.yaml`: run 2 with the proprioceptive state withheld, so the policy
-sees only the two cameras); `act_cpu_v6_scripted50` is run 6 (`act_cpu_v6.yaml`: run 2 with lr 1e-5 and
+sees only the two cameras); `act_cpu_v7_abs` is run 7 (`experiments/privileged/run7/act_cpu_v7_abs.yaml`: run 2
+with absolute TCP-target actions `[x, y, z, yaw, gripper]`, 6000 steps, 50 demos
+re-recorded with absolute targets) and `act_cpu_v8_abs_dart` is run 8
+(`experiments/privileged/run8/act_cpu_v8_abs_dart.yaml`: run 7 with 200 demos, half
+with DART noise, 198 kept, 20000 steps). Both run through `AbsoluteTargetWrapper`; the
+eval adapter detects the 5-D action. Run 8 @ 20k is the headline policy, fixed on dev
+seeds before testing. `act_cpu_v6_scripted50` is run 6 (`act_cpu_v6.yaml`: run 2 with lr 1e-5 and
 backbone lr 1e-5, LeRobot's ACT defaults; it tests whether the 1e-4 used by runs 1–5
 caused the collapse); `act_cpu_v5_scripted50_128px` is run 5 (`act_cpu_v5.yaml`:
 run 4 with both cameras at 128 px, trained on `pickplace_scripted_50_128px`, the same 50
@@ -100,6 +116,10 @@ its own test seeds, which no configuration choice has seen.
 | ACT run 5 (`act_cpu_v5_scripted50_128px`) | shifted | 10400–10499 | 100 | 0/100 (0 %) | 0 %–4 % | – | [`results/eval_act_cpu_v5_scripted50_128px_s10400.csv`](../results/eval_act_cpu_v5_scripted50_128px_s10400.csv) |
 | ACT run 6 (`act_cpu_v6_scripted50`) | nominal | 10600–10699 | 100 | 0/100 (0 %) | 0 %–4 % | – | [`results/eval_act_cpu_v6_scripted50_s10600.csv`](../results/eval_act_cpu_v6_scripted50_s10600.csv) |
 | ACT run 6 (`act_cpu_v6_scripted50`) | shifted | 10600–10699 | 100 | 0/100 (0 %) | 0 %–4 % | – | [`results/eval_act_cpu_v6_scripted50_s10600.csv`](../results/eval_act_cpu_v6_scripted50_s10600.csv) |
+| ACT run 7 (`act_cpu_v7_abs`) | nominal | 10700–10799 | 100 | 57/100 (57 %) | 47 %–66 % | 115.4 | [`results/eval_act_cpu_v7_abs_s10700.csv`](../results/eval_act_cpu_v7_abs_s10700.csv) |
+| ACT run 7 (`act_cpu_v7_abs`) | shifted | 10700–10799 | 100 | 19/100 (19 %) | 13 %–28 % | 117.9 | [`results/eval_act_cpu_v7_abs_s10700.csv`](../results/eval_act_cpu_v7_abs_s10700.csv) |
+| ACT run 8 (`act_cpu_v8_abs_dart`) | nominal | 10700–10799 | 100 | 63/100 (63 %) | 53 %–72 % | 114.6 | [`results/eval_act_cpu_v8_abs_dart_s10700.csv`](../results/eval_act_cpu_v8_abs_dart_s10700.csv) |
+| ACT run 8 (`act_cpu_v8_abs_dart`) | shifted | 10700–10799 | 100 | 16/100 (16 %) | 10 %–24 % | 127.8 | [`results/eval_act_cpu_v8_abs_dart_s10700.csv`](../results/eval_act_cpu_v8_abs_dart_s10700.csv) |
 <!-- sdp-report:success:end -->
 
 | Policy / data | Config | Success |
@@ -136,6 +156,20 @@ every saved checkpoint: swap change d_x / d_yaw 0.0031 / 0.0029 at step 1000,
 the final run row above). **Not met** at any checkpoint, and the sensitivity shrinks
 with training.
 
+## Paired comparison (runs on identical seeds)
+
+<!-- sdp-report:paired:begin -->
+| Run A | Run B | Cube poses | Both succeed | Only A | Only B | Neither |
+|---|---|---|---|---|---|---|
+| run 7 | run 8 | nominal | 40 | 17 | 23 | 20 |
+| run 7 | run 8 | shifted | 8 | 11 | 8 | 73 |
+<!-- sdp-report:paired:end -->
+
+Runs 7 and 8 have no `results/openloop_*.json` rows. Their swap sensitivity was
+measured by the experiment's own script, in the wrapper's delta units:
+`experiments/privileged/run7/results/swap_sensitivity.json` and
+`experiments/privileged/run8/results/swap_sensitivity.json`.
+
 ## Failure taxonomy (counts per label)
 
 Labels and their order are defined in `sdp/eval/taxonomy.py`; each episode gets exactly one.
@@ -160,6 +194,10 @@ Labels and their order are defined in `sdp/eval/taxonomy.py`; each episode gets 
 | ACT run 5 (`act_cpu_v5_scripted50_128px`) | shifted | 0 | 3 | 97 | 0 | 0 | 0 | 0 |
 | ACT run 6 (`act_cpu_v6_scripted50`) | nominal | 0 | 15 | 82 | 2 | 0 | 1 | 0 |
 | ACT run 6 (`act_cpu_v6_scripted50`) | shifted | 0 | 68 | 32 | 0 | 0 | 0 | 0 |
+| ACT run 7 (`act_cpu_v7_abs`) | nominal | 57 | 0 | 3 | 37 | 3 | 0 | 0 |
+| ACT run 7 (`act_cpu_v7_abs`) | shifted | 19 | 0 | 69 | 12 | 0 | 0 | 0 |
+| ACT run 8 (`act_cpu_v8_abs_dart`) | nominal | 63 | 0 | 1 | 30 | 5 | 0 | 1 |
+| ACT run 8 (`act_cpu_v8_abs_dart`) | shifted | 16 | 0 | 69 | 14 | 1 | 0 | 0 |
 <!-- sdp-report:taxonomy:end -->
 
 ## Training
@@ -175,6 +213,8 @@ Regenerate with `scripts/train_cpu.sh` (the loss curve is in `results/train_*.cs
 | run 4 (`act_cpu_v4_scripted50`) | run 2 + proprioceptive state withheld (cameras only) | 3000 | 17.2 min | 0.073 | `sdp/train/configs/act_cpu_v4.yaml` |
 | run 5 (`act_cpu_v5_scripted50_128px`) | run 4 + 128 px cameras (demos re-recorded) | 3000 | 21.5 min | 0.079 | `sdp/train/configs/act_cpu_v5.yaml` |
 | run 6 (`act_cpu_v6_scripted50`) | run 2 + lr 1e-5 and backbone lr 1e-5 (LeRobot defaults) | 3000 | 16.3 min | 0.114 | `sdp/train/configs/act_cpu_v6.yaml` |
+| run 7 (`act_cpu_v7_abs`) | run 2 + absolute TCP-target actions | 6000 | 32.4 min | 0.065 | `experiments/privileged/run7/act_cpu_v7_abs.yaml` |
+| run 8 (`act_cpu_v8_abs_dart`) | run 7 + 200 demos, half with DART noise | 20000 | 113.4 min | 0.070 | `experiments/privileged/run8/act_cpu_v8_abs_dart.yaml` |
 <!-- sdp-report:training:end -->
 
 Stage wall times (recording and eval timings are saved from run 5 on):
@@ -188,6 +228,8 @@ Stage wall times (recording and eval timings are saved from run 5 on):
 | run 4 (`act_cpu_v4_scripted50`) | – | 17.2 min | – |
 | run 5 (`act_cpu_v5_scripted50_128px`) | 55 s | 21.5 min | 5.0 min |
 | run 6 (`act_cpu_v6_scripted50`) | – | 16.3 min | 4.5 min |
+| run 7 (`act_cpu_v7_abs`) | 44 s | 32.4 min | 3.5 min |
+| run 8 (`act_cpu_v8_abs_dart`) | – | 113.4 min | 3.4 min |
 <!-- sdp-report:timing:end -->
 
 Training budget: 45 min per run on the laptop CPU. For run 3 only, Giri raised the cap
@@ -206,6 +248,8 @@ Regenerate with `scripts/record_demos.sh`.
 <!-- sdp-report:dataset:begin -->
 | Dataset | Image size | Episodes | Successful | Frames | Mean length | Demo seeds | Format |
 |---|---|---|---|---|---|---|---|
+| pickplace_abs_50 | 96 px | 50 | 50 | 5513 | 110.3 steps | 0–49 | LeRobot v3.0 |
+| pickplace_abs_dart_200 | 96 px | 198 | 198 | 22177 | 112.0 steps | 0–199 | LeRobot v3.0 |
 | pickplace_scripted_50 | 96 px | 50 | 50 | 5513 | 110.3 steps | 0–49 | LeRobot v3.0 |
 | pickplace_scripted_50_128px | 128 px | 50 | 50 | 5513 | 110.3 steps | 0–49 | LeRobot v3.0 |
 <!-- sdp-report:dataset:end -->

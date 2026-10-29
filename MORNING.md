@@ -1,46 +1,45 @@
 # MORNING — sim-demo-to-policy
 
-## STATUS (00:50 IST, 30 Oct)
+## STATUS (04:15 IST, 30 Oct)
 
-**v0.1 MUST list: done. CI: green. ACT: six CPU runs, all 0/100.** Run 6 tested the
-retrospective's leading hypothesis (`experiments/RETROSPECTIVE.md`): that the
-transformer lr of 1e-4 in runs 1–5 caused the collapse. With LeRobot's defaults (lr
-1e-5, backbone 1e-5, clip 10) it scores 0/100 nominal and 0/100 shifted. The
-pre-registered criterion is not met at any checkpoint: image-swap sensitivity in x/yaw
-is 0.0031/0.0029 (1k) → 0.0018/0.0018 (2k) → 0.0009/0.0012 (3k), so 10–30× runs 1–5
-but shrinking. **The learning rate is not the sole cause.**
+**ACT works with absolute TCP-target actions.** Official test, seeds 10700–10799,
+pre-registered in NOTES.md (commit 8060419) before any test eval, the same seeds for
+both policies:
 
-| Run | Change from the spec'd CPU config | Steps | Training | Test seeds | Nominal | Shifted |
-|---|---|---|---|---|---|---|
-| 1 | spec'd config; lr 1e-4, backbone 1e-5, CVAE on | 3000 | 21.0 min | 10100–10199 (dev 10000–10099) | 0/100 (Wilson 0–4 %) | 0/100 (0–4 %) |
-| 2 | run 1 + backbone lr 1e-4, CVAE off | 3000 | 17.1 min | 10100–10199 | 0/100 (0–4 %) | 0/100 (0–4 %) |
-| 3 | run 2 + 8000 steps (cap raised to 50 min) | 8000 | 45.3 min | 10200–10299 | 0/100 (0–4 %) | 0/100 (0–4 %) |
-| 4 | run 2 + proprioceptive state withheld | 3000 | 17.2 min | 10300–10399 | 0/100 (0–4 %) | 0/100 (0–4 %) |
-| 5 | run 4 + 128 px cameras (demos re-recorded) | 3000 | 21.5 min | 10400–10499 | 0/100 (0–4 %) | 0/100 (0–4 %) |
-| 6 | run 2 + lr 1e-5, backbone lr 1e-5 | 3000 | 16.3 min | 10600–10699 | 0/100 (0–4 %) | 0/100 (0–4 %) |
+| Policy | Nominal | Shifted |
+|---|---|---|
+| run 8 @ 20k (headline: run 7 + 200 demos, half DART, 20000 steps) | 63/100 (Wilson 53–72 %) | 16/100 (10–24 %) |
+| run 7 @ 6k (run 2 with absolute targets, 6000 steps) | 57/100 (47–66 %) | 19/100 (13–28 %) |
+| runs 1–6 (per-step delta actions) | 0/100 each | 0/100 each |
 
-Run 6 changed the failure mix (nominal: 82 never_reached, 15 collision, 2 grasp_missed,
-1 placed_outside, the first episode in any run that lifted the cube; shifted: 68
-collision). The approach is still image-blind, so that lift is most likely luck.
+- Nominal failures are mostly grasping (run 8: 30 grasp_missed, 5 dropped). Shifted
+  failures are mostly never_reached (69 for each policy).
+- The run 8 vs run 7 difference is not resolved: on the paired seeds, 23 succeed only
+  with run 8 and 17 only with run 7.
+- Repro check: the repo's `sdp eval` reproduces the experiment's run 7 dev result
+  exactly (31/50, identical on all 50 seeds; `results/repro/`).
+- Credit for the fix: `experiments/` (retrospective, integrity checks, privileged-state
+  comparison), now committed.
 
-Commits: run 6 in the commits pushed with this status (see `git log`); runs 3–5 in
-91bac96 … 17bf863. Earlier:
+Commits this turn: 2cfecdd (fast-forward of `feat/abs-actions`; branch and worktree
+deleted), 8060419 (pre-registration + repro), d048604 (`experiments/`), and the results
+and docs commits pushed with this status (see `git log`). CI: see the latest run on
+<https://github.com/giridhar-shenoy/sim-demo-to-policy/actions>.
 
-| What | Commit(s) |
-|---|---|
-| Skeleton (license, Dockerfile, devcontainer, CI, pre-commit, docs stubs) | 6cf6118 … ba38e80 |
-| PandaPickPlace-v0 env (DLS IK, 500/20 Hz, two cameras, 448 steps/s at 96 px) | 9a315fa |
-| Scripted expert, 100/100 on demo + eval seeds (also at 128 px) | bdd4b6b, 80dfb12 |
-| Eval harness, taxonomy, seed split, Wilson | 479624b, 7d1fbb1, 75f3295 |
-| LeRobot v3.0 recorder + 50 scripted demos | 713a7aa, 4e9bc9e |
-| Training wrapper + ACT CPU config (bundled commit, see #3) | d8bde37 |
-| ACT runs 1 and 2 + results; diagnostics | 3c8851e, 6796baf, 06794f7, 57535a3, 768d54e, 5f4ed0f |
+After smallbc finishes (~08:00), when the CPU is free:
 
-CI: see the latest run on <https://github.com/giridhar-shenoy/sim-demo-to-policy/actions>.
-`experiments/` is untracked on purpose (other agents' work) and is not in any commit.
-
-Blocked (decisions below): the next ACT step (#8, Giri is sending it), release upload
-(#4), topics and branch protection (#1, #2), hardware-transfer draft (#6).
+1. `scripts/package_release_abs.sh`: packs run 7 @ 6000 and run 8 @ 20000 with their
+   datasets into `outputs/release/` (about 150 MB of gzip).
+2. Upload everything:
+   `gh release create v0.1.0 outputs/release/*.tar.gz --title "sim-demo-to-policy v0.1.0"`.
+   Final asset list: pickplace_scripted_50, pickplace_scripted_50_128px,
+   pickplace_abs_50, pickplace_abs_dart_200, act_cpu_scripted50,
+   act_cpu_v2_scripted50, act_cpu_v3_scripted50, act_cpu_v4_scripted50,
+   act_cpu_v5_scripted50_128px, act_cpu_v6_scripted50, act_cpu_v7_abs and
+   act_cpu_v8_abs_dart (all `.tar.gz`).
+3. Re-render the README GIF with run 8:
+   `python scripts/record_gifs.py --checkpoint experiments/privileged/run8/train/act_cpu_v8_abs_dart/checkpoints/020000 --csv results/eval_act_cpu_v8_abs_dart_s10700.csv --policy-label "ACT run 8"`.
+   It currently shows run 3.
 
 ## WAITING FOR GIRI
 
@@ -57,22 +56,17 @@ Blocked (decisions below): the next ACT step (#8, Giri is sending it), release u
    GIF script; docs) under the training-wrapper message, because of a staging mistake
    right after the OOM restart. Splitting it would be a history rewrite.
    Recommendation: leave it. Blocks: nothing.
-4. **Upload the v0.1 release assets** (over the 50 MB commit limit). Packed in
-   `outputs/release/`: act_cpu_scripted50 89 MB; act_cpu_v2/v3/v4/v6_scripted50 and
-   act_cpu_v5_scripted50_128px ~62 MB each; pickplace_scripted_50 5.2 MB;
-   pickplace_scripted_50_128px 6.6 MB. Command:
-   `gh release create v0.1.0 outputs/release/*.tar.gz` (then
-   `scripts/download_release_assets.sh` works). Until then the README's run path
-   retrains (~2.5 h for the six runs). Blocks: a download-only one-command demo.
+4. **Upload the release assets** after smallbc: run `scripts/package_release_abs.sh`,
+   then `gh release create v0.1.0 outputs/release/*.tar.gz` (asset list in STATUS).
+   Blocks: a download-only one-command demo.
 5. **Look at the dataset in the LeRobot visualiser** (`lerobot-dataset-viz`, needs a
    GUI and the `viz` extra). Blocks: nothing.
 6. **Edit `docs/hardware_transfer.md`** (marked DRAFT, first person, no employer names).
 7. **Keyboard teleop demos (SHOULD)**: skipped; needs you at the keyboard.
-8. **Next ACT step: Giri is sending it** (after run 6). The retrospective's plan
-   continues with a pipeline proof (privileged-state ACT, integrity checks), a small
-   spatial-softmax BC, and an overnight ACT with the combined recipe. Seed ledger:
-   10500–10599 for those experiments, 10700–10999 for later runs, 11000–11099 the final
-   test (used once).
+8. **Next ACT step.** Grasp failures dominate nominal; the shifted box is mostly
+   never_reached. Candidates: chunk-relative actions, more DART demos near the grasp,
+   a wider demo pose box, several training seeds. Seeds 10800–10899 are reserved for
+   the smallbc eval, 11000+ for a final check.
 
 The aborted run-3 attempts are kept, not reported: `outputs/train/act_cpu_v3_scripted50_aborted_1217*`
 and `…_aborted_1534*` (checkpoints 1000–4000). Delete them when you no longer need them.

@@ -514,7 +514,7 @@ Open questions:
   offset on all 50 seeds. The repo's adapter auto-detected the 5-D action and wrapped the
   env.
 
-### Runs 7 and 8: pre-registered test plan (written 03:49, before any test eval)
+### Runs 7 and 8: pre-registered test plan (written 03:48, before any test eval; commit 8060419)
 
 - **Headline policy: run 8 @ 20k** (`experiments/privileged/run8/train/
   act_cpu_v8_abs_dart/checkpoints/020000`), chosen on dev seeds 10500–10549 before
@@ -530,3 +530,42 @@ Open questions:
   after seeing test results.
 - Order: run 8 nominal, run 8 shifted, run 7 nominal, run 7 shifted, all with `sdp eval`
   under heavy+build `flock -o`, `nice -n 10`, after the 5 GB memory wait.
+
+### Official test evals (seeds 10700–10799, as pre-registered)
+
+- 03:48:45–03:52:12 run 8 @ 20k (`sdp eval --checkpoint experiments/privileged/run8/train/
+  act_cpu_v8_abs_dart/checkpoints/020000 --condition act_cpu_v8_abs_dart --trials 100
+  --seed-start 700 --distributions nominal shifted`, eval wall time 206.3 s):
+  - nominal **63/100** (Wilson 95 % 53–72 %): 30 grasp_missed, 5 dropped,
+    1 never_reached, 1 timeout;
+  - shifted **16/100** (10–24 %): 69 never_reached, 14 grasp_missed, 1 dropped.
+- 03:52:12–03:55:43 run 7 @ 6k (same command form, `--condition act_cpu_v7_abs`,
+  210.3 s):
+  - nominal **57/100** (47–66 %): 37 grasp_missed, 3 dropped, 3 never_reached;
+  - shifted **19/100** (13–28 %): 69 never_reached, 12 grasp_missed.
+- Paired on the same seeds, nominal: 40 both, 23 only run 8, 17 only run 7, 20 neither.
+  Shifted: 8 both, 8 only run 8, 11 only run 7, 73 neither. Run 8 vs run 7 is not
+  resolved by these trials.
+- 03:55:43 `touch ~/work/sessions/logs/r4/evals-done.marker` (CPU handed to smallbc).
+  Nothing heavy after this point.
+
+### Part B (light, after the marker)
+
+- `experiments/` committed (d048604): code, configs, REPORT.md, NOTES.txt,
+  RETROSPECTIVE.md and small JSON/CSV/JSONL results. That is 89 files and 0.5 MB, the
+  largest under 1 MB, with no employer terms. Gitignored: datasets, train outputs and
+  checkpoints, raw logs (run 8's train log is 1.6 MB), the integrity PNG/NPZ dumps, and
+  smallbc data/runs/logs. smallbc code committed unchanged. One provenance field in
+  `run7/results/swap_sensitivity.json` holds an absolute dataset path; it is a record,
+  not a dependency, and was left as written.
+- Runs 7 and 8 into the repo's results layout: `results/train_act_cpu_v7_abs.*` and
+  `results/train_act_cpu_v8_abs_dart.*` copied from the experiments' wrapper JSON/CSV
+  (wall time 1942.3 s and 6804.0 s), `results/dataset_pickplace_abs_50.json` and
+  `results/dataset_pickplace_abs_dart_200.json` from `dataset_summary.py`.
+- Report: runs 7/8 in `RUNS`; the headline uses `HEADLINE_RUN` (run 8, pre-registered),
+  not "best on test"; new paired-comparison table.
+- Credit: the fix (absolute TCP targets) came from the experiments under
+  `experiments/` — the retrospective, the integrity checks and the privileged-state
+  comparison.
+- Not done this turn (needs the CPU): the README GIF of run 8 and the release
+  compression (`scripts/package_release_abs.sh`), both after smallbc (~08:00).

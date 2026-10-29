@@ -61,6 +61,18 @@ All notable changes to this project are documented here. The format follows
   the action mode from the checkpoint's action shape and wraps the env. Motivated by a
   privileged-state experiment: delta actions 0/50, absolute targets 50/50.
 
+- **ACT succeeds with absolute TCP-target actions.** On test seeds 10700–10799,
+  pre-registered: run 8 (run 7 + 200 demos, half with DART noise, 20000 steps) 63/100
+  nominal (Wilson 95 % 53–72 %) and 16/100 shifted (10–24 %); run 7 (run 2 with
+  absolute targets, 6000 steps) 57/100 (47–66 %) and 19/100 (13–28 %) on the same seeds.
+  Runs 1–6 with per-step deltas stay at 0/100.
+- `experiments/`: the retrospective, the integrity checks, the privileged-state
+  comparison (delta 0/50 vs absolute 50/50) and the run 7/8 code. They found the fix.
+- `results/repro/`: the repo's `sdp eval` reproduces the experiment's run 7 dev result
+  on all 50 seeds.
+- Report: paired-comparison table; the headline uses the policy fixed before testing.
+- `scripts/package_release_abs.sh`; `package_release_assets.sh` takes a checkpoint step.
+
 ### Fixed
 
 - Training CSV step column (lerobot prints `step:2K`); Wilson bounds exactly 0/1 at
