@@ -18,9 +18,12 @@ torch 2.11, 4 threads), MuJoCo offscreen rendering via EGL on the integrated GPU
 | act_cpu_v2_scripted50 (shifted) | success, seeds 10100–10199 | 0/100 (0 %, Wilson 95 % 0 %–4 %) | `sdp eval --checkpoint outputs/train/act_cpu_v2_scripted50 --condition act_cpu_v2_scripted50 --trials 100 --seed-start 100` |
 | act_cpu_v3_scripted50 (nominal) | success, seeds 10200–10299 | 0/100 (0 %, Wilson 95 % 0 %–4 %) | `sdp eval --checkpoint outputs/train/act_cpu_v3_scripted50 --condition act_cpu_v3_scripted50 --trials 100 --seed-start 200` |
 | act_cpu_v3_scripted50 (shifted) | success, seeds 10200–10299 | 0/100 (0 %, Wilson 95 % 0 %–4 %) | `sdp eval --checkpoint outputs/train/act_cpu_v3_scripted50 --condition act_cpu_v3_scripted50 --trials 100 --seed-start 200` |
+| act_cpu_v4_scripted50 (nominal) | success, seeds 10300–10399 | 0/100 (0 %, Wilson 95 % 0 %–4 %) | `sdp eval --checkpoint outputs/train/act_cpu_v4_scripted50 --condition act_cpu_v4_scripted50 --trials 100 --seed-start 300` |
+| act_cpu_v4_scripted50 (shifted) | success, seeds 10300–10399 | 0/100 (0 %, Wilson 95 % 0 %–4 %) | `sdp eval --checkpoint outputs/train/act_cpu_v4_scripted50 --condition act_cpu_v4_scripted50 --trials 100 --seed-start 300` |
 | Training act_cpu_scripted50 | wall time | 21.0 min | `scripts/train_cpu.sh` |
 | Training act_cpu_v2_scripted50 | wall time | 17.1 min | `scripts/train_cpu.sh` |
 | Training act_cpu_v3_scripted50 | wall time | 45.3 min | `scripts/train_cpu.sh` |
+| Training act_cpu_v4_scripted50 | wall time | 17.2 min | `scripts/train_cpu.sh` |
 | Dataset pickplace_scripted_50 | episodes (successful) / mean length | 50 (50) / 110.3 steps | `scripts/record_demos.sh` |
 <!-- sdp-report:index:end -->
 
@@ -33,6 +36,7 @@ torch 2.11, 4 threads), MuJoCo offscreen rendering via EGL on the integrated GPU
 | — dev | 10000–10099: run 1's eval, whose result led to run 2's config | `scripts/eval_all.sh` |
 | — test 1 | 10100–10199: runs 1 and 2, once each, after run 2's config was frozen | `scripts/eval_all.sh` |
 | — test 2 | 10200–10299: run 3 only; chosen before run 3 was trained, never used for any choice | `scripts/eval_all.sh` |
+| — test 3 | 10300–10399: run 4 only; chosen before run 4 was trained, never used for any choice | `scripts/eval_all.sh` |
 | Overlap | none | `tests/test_seed_split.py` |
 
 A seed fully determines the cube's initial pose. Nominal and shifted evals use the
@@ -51,11 +55,13 @@ Regenerate with `scripts/eval_all.sh` (ACT) and `python scripts/eval_expert.py` 
 `act_cpu_scripted50` is run 1 (`sdp/train/configs/act_cpu.yaml`); `act_cpu_v2_scripted50`
 is run 2 (`act_cpu_v2.yaml`: backbone lr 1e-4 instead of 1e-5, CVAE off);
 `act_cpu_v3_scripted50` is run 3 (`act_cpu_v3.yaml`: run 2 with 8000 steps instead of
-the spec'd 3000, approved by Giri after runs 1 and 2 underfit). Run 2 exists
+the spec'd 3000, approved by Giri after runs 1 and 2 underfit); `act_cpu_v4_scripted50`
+is run 4 (`act_cpu_v4.yaml`: run 2 with the proprioceptive state withheld, so the policy
+sees only the two cameras). Run 2 exists
 because run 1 scored 0/100 on the dev seeds; a training-set check showed its first-step
 x/y/yaw actions did not vary with the cube's position (std ≤ 0.003 over 20 training
-episodes, against 0.38 / 0.04 / 0.55 in the data). The headline uses run 3 on test 2
-seeds, which no configuration choice has seen.
+episodes, against 0.38 / 0.04 / 0.55 in the data). The headline reports the best run on
+its own test seeds, which no configuration choice has seen.
 
 <!-- sdp-report:success:begin -->
 | Policy / data | Cube poses | Seeds | Trials | Success | Wilson 95 % CI | Mean length, successes (steps) | Per-episode CSV |
@@ -71,6 +77,8 @@ seeds, which no configuration choice has seen.
 | ACT run 2 (`act_cpu_v2_scripted50`) | shifted | 10100–10199 | 100 | 0/100 (0 %) | 0 %–4 % | – | [`results/eval_act_cpu_v2_scripted50_s10100.csv`](../results/eval_act_cpu_v2_scripted50_s10100.csv) |
 | ACT run 3 (`act_cpu_v3_scripted50`) | nominal | 10200–10299 | 100 | 0/100 (0 %) | 0 %–4 % | – | [`results/eval_act_cpu_v3_scripted50_s10200.csv`](../results/eval_act_cpu_v3_scripted50_s10200.csv) |
 | ACT run 3 (`act_cpu_v3_scripted50`) | shifted | 10200–10299 | 100 | 0/100 (0 %) | 0 %–4 % | – | [`results/eval_act_cpu_v3_scripted50_s10200.csv`](../results/eval_act_cpu_v3_scripted50_s10200.csv) |
+| ACT run 4 (`act_cpu_v4_scripted50`) | nominal | 10300–10399 | 100 | 0/100 (0 %) | 0 %–4 % | – | [`results/eval_act_cpu_v4_scripted50_s10300.csv`](../results/eval_act_cpu_v4_scripted50_s10300.csv) |
+| ACT run 4 (`act_cpu_v4_scripted50`) | shifted | 10300–10399 | 100 | 0/100 (0 %) | 0 %–4 % | – | [`results/eval_act_cpu_v4_scripted50_s10300.csv`](../results/eval_act_cpu_v4_scripted50_s10300.csv) |
 <!-- sdp-report:success:end -->
 
 | Policy / data | Config | Success |
@@ -89,7 +97,14 @@ outputs/train/<run>` (`results/trainseeds_<run>.json`).
 | act_cpu_scripted50 | 0.0001 / 0.0030 / 0.0001 (0.38 / 0.04 / 0.55) | 0.0098 | 0.62 | 0/10 (10 never_reached) |
 | act_cpu_v2_scripted50 | 0.0000 / 0.0005 / 0.0001 (0.38 / 0.04 / 0.55) | 0.0026 | 1.98 | 0/10 (10 never_reached) |
 | act_cpu_v3_scripted50 | 0.0000 / 0.0002 / 0.0000 (0.38 / 0.04 / 0.55) | 0.0020 | 1.99 | 0/10 (9 never_reached, 1 collision) |
+| act_cpu_v4_scripted50 | 0.0000 / 0.0002 / 0.0000 (0.38 / 0.04 / 0.55) | 0.0055 | 1.74 | 0/10 (10 never_reached) |
 <!-- sdp-report:diagnostics:end -->
+
+Run 4's pass criterion, written down before training: swapping images moves the
+first-step d_x or d_yaw by ≥ 0.1, and the first-step d_x or d_yaw std across the 20
+training episodes is ≥ 0.1. Result: swap change 0.0000 (d_x) and 0.0001 (d_yaw); std
+0.0000 and 0.0000. **Not met.** The swap column above is the maximum over all seven
+action dimensions; for run 4 that 0.0055 comes from the other dimensions.
 
 ## Failure taxonomy (counts per label)
 
@@ -109,6 +124,8 @@ Labels and their order are defined in `sdp/eval/taxonomy.py`; each episode gets 
 | ACT run 2 (`act_cpu_v2_scripted50`) | shifted | 0 | 5 | 95 | 0 | 0 | 0 | 0 |
 | ACT run 3 (`act_cpu_v3_scripted50`) | nominal | 0 | 13 | 87 | 0 | 0 | 0 | 0 |
 | ACT run 3 (`act_cpu_v3_scripted50`) | shifted | 0 | 13 | 87 | 0 | 0 | 0 | 0 |
+| ACT run 4 (`act_cpu_v4_scripted50`) | nominal | 0 | 0 | 100 | 0 | 0 | 0 | 0 |
+| ACT run 4 (`act_cpu_v4_scripted50`) | shifted | 0 | 1 | 99 | 0 | 0 | 0 | 0 |
 <!-- sdp-report:taxonomy:end -->
 
 ## Training
@@ -121,6 +138,7 @@ Regenerate with `scripts/train_cpu.sh` (the loss curve is in `results/train_*.cs
 | run 1 (`act_cpu_scripted50`) | spec'd config; lr 1e-4, backbone lr 1e-5, CVAE on | 3000 | 21.0 min | 0.096 | `sdp/train/configs/act_cpu.yaml` |
 | run 2 (`act_cpu_v2_scripted50`) | run 1 + backbone lr 1e-4, CVAE off | 3000 | 17.1 min | 0.082 | `sdp/train/configs/act_cpu_v2.yaml` |
 | run 3 (`act_cpu_v3_scripted50`) | run 2 + 8000 steps instead of the spec'd 3000 | 8000 | 45.3 min | 0.063 | `sdp/train/configs/act_cpu_v3.yaml` |
+| run 4 (`act_cpu_v4_scripted50`) | run 2 + proprioceptive state withheld (cameras only) | 3000 | 17.2 min | 0.073 | `sdp/train/configs/act_cpu_v4.yaml` |
 <!-- sdp-report:training:end -->
 
 Training budget: 45 min per run on the laptop CPU. For run 3 only, Giri raised the cap

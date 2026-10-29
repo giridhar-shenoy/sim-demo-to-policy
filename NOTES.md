@@ -337,3 +337,37 @@ uv pip install --python .venv/bin/python --no-deps -e .
   shortcut that more training at this scale does not remove. README "Where it fails"
   and "What I'd do next" are updated accordingly.
 - Release tarballs now include `act_cpu_v3_scripted50.tar.gz` (62 MB).
+
+## Session 3 — 29 Oct 2026 evening: ACT run 4 (proprioception withheld)
+
+- Giri approved run 4: run 2's config with the proprioceptive state withheld from the
+  policy; same locks, memory wait, re-probe, 50-min cap with resume-on-over-cap; fresh
+  test seeds 10300–10399.
+- How: LeRobot fills `policy.input_features` from the dataset only when the config
+  leaves it empty (`lerobot/policies/factory.py`, `if not cfg.input_features`). draccus
+  parses `--policy.input_features=<JSON>` (checked: `robot_state_feature` → None, both
+  image features present), and ACT accepts image-only inputs (`validate_features`).
+  `act_cpu_v4.yaml` = `act_cpu_v2.yaml` + that one key; `train.py` passes
+  `input_features` as one JSON argument (`JSON_LEAVES`). The dataset is unchanged.
+- **Criterion, fixed before any run-4 result:** the diagnosis counts as fixed only if,
+  in `scripts/diagnose_openloop.py`, swapping images moves the first-step d_x or d_yaw
+  by ≥ 0.1, **and** the first-step d_x or d_yaw std across the 20 training episodes is
+  ≥ 0.1 (data: 0.38 and 0.55). Success rate is reported separately.
+- 19:47 probe (150 steps, `outputs/probe_v4`): 0.26–0.28 s/step → ~15 min; probe
+  checkpoint `config.json` input_features = [front, wrist] only, use_vae False,
+  backbone lr 1e-4, chunk 20, dim 256.
+- 19:48:54–20:06:05 run 4, one segment, **1030.5 s = 17.2 min** (guard projections
+  15.6–18.3 min; cap 50). Final L1 0.073 (run 2: 0.082).
+- 20:06–20:12 eval on test 3 seeds 10300–10399: nominal **0/100** (100 never_reached),
+  shifted **0/100** (99 never_reached, 1 collision), Wilson 95 % 0–4 %. Policy compute
+  mean 2.4–3.6 ms per step, max ~90 ms.
+- Diagnostics: first-step d_x/d_y/d_yaw std 0.0000/0.0002/0.0000; image swap change
+  d_x 0.0000, d_yaw 0.0001 (max over all dims 0.0055, gripper); black images change z
+  0.68, y 0.31, gripper 1.74, x 0.000, yaw 0.000. Episode-0 open-loop error z 0.071,
+  gripper 0.010 (run 2: 0.083, 0.012). Training seeds 0/10 (10 never_reached).
+- **Pre-registered criterion: not met.** The image-only policy reads the arm's progress
+  from the images, but its x/yaw (the cube-dependent dimensions) never respond to the
+  images. Revised diagnosis: the state shortcut was not the whole story; the vision
+  path at 96 px (3×3 ResNet-18 feature map, cube 6–10 px, approach ≈ 9 % of targets)
+  does not learn the cube's position within 3000–8000 CPU steps.
+- Run 4 does not beat run 3 (both 0/100), so the GIF was not regenerated (Giri's rule).

@@ -15,7 +15,7 @@ and confidence intervals.
 It shows the whole demonstration-to-policy loop running end to end on a CPU, with every
 success rate traceable to a per-episode CSV whose seeds never overlap the demonstrations.
 <!-- sdp-report:headline:begin -->
-ACT (run 3: 8000 training steps, 45.3 min on the laptop CPU, 50 scripted demonstrations) succeeds in 0/100 (0 %, Wilson 95 % 0 %–4 %) held-out test episodes (seeds 10200–10299), and in 0/100 (0 %, Wilson 95 % 0 %–4 %) with the cube's start box shifted by 8 cm.
+None of the 4 ACT CPU runs succeeds: each scores 0/100 (0 %, Wilson 95 % 0 %–4 %) on 100 held-out nominal test episodes and 0/100 with the cube's start box shifted by 8 cm (run 1, seeds 10100–10199: spec'd config; lr 1e-4, backbone lr 1e-5, CVAE on; run 2, seeds 10100–10199: run 1 + backbone lr 1e-4, CVAE off; run 3, seeds 10200–10299: run 2 + 8000 steps instead of the spec'd 3000; run 4, seeds 10300–10399: run 2 + proprioceptive state withheld (cameras only)).
 <!-- sdp-report:headline:end -->
 
 **Language split:** Python only. The imitation-learning stack (LeRobot, PyTorch,
@@ -67,6 +67,8 @@ downloading them.
 | ACT run 2 (`act_cpu_v2_scripted50`) | shifted | 10100–10199 | 100 | 0/100 (0 %) | 0 %–4 % | – | [`results/eval_act_cpu_v2_scripted50_s10100.csv`](results/eval_act_cpu_v2_scripted50_s10100.csv) |
 | ACT run 3 (`act_cpu_v3_scripted50`) | nominal | 10200–10299 | 100 | 0/100 (0 %) | 0 %–4 % | – | [`results/eval_act_cpu_v3_scripted50_s10200.csv`](results/eval_act_cpu_v3_scripted50_s10200.csv) |
 | ACT run 3 (`act_cpu_v3_scripted50`) | shifted | 10200–10299 | 100 | 0/100 (0 %) | 0 %–4 % | – | [`results/eval_act_cpu_v3_scripted50_s10200.csv`](results/eval_act_cpu_v3_scripted50_s10200.csv) |
+| ACT run 4 (`act_cpu_v4_scripted50`) | nominal | 10300–10399 | 100 | 0/100 (0 %) | 0 %–4 % | – | [`results/eval_act_cpu_v4_scripted50_s10300.csv`](results/eval_act_cpu_v4_scripted50_s10300.csv) |
+| ACT run 4 (`act_cpu_v4_scripted50`) | shifted | 10300–10399 | 100 | 0/100 (0 %) | 0 %–4 % | – | [`results/eval_act_cpu_v4_scripted50_s10300.csv`](results/eval_act_cpu_v4_scripted50_s10300.csv) |
 <!-- sdp-report:success:end -->
 
 Failure labels (one per episode, defined in [`sdp/eval/taxonomy.py`](sdp/eval/taxonomy.py)):
@@ -85,6 +87,8 @@ Failure labels (one per episode, defined in [`sdp/eval/taxonomy.py`](sdp/eval/ta
 | ACT run 2 (`act_cpu_v2_scripted50`) | shifted | 0 | 5 | 95 | 0 | 0 | 0 | 0 |
 | ACT run 3 (`act_cpu_v3_scripted50`) | nominal | 0 | 13 | 87 | 0 | 0 | 0 | 0 |
 | ACT run 3 (`act_cpu_v3_scripted50`) | shifted | 0 | 13 | 87 | 0 | 0 | 0 | 0 |
+| ACT run 4 (`act_cpu_v4_scripted50`) | nominal | 0 | 0 | 100 | 0 | 0 | 0 | 0 |
+| ACT run 4 (`act_cpu_v4_scripted50`) | shifted | 0 | 1 | 99 | 0 | 0 | 0 | 0 |
 <!-- sdp-report:taxonomy:end -->
 
 <!-- sdp-report:training:begin -->
@@ -93,6 +97,7 @@ Failure labels (one per episode, defined in [`sdp/eval/taxonomy.py`](sdp/eval/ta
 | run 1 (`act_cpu_scripted50`) | spec'd config; lr 1e-4, backbone lr 1e-5, CVAE on | 3000 | 21.0 min | 0.096 | `sdp/train/configs/act_cpu.yaml` |
 | run 2 (`act_cpu_v2_scripted50`) | run 1 + backbone lr 1e-4, CVAE off | 3000 | 17.1 min | 0.082 | `sdp/train/configs/act_cpu_v2.yaml` |
 | run 3 (`act_cpu_v3_scripted50`) | run 2 + 8000 steps instead of the spec'd 3000 | 8000 | 45.3 min | 0.063 | `sdp/train/configs/act_cpu_v3.yaml` |
+| run 4 (`act_cpu_v4_scripted50`) | run 2 + proprioceptive state withheld (cameras only) | 3000 | 17.2 min | 0.073 | `sdp/train/configs/act_cpu_v4.yaml` |
 <!-- sdp-report:training:end -->
 
 Training budget: 45 min per run on the laptop CPU. For run 3 only, Giri raised the cap
@@ -112,7 +117,7 @@ every row: [docs/results.md](docs/results.md).
 Every ACT row is 100 independent episodes. Each episode's starting cube pose is fixed
 by its seed. The 50 demonstrations use seeds 0–49, from the demo range 0–999. Eval
 seeds come from 10000–19999, so the ranges cannot overlap: `sdp/seeds.py` enforces it
-and `tests/test_seed_split.py` tests it. There were three training runs, and each
+and `tests/test_seed_split.py` tests it. There were four training runs, and each
 choice was made on data the later evaluation does not reuse:
 
 - **Run 1** (the spec'd CPU config, 3000 steps) scored 0/100 on seeds 10000–10099,
@@ -122,8 +127,14 @@ choice was made on data the later evaluation does not reuse:
   (*test 1*).
 - **Run 3** is run 2 trained for 8000 steps instead of the spec'd 3000. The step count
   is a deliberate departure from the spec, approved because runs 1 and 2 underfit at
-  3000. It was scored once on fresh seeds 10200–10299 (*test 2*); the headline uses
-  that row.
+  3000. It was scored once on fresh seeds 10200–10299 (*test 2*).
+- **Run 4** is run 2 with the proprioceptive state withheld from the policy (cameras
+  only; the dataset is unchanged). It was scored once on fresh seeds 10300–10399
+  (*test 3*). Its pass criterion for the diagnosis was written down before training
+  (NOTES.md).
+
+No test seed range is reused across experiments. The headline reports the best run on
+its own test seeds and lists every run.
 
 The shifted condition reuses the same seeds with the cube's start box moved by
 (+8 cm, −8 cm), so each shifted episode is a paired twin of a nominal one; about 22 %
@@ -137,25 +148,33 @@ about seed-to-seed variance.
 
 ## Where it fails
 
-- **The ACT policy never reaches the cube.** All three CPU runs score 0/100, nominal
-  and shifted, on every seed set. 87–100 % of the episodes are `never_reached` and the
-  rest are `collision` (fingers pressed into the table). The policy descends straight
-  down from the home pose instead of first moving over the cube. On its own training
-  frames it reproduces the descend, close, lift and carry actions. But its first x, y
-  and yaw outputs are essentially identical (std ≤ 0.003) across 20 training episodes
-  whose cubes sit in different places, while the recorded actions vary (std 0.38 in
-  x, 0.55 in yaw) ([`results/openloop_*.json`](results/)). Swapping in another
-  episode's images moves any output by at most 0.01, while black images move it by up
-  to 2.0. So the network uses the images, but not to find the cube. Each run also
-  fails from its own training seeds (0/10 on demo seeds 0–9;
-  [`results/trainseeds_*.json`](results/), a diagnostic, not an eval). The 15-D
-  proprioceptive state predicts every phase except the ~10 approach frames per
-  episode, and the network fits that state-predictable part. Run 2's changes
-  (backbone lr 1e-4, CVAE off) did not help. Neither did run 3's 8000 steps (≈ 11.6
-  epochs, final loss 0.063 vs 0.082): its first-step outputs are just as flat (std ≤
-  0.0002, image swap ≤ 0.002). So this is a shortcut through the proprioceptive state
-  that more training at this scale does not remove, not distribution shift. The
-  shifted condition says nothing yet, because there is no nominal success to lose.
+- **The ACT policy never reaches the cube.** All four CPU runs score 0/100, nominal
+  and shifted, each on its own test seeds. 87–100 % of the episodes are
+  `never_reached` and the rest are `collision` (fingers pressed into the table). The
+  policy descends straight down from the home pose instead of first moving over the
+  cube. On its own training frames it reproduces the descend, close, lift and carry
+  actions. But its first x, y and yaw outputs are essentially identical (std ≤ 0.003)
+  across 20 training episodes whose cubes sit in different places, while the recorded
+  actions vary (std 0.38 in x, 0.55 in yaw) ([`results/openloop_*.json`](results/)).
+  Each run also fails from its own training seeds (0/10 on demo seeds 0–9;
+  [`results/trainseeds_*.json`](results/), a diagnostic, not an eval).
+  - Runs 1–3 had the 15-D proprioceptive state as an input. It predicts every phase
+    except the ~10 approach frames per episode, and the networks fitted exactly that
+    part. Run 2's changes (backbone lr 1e-4, CVAE off) did not help. Neither did run 3's
+    8000 steps (≈ 11.6 epochs; final loss 0.063 vs 0.082).
+  - Run 4 removed that shortcut: the policy sees only the two cameras. It still tracks
+    the task's phases from the images: on episode 0 its z and gripper errors match run
+    2's (0.071 vs 0.083 and 0.010 vs 0.012). But its approach actions do not depend on
+    the images at all. Swapping in other episodes' images moves the first-step x and
+    yaw by 0.0000 and 0.0001, and even black images leave them unchanged while moving z
+    and the gripper. It fails the pass criterion fixed before training (a ≥ 0.1 change
+    and ≥ 0.1 std in x or yaw).
+  - So the bottleneck is not only the state shortcut. At 96 px, ResNet-18 reduces each
+    camera to a 3×3 feature map. The cube is 6–10 px wide, and the approach actions it
+    determines are ~9 % of the training targets. Within 3000–8000 steps the network
+    learns the large visual changes (arm and gripper) but not where the small cube is.
+    This is a training failure, not distribution shift. The shifted condition says
+    nothing yet, because there is no nominal success to lose.
 - **Only scripted data.** All 50 demos come from one deterministic waypoint expert, so
   every demonstration follows the same path with the same timing. That is the easiest
   data an imitation learner can get. Teleoperated demos are slower, noisier and
@@ -197,12 +216,15 @@ contact-rich task. The longer version, marked as a draft:
 
 ## What I'd do next
 
-- **Make ACT localise the cube** before anything else. Longer training alone did not
-  do it (run 3). Next: withhold or delay the proprioceptive state so it can't stand in
-  for the cube's position; randomise the arm's start pose so the state stops encoding
-  episode progress; or try larger or cropped images. Accept a change only when the
-  open-loop image-swap test moves the approach actions. A full-size run on a free GPU
-  comes after that.
+- **Make ACT localise the cube** before anything else. Neither longer training (run
+  3) nor removing the state (run 4) did it. Next, in order:
+  - give the vision path more spatial resolution: larger images, a crop around the
+    workspace, or a spatial-softmax keypoint head as in diffusion policy;
+  - weight or oversample the approach frames;
+  - add an auxiliary cube-position target during training only.
+
+  The test stays the same: accept a change only when the open-loop image-swap test
+  moves the approach actions. A full-size run on a free GPU comes after that.
 - **Teleoperated data**: keyboard teleop in the gym_hil key layout, then SpaceMouse,
   then the R3 retargeting pipeline as the teleop device. That would give a
   scripted-vs-teleop data comparison on the same eval seeds.

@@ -235,3 +235,16 @@ one segment.
 | ACT run 3 | shifted | 10200–10299 (test 2) | 0/100 | 0–4 % | 87 never_reached, 13 collision |
 
 Open-loop: first-step x/y/yaw std ≤ 0.0002; image swap ≤ 0.002; training seeds 0/10.
+
+## Addendum — ACT run 4 (29 Oct 2026, 20:15 IST, approved by Giri)
+
+Run 4 = run 2's config with the proprioceptive state withheld (cameras only). One
+segment, 1030.5 s = 17.2 min.
+
+| Policy | Cube poses | Seeds | Success | Wilson 95 % | Labels |
+|---|---|---|---|---|---|
+| ACT run 4 | nominal | 10300–10399 (test 3) | 0/100 | 0–4 % | 100 never_reached |
+| ACT run 4 | shifted | 10300–10399 (test 3) | 0/100 | 0–4 % | 99 never_reached, 1 collision |
+
+Pre-registered criterion (image swap moves first-step d_x or d_yaw by ≥ 0.1, and their
+std across training episodes ≥ 0.1): not met (0.0000 / 0.0001; std 0.0000).

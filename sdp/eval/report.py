@@ -73,6 +73,7 @@ RUNS = {
     "act_cpu_scripted50": ("run 1", "spec'd config; lr 1e-4, backbone lr 1e-5, CVAE on"),
     "act_cpu_v2_scripted50": ("run 2", "run 1 + backbone lr 1e-4, CVAE off"),
     "act_cpu_v3_scripted50": ("run 3", "run 2 + 8000 steps instead of the spec'd 3000"),
+    "act_cpu_v4_scripted50": ("run 4", "run 2 + proprioceptive state withheld (cameras only)"),
 }
 
 
@@ -178,14 +179,29 @@ def speed_table(results: Path) -> str:
     )
 
 
-def _latest_run_eval(results: Path) -> tuple[str, dict[str, dict]] | None:
-    """The last run in RUNS that has an eval file, with its highest-seed eval."""
-    for run in reversed(RUNS):
+def _test_evals(results: Path) -> dict[str, dict[str, dict]]:
+    """Each run's test-seed eval: its highest-seed eval file (run 1's dev file comes first)."""
+    out = {}
+    for run in RUNS:
         files = sorted(results.glob(f"eval_{run}_s*.json"))
         if files:
-            conds = json.loads(files[-1].read_text())["conditions"]
-            return run, {c["distribution"]: c for c in conds}
-    return None
+            out[run] = {
+                c["distribution"]: c for c in json.loads(files[-1].read_text())["conditions"]
+            }
+    return out
+
+
+def _best_run(evals: dict[str, dict[str, dict]]) -> str:
+    """Most nominal successes, then most shifted successes; ties go to the later run."""
+    order = list(RUNS)
+    return max(
+        evals,
+        key=lambda r: (
+            evals[r]["nominal"]["successes"],
+            evals[r].get("shifted", {}).get("successes", -1),
+            order.index(r),
+        ),
+    )
 
 
 def _rate(c: dict) -> str:
@@ -197,11 +213,25 @@ def _rate(c: dict) -> str:
 
 
 def headline(results: Path) -> str:
-    latest = _latest_run_eval(results)
-    if latest is None or "nominal" not in latest[1]:
+    evals = {r: e for r, e in _test_evals(results).items() if "nominal" in e}
+    if not evals:
         return "_ACT evaluation pending._"
-    run, act = latest
+    run = _best_run(evals)
+    act = evals[run]
     c = act["nominal"]
+    if c["successes"] == 0 and all(
+        e.get("shifted", {}).get("successes", 0) == 0 for e in evals.values()
+    ):
+        runs = "; ".join(
+            f"{RUNS[r][0]}, seeds {e['nominal']['seed_min']}–{e['nominal']['seed_max']}: "
+            f"{RUNS[r][1]}"
+            for r, e in evals.items()
+        )
+        return (
+            f"None of the {len(evals)} ACT CPU runs succeeds: each scores {_rate(c)} on 100 "
+            f"held-out nominal test episodes and 0/100 with the cube's start box shifted by "
+            f"8 cm ({runs})."
+        )
     train = results / f"train_{run}.json"
     details = []
     if train.with_suffix(".csv").is_file():
@@ -214,12 +244,16 @@ def headline(results: Path) -> str:
         )
     details.append("50 scripted demonstrations")
     text = (
-        f"ACT ({RUNS[run][0]}: {', '.join(details)}) succeeds in {_rate(c)} held-out test "
-        f"episodes (seeds {c['seed_min']}–{c['seed_max']})"
+        f"Best of {len(evals)} ACT runs: {RUNS[run][0]} ({RUNS[run][1]}; {', '.join(details)}) "
+        f"succeeds in {_rate(c)} held-out test episodes (seeds {c['seed_min']}–{c['seed_max']})"
     )
     if "shifted" in act:
         text += f", and in {_rate(act['shifted'])} with the cube's start box shifted by 8 cm"
-    return text + "."
+    others = ", ".join(
+        f"{RUNS[r][0]} {e['nominal']['successes']}/{e['nominal']['trials']}"
+        for r, e in evals.items()
+    )
+    return text + f". All runs, nominal, on their own test seeds: {others}."
 
 
 def index_table(results: Path) -> str:
