@@ -248,3 +248,16 @@ segment, 1030.5 s = 17.2 min.
 
 Pre-registered criterion (image swap moves first-step d_x or d_yaw by ≥ 0.1, and their
 std across training episodes ≥ 0.1): not met (0.0000 / 0.0001; std 0.0000).
+
+## Addendum — ACT run 5 (29 Oct 2026, 23:40 IST, approved by Giri)
+
+Run 5 = run 4 (cameras only) with both cameras at 128 px; demos re-recorded at 128 px
+(same seeds; expert 100/100 at 128 px). Recording 54.6 s, training 1291.3 s = 21.5 min
+(one segment), eval 298.7 s = 5.0 min.
+
+| Policy | Cube poses | Seeds | Success | Wilson 95 % | Labels |
+|---|---|---|---|---|---|
+| ACT run 5 | nominal | 10400–10499 (test 4) | 0/100 | 0–4 % | 100 never_reached |
+| ACT run 5 | shifted | 10400–10499 (test 4) | 0/100 | 0–4 % | 97 never_reached, 3 collision |
+
+Pre-registered criterion: not met (image swap moves d_x/d_yaw by 0.0001; std 0.0000).

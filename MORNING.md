@@ -1,50 +1,47 @@
 # MORNING — sim-demo-to-policy
 
-## STATUS (23:00 IST, 29 Oct)
+## STATUS (23:45 IST, 29 Oct)
 
-**v0.1 MUST list: done. CI: green. ACT: four CPU runs, all 0/100.** Run 4 (your
-approved experiment: run 2 with the proprioceptive state withheld) took 17.2 min and
-fails the criterion fixed before training. With only the cameras as input, the policy
-reads the arm's progress from the images but never uses them to find the cube. The
-bottleneck is the vision path at 96 px, not only the state shortcut.
+**v0.1 MUST list: done. CI: green. ACT: five CPU runs, all 0/100.** Run 5 (your
+approved experiment: run 4 at 128 px) recorded in 55 s, trained in 21.5 min and
+evaluated in 5.0 min. It fails the criterion fixed before training, exactly like run 4:
+the policy tracks the arm from the images but never uses them to find the cube.
+Training length, the state shortcut and resolution are now each ruled out at this
+scale. My recommendation for Sunday is to **ship v0.1 with the diagnosis**.
 
-| Run | Change from the spec'd CPU config | Steps | Wall time | Test seeds | Nominal | Shifted |
+| Run | Change from the spec'd CPU config | Steps | Training | Test seeds | Nominal | Shifted |
 |---|---|---|---|---|---|---|
 | 1 | spec'd config; lr 1e-4, backbone 1e-5, CVAE on | 3000 | 21.0 min | 10100–10199 (dev 10000–10099) | 0/100 (Wilson 0–4 %) | 0/100 (0–4 %) |
 | 2 | run 1 + backbone lr 1e-4, CVAE off | 3000 | 17.1 min | 10100–10199 | 0/100 (0–4 %) | 0/100 (0–4 %) |
 | 3 | run 2 + 8000 steps (cap raised to 50 min) | 8000 | 45.3 min | 10200–10299 | 0/100 (0–4 %) | 0/100 (0–4 %) |
 | 4 | run 2 + proprioceptive state withheld | 3000 | 17.2 min | 10300–10399 | 0/100 (0–4 %) | 0/100 (0–4 %) |
+| 5 | run 4 + 128 px cameras (demos re-recorded) | 3000 | 21.5 min | 10400–10499 | 0/100 (0–4 %) | 0/100 (0–4 %) |
 
-Done today (all pushed): run 3 (91bac96, eccfd43, 048856f), run 4 support, config,
-results and docs (05965f0, b574bb3, 043c036), and this status commit (the release
-download script now fetches all four checkpoints). Earlier commits:
+Commits: run 3 (91bac96, eccfd43, 048856f); run 4 (05965f0, b574bb3, 043c036,
+7839069); run 5 in the commits pushed with this status (see `git log`). Earlier:
 
 | What | Commit(s) |
 |---|---|
 | Skeleton (license, Dockerfile, devcontainer, CI, pre-commit, docs stubs) | 6cf6118 … ba38e80 |
-| PandaPickPlace-v0 env (DLS IK, 500/20 Hz, two 96 px cameras, 448 steps/s) | 9a315fa |
-| Scripted expert, 100/100 on demo + eval seeds | bdd4b6b, 80dfb12 |
+| PandaPickPlace-v0 env (DLS IK, 500/20 Hz, two cameras, 448 steps/s at 96 px) | 9a315fa |
+| Scripted expert, 100/100 on demo + eval seeds (also at 128 px) | bdd4b6b, 80dfb12 |
 | Eval harness, taxonomy, seed split, Wilson | 479624b, 7d1fbb1, 75f3295 |
 | LeRobot v3.0 recorder + 50 scripted demos | 713a7aa, 4e9bc9e |
 | Training wrapper + ACT CPU config (bundled commit, see #3) | d8bde37 |
 | ACT runs 1 and 2 + results; diagnostics | 3c8851e, 6796baf, 06794f7, 57535a3, 768d54e, 5f4ed0f |
 
-CI: <https://github.com/giridhar-shenoy/sim-demo-to-policy/actions/runs/40894685170>
-(commit 043c036).
+CI: see the latest run on <https://github.com/giridhar-shenoy/sim-demo-to-policy/actions>.
 
-Blocked (decisions below): the next ACT experiment (#8), release upload (#4), topics
-and branch protection (#1, #2), hardware-transfer draft (#6).
+Blocked (decisions below): release upload (#4), topics and branch protection (#1, #2),
+hardware-transfer draft (#6), what to do about ACT after Sunday (#8).
 
 Next three steps:
 
-1. Decide #8. My recommendation is run 4's config (cameras only) with 128 px images:
-   4×4 instead of 3×3 feature maps, and the cube at ~8–13 px. That means re-recording the
-   50 demos at 128 px. Estimated training time ≈ 31 min (run 4's 17.2 min × (128/96)²);
-   ≈ 40 min end to end with re-recording and the 200-episode eval. Confirm with a probe,
-   and keep the same image-swap pass criterion.
-2. Upload the release (`gh release create v0.1.0 outputs/release/*.tar.gz`; all four
-   checkpoints and the dataset are packed).
-3. Edit `docs/hardware_transfer.md` and the README's hardware paragraph in your voice.
+1. Upload the release (`gh release create v0.1.0 outputs/release/*.tar.gz`: five
+   checkpoints and both datasets).
+2. Edit `docs/hardware_transfer.md` and the README's hardware paragraph in your voice.
+3. After Sunday, #8: approach-frame weighting or a slower expert approach first, then
+   an auxiliary cube-position loss, then a full-size GPU run.
 
 ## WAITING FOR GIRI
 
@@ -62,24 +59,26 @@ Next three steps:
    right after the OOM restart. Splitting it would be a history rewrite.
    Recommendation: leave it. Blocks: nothing.
 4. **Upload the v0.1 release assets** (over the 50 MB commit limit). Packed in
-   `outputs/release/`: act_cpu_scripted50.tar.gz 89 MB, act_cpu_v2_scripted50.tar.gz
-   62 MB, act_cpu_v3_scripted50.tar.gz 62 MB, act_cpu_v4_scripted50.tar.gz 62 MB,
-   pickplace_scripted_50.tar.gz 5.2 MB.
-   Command: `gh release create v0.1.0 outputs/release/*.tar.gz` (then
+   `outputs/release/`: act_cpu_scripted50 89 MB; act_cpu_v2/v3/v4_scripted50 and
+   act_cpu_v5_scripted50_128px 62 MB each; pickplace_scripted_50 5.2 MB;
+   pickplace_scripted_50_128px 6.6 MB. Command:
+   `gh release create v0.1.0 outputs/release/*.tar.gz` (then
    `scripts/download_release_assets.sh` works). Until then the README's run path
-   retrains (~100 min for the four runs). Blocks: a download-only one-command demo.
+   retrains (~2 h for the five runs). Blocks: a download-only one-command demo.
 5. **Look at the dataset in the LeRobot visualiser** (`lerobot-dataset-viz`, needs a
    GUI and the `viz` extra). Blocks: nothing.
 6. **Edit `docs/hardware_transfer.md`** (marked DRAFT, first person, no employer names).
 7. **Keyboard teleop demos (SHOULD)**: skipped; needs you at the keyboard.
-8. **Next ACT experiment.** Runs 3 (8000 steps) and 4 (state withheld) are done, both
-   0/100. Options: (a) more spatial resolution for the vision path: re-record at
-   128–192 px or crop the workspace (a dataset/env change, so it needs your OK);
-   (b) oversample or weight the approach frames (a training-data change); (c) an
-   auxiliary cube-position loss during training only (code in this repo, not stock
-   LeRobot); (d) leave v0.1 at 0 % with the diagnosis and do the full-size Colab run.
-   Recommendation: (a) at 128 px with run 4's config, ≈ 31 min training, ≈ 40 min end
-   to end (estimate; a probe confirms it first). Blocks: a non-zero headline.
+8. **ACT after Sunday.** Runs 3 (8000 steps), 4 (state withheld) and 5 (128 px) each
+   ruled out one cause; all five runs are 0/100. What is left is the data and the
+   objective: the approach is 11.9 % of the targets, and L1 regression settles on their
+   mean. Options, in my order: (a) oversample or up-weight the approach frames (LeRobot
+   0.6.1 has a `--sample_weighting` config I have not verified yet); (b) a slower,
+   unsaturated expert approach (env/expert change plus re-record); (c) an auxiliary
+   cube-position loss during training (code in this repo); (d) a full-size GPU run.
+   Each is ~1 h end to end on the laptop, with no guarantee. Recommendation: ship v0.1
+   with the diagnosis on Sunday and do (a) then (b) next week. Blocks: a non-zero
+   headline.
 
 The aborted run-3 attempts are kept, not reported: `outputs/train/act_cpu_v3_scripted50_aborted_1217*`
 and `…_aborted_1534*` (checkpoints 1000–4000). Delete them when you no longer need them.

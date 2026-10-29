@@ -74,6 +74,11 @@ RUNS = {
     "act_cpu_v2_scripted50": ("run 2", "run 1 + backbone lr 1e-4, CVAE off"),
     "act_cpu_v3_scripted50": ("run 3", "run 2 + 8000 steps instead of the spec'd 3000"),
     "act_cpu_v4_scripted50": ("run 4", "run 2 + proprioceptive state withheld (cameras only)"),
+    "act_cpu_v5_scripted50_128px": ("run 5", "run 4 + 128 px cameras (demos re-recorded)"),
+}
+# Dataset each run was trained on (results/dataset_<name>.json).
+RUN_DATASET = {run: "pickplace_scripted_50" for run in RUNS} | {
+    "act_cpu_v5_scripted50_128px": "pickplace_scripted_50_128px"
 }
 
 
@@ -151,13 +156,15 @@ def training_table(results: Path) -> str:
 
 def dataset_table(results: Path) -> str:
     lines = [
-        "| Dataset | Episodes | Successful | Frames | Mean length | Demo seeds | Format |",
-        "|---|---|---|---|---|---|---|",
+        "| Dataset | Image size | Episodes | Successful | Frames | Mean length | Demo seeds "
+        "| Format |",
+        "|---|---|---|---|---|---|---|---|",
     ]
     for path in sorted(results.glob("dataset_*.json")):
         d = json.loads(path.read_text())
         lines.append(
-            f"| {d['dataset']} | {d['episodes']} | {d['successful_episodes']} | {d['frames']} "
+            f"| {d['dataset']} | {d['image_size']} px | {d['episodes']} "
+            f"| {d['successful_episodes']} | {d['frames']} "
             f"| {d['mean_episode_length_steps']:.1f} steps | {d['seeds'][0]}–{d['seeds'][1]} "
             f"| LeRobot {d['codebase_version']} |"
         )
@@ -316,7 +323,33 @@ def diagnostics_table(results: Path) -> str:
     return "\n".join(lines)
 
 
+def timing_table(results: Path) -> str:
+    """Wall time of each stage of a run, where it was recorded (from run 5 on)."""
+    lines = [
+        "| Run | Demo recording (50 episodes) | Training | Eval (200 episodes) |",
+        "|---|---|---|---|",
+    ]
+    for run, (label, _) in RUNS.items():
+        train = results / f"train_{run}.json"
+        if not train.is_file():
+            continue
+        rec = "–"
+        ds = results / f"dataset_{RUN_DATASET[run]}.json"
+        if ds.is_file() and "recording_wall_time_s" in json.loads(ds.read_text()):
+            rec = f"{json.loads(ds.read_text())['recording_wall_time_s']:.0f} s"
+        ev = "–"
+        evals = sorted(results.glob(f"eval_{run}_s*.json"))
+        if evals:
+            meta = json.loads(evals[-1].read_text()).get("meta", {})
+            if "wall_time_s" in meta:
+                ev = f"{meta['wall_time_s'] / 60:.1f} min"
+        wall = json.loads(train.read_text())["wall_time_s"] / 60
+        lines.append(f"| {label} (`{run}`) | {rec} | {wall:.1f} min | {ev} |")
+    return "\n".join(lines)
+
+
 TABLES = {
+    "timing": timing_table,
     "diagnostics": diagnostics_table,
     "headline": headline,
     "index": index_table,

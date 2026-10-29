@@ -38,6 +38,13 @@ All notable changes to this project are documented here. The format follows
   0/100 shifted on fresh test seeds 10300–10399 (Wilson 95 % 0–4 %). It fails the
   pre-registered image-swap criterion: its approach actions do not depend on the images.
 - `train.py` passes dict-valued `input_features` to lerobot-train as one JSON argument.
+- ACT run 5 (`act_cpu_v5.yaml`: run 4 with both cameras at 128 px; demos re-recorded
+  at 128 px into `pickplace_scripted_50_128px`, same seeds; approved by Giri): recording
+  55 s, training 21.5 min, eval 5.0 min; 0/100 nominal and 0/100 shifted on fresh test
+  seeds 10400–10499 (Wilson 95 % 0–4 %). Fails the same pre-registered criterion.
+- `--image-size` for `sdp record`, `record_demos.sh` and `eval_expert.py`; eval,
+  diagnostics and the GIF take the image size from the checkpoint; recording and eval
+  wall times are saved and tabulated.
 - README GIF: scripted expert (reference) beside an ACT failure on the same seed.
 - CI: 50-step training smoke and 3-episode eval smoke (37 tests, ~40 s).
 

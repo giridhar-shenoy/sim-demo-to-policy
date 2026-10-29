@@ -7,12 +7,12 @@ it is removed from the README.
 
 | Script | Produces | Approx. time (4-core laptop) |
 |---|---|---|
-| `regenerate_all.sh` | everything below, in order, into a fresh `outputs/regen-*` dir | ~2.5 h |
+| `regenerate_all.sh` | everything below, in order, into a fresh `outputs/regen-*` dir | ~3 h |
 | `bench_env_speed.py` | `results/env_speed.json` | 15 s |
-| `eval_expert.py` | `results/expert_pickplace.{csv,json}` | 1.5 min |
-| `record_demos.sh [out]` | 50-episode LeRobot v3.0 dataset + `results/dataset_*.json` | 1 min |
+| `eval_expert.py [--image-size N --out …]` | `results/expert_pickplace.{csv,json}` (or the 128 px check) | 1.5–2 min |
+| `record_demos.sh [out] [image_size]` | 50-episode LeRobot v3.0 dataset + `results/dataset_*.json` | 1 min |
 | `train_cpu.sh [dataset] [out] [config]` | ACT checkpoint + `results/train_*.{csv,json}` | 17–21 min (3000 steps), ~45 min (8000) |
-| `eval_all.sh [run1] … [run4]` | `results/eval_*.{csv,json}`: run 1 on dev + test 1, run 2 on test 1, run 3 on test 2, run 4 on test 3 (5 × 200 episodes) | ~25 min |
+| `eval_all.sh [run1] … [run5]` | `results/eval_*.{csv,json}`: run 1 on dev + test 1, run 2 on test 1, runs 3–5 on test 2–4 (6 × 200 episodes) | ~30 min |
 | `record_gifs.sh [checkpoint]` | `docs/assets/act_success_failure.gif` | < 1 min |
 | `diagnose_openloop.py --checkpoint <run>` | `results/openloop_<run>.json`: does the first action vary with the cube's position? | 1 min |
 | `package_release_assets.sh` / `download_release_assets.sh` | release tarballs of the dataset and a checkpoint / fetch them | seconds |

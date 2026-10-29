@@ -398,3 +398,40 @@ Open questions:
 3. Branch protection, the bundled commit d8bde37, the hardware-transfer draft, the
    teleop session, the GIF substitution: unchanged from the session-1 list (Q3, Q5–Q7,
    Q10).
+
+## Session 4 — 29 Oct 2026, 23:05: ACT run 5 (run 4 at 128 px)
+
+- Giri approved run 5: run 4 (cameras only, 3000 steps, backbone lr 1e-4, CVAE off) with
+  both cameras at 128 px; 50 scripted demos re-recorded at 128 px into
+  `datasets/pickplace_scripted_50_128px` (same demo seeds 0–49); the 96 px dataset and
+  all checkpoints untouched. Expert must still be ≥ 90 % with 128 px rendering, else stop.
+  Eval on fresh seeds 10400–10499.
+- `act_cpu_v5.yaml` = `act_cpu_v4.yaml` with the two image shapes [3, 128, 128].
+  Code: `--image-size` for `sdp record` / `record_demos.sh` / `eval_expert.py`; eval,
+  diagnostics and GIF take the image size from the checkpoint; recording and eval wall
+  times are now saved (`meta/sdp_recording.json`, eval JSON `meta.wall_time_s`).
+- **Criterion, fixed before any run-5 result (same as run 4):** fixed only if swapping
+  images moves the first-step d_x or d_yaw by ≥ 0.1 **and** the first-step d_x or d_yaw
+  std across the 20 training episodes is ≥ 0.1 (data 0.38 / 0.55).
+- 23:04–23:06 expert check at 128 px (`eval_expert.py --image-size 128 --out
+  results/expert_check_128px`): 100/100 on demo seeds 0–99 and on eval seeds
+  10000–10099 under both distributions (identical to 96 px; the expert never reads the
+  images).
+- 23:06–23:07 recorded `datasets/pickplace_scripted_50_128px`: 50/50 successful, 5513
+  frames (same as 96 px), **54.6 s**. The 96 px dataset is untouched.
+- 23:07 probe (150 steps, `outputs/probe_v5`): 0.38–0.42 s/step → ~21 min (my estimate
+  from pixel scaling was 31 min; the backbone is not the whole step cost). Config check:
+  inputs [3,128,128] × 2, use_vae False, backbone lr 1e-4, num_workers 1.
+- 23:08:51–23:30:23 run 5, locks heavy then build (`flock -o`), one segment, **1291.3 s =
+  21.5 min** (guard projections 21.2–21.5 min). Final L1 0.079.
+- 23:30–23:36 eval on test 4 seeds 10400–10499, **298.7 s = 5.0 min**: nominal **0/100**
+  (100 never_reached), shifted **0/100** (97 never_reached, 3 collision), Wilson 95 %
+  0–4 %. Diagnostics: first-step d_x/d_y/d_yaw std 0.0000/0.0003/0.0000; image swap
+  d_x 0.0001, d_yaw 0.0001; black images change z 0.65, y 0.61, gripper 1.90, x 0.000,
+  yaw 0.001. Episode-0 error z 0.081, gripper 0.010. Training seeds 0/10. **Criterion
+  not met.** Resolution is ruled out at this scale.
+- Correction to the "≈ 9 % of targets" figure used above and in run-4 docs: measured
+  over the 50 demo seeds, the approach (above_cube) phase is 13.1 frames per episode
+  (8–18), **11.9 %** of all frames, and 35 % of its x/yaw actions sit at the ±0.6
+  saturation (so "nearly sign-like" overstated it). README fixed.
+- Run 5 does not beat the earlier runs (all 0/100), so the GIF was not regenerated.
