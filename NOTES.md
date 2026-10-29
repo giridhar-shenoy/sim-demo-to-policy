@@ -435,3 +435,39 @@ Open questions:
   (8–18), **11.9 %** of all frames, and 35 % of its x/yaw actions sit at the ±0.6
   saturation (so "nearly sign-like" overstated it). README fixed.
 - Run 5 does not beat the earlier runs (all 0/100), so the GIF was not regenerated.
+
+## Session 5 — 30 Oct 2026, from 00:13: ACT run 6 (lr 1e-5 / 1e-5)
+
+- Giri approved run 6 after a retrospective (`experiments/RETROSPECTIVE.md`, read only;
+  nothing else under `experiments/` is read, modified or committed — other agents work
+  there). Leading hypothesis: all five runs used transformer lr 1e-4, 10× LeRobot's
+  default, and that caused the collapse to a constant chunk (physical-ai-studio #998:
+  same symptom at lr 1e-4 on 35 episodes / batch 8, fixed by lr 1e-5 / 1e-5 / clip 10).
+- `act_cpu_v6.yaml` = `act_cpu_v2.yaml` with `optimizer_lr` 1e-5 and
+  `optimizer_lr_backbone` 1e-5 (grad clip is already 10 in every run). 96 px, state +
+  both cameras, CVAE off, 3000 steps, batch 8, chunk 20 / exec 10, save_freq 1000,
+  num_workers 1, dataset `datasets/pickplace_scripted_50`.
+- **Criterion, fixed before training (as runs 4–5):** swapping images moves the
+  first-step d_x or d_yaw by ≥ 0.1 **and** the first-step d_x or d_yaw std across 20
+  training episodes is ≥ 0.1. Checked at checkpoints 1000, 2000 and 3000.
+- Eval on fresh test seeds 10600–10699 (`--seed-start 600`); 10500–10599 belong to the
+  experiments and are not used here.
+- 00:12–00:18 queued behind another agent's privileged-state ACT job on the heavy lock.
+- 00:18:20–00:34:38 run 6, one segment, **977.2 s = 16.3 min**, final L1 0.114 (run 2:
+  0.082). Guard bug: its INFO-line regex hard-coded the date 2026-10-29, so after
+  midnight it saw no steps and could not have stopped an over-cap run. Found at
+  00:28 (no progress lines), fixed to `INFO [0-9-]+`, restarted; projection 16.3 min.
+- 00:34–00:39 post-run (same lock session):
+  - open loop, d_x / d_yaw: step 1000 swap 0.0031 / 0.0029, std 0.0011 / 0.0007;
+    step 2000 swap 0.0018 / 0.0018, std 0.0007 / 0.0005; step 3000 swap 0.0009 /
+    0.0012, std 0.0005 / 0.0005. Black images: x ≤ 0.03, z ~0.5, gripper ~1.7–1.9.
+    **Criterion not met at any checkpoint; sensitivity decreases with training.**
+  - training seeds 0–9: 0/10 (9 never_reached, 1 collision).
+  - eval seeds 10600–10699 (**270.3 s = 4.5 min**): nominal **0/100** (82 never_reached,
+    15 collision, 2 grasp_missed, 1 placed_outside), shifted **0/100** (68 collision,
+    32 never_reached); Wilson 95 % 0–3.7 %. The placed_outside episode lifted the cube,
+    the first lift by any run; with the approach still image-blind, most likely a
+    favourably placed cube.
+- Verdict on the hypothesis: lr 1e-4 was not the sole cause. The reference fix (lr 1e-5
+  / 1e-5, clip 10 — clip was already 10) does not reproduce the issue's "responds to
+  images within ~1.4k steps" on this dataset in 3000 steps.

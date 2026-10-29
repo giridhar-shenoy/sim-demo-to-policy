@@ -15,7 +15,7 @@ and confidence intervals.
 It shows the whole demonstration-to-policy loop running end to end on a CPU, with every
 success rate traceable to a per-episode CSV whose seeds never overlap the demonstrations.
 <!-- sdp-report:headline:begin -->
-None of the 5 ACT CPU runs succeeds: each scores 0/100 (0 %, Wilson 95 % 0 %–4 %) on 100 held-out nominal test episodes and 0/100 with the cube's start box shifted by 8 cm (run 1, seeds 10100–10199: spec'd config; lr 1e-4, backbone lr 1e-5, CVAE on; run 2, seeds 10100–10199: run 1 + backbone lr 1e-4, CVAE off; run 3, seeds 10200–10299: run 2 + 8000 steps instead of the spec'd 3000; run 4, seeds 10300–10399: run 2 + proprioceptive state withheld (cameras only); run 5, seeds 10400–10499: run 4 + 128 px cameras (demos re-recorded)).
+None of the 6 ACT CPU runs succeeds: each scores 0/100 (0 %, Wilson 95 % 0 %–4 %) on 100 held-out nominal test episodes and 0/100 with the cube's start box shifted by 8 cm (run 1, seeds 10100–10199: spec'd config; lr 1e-4, backbone lr 1e-5, CVAE on; run 2, seeds 10100–10199: run 1 + backbone lr 1e-4, CVAE off; run 3, seeds 10200–10299: run 2 + 8000 steps instead of the spec'd 3000; run 4, seeds 10300–10399: run 2 + proprioceptive state withheld (cameras only); run 5, seeds 10400–10499: run 4 + 128 px cameras (demos re-recorded); run 6, seeds 10600–10699: run 2 + lr 1e-5 and backbone lr 1e-5 (LeRobot defaults)).
 <!-- sdp-report:headline:end -->
 
 **Language split:** Python only. The imitation-learning stack (LeRobot, PyTorch,
@@ -72,6 +72,8 @@ downloading them.
 | ACT run 4 (`act_cpu_v4_scripted50`) | shifted | 10300–10399 | 100 | 0/100 (0 %) | 0 %–4 % | – | [`results/eval_act_cpu_v4_scripted50_s10300.csv`](results/eval_act_cpu_v4_scripted50_s10300.csv) |
 | ACT run 5 (`act_cpu_v5_scripted50_128px`) | nominal | 10400–10499 | 100 | 0/100 (0 %) | 0 %–4 % | – | [`results/eval_act_cpu_v5_scripted50_128px_s10400.csv`](results/eval_act_cpu_v5_scripted50_128px_s10400.csv) |
 | ACT run 5 (`act_cpu_v5_scripted50_128px`) | shifted | 10400–10499 | 100 | 0/100 (0 %) | 0 %–4 % | – | [`results/eval_act_cpu_v5_scripted50_128px_s10400.csv`](results/eval_act_cpu_v5_scripted50_128px_s10400.csv) |
+| ACT run 6 (`act_cpu_v6_scripted50`) | nominal | 10600–10699 | 100 | 0/100 (0 %) | 0 %–4 % | – | [`results/eval_act_cpu_v6_scripted50_s10600.csv`](results/eval_act_cpu_v6_scripted50_s10600.csv) |
+| ACT run 6 (`act_cpu_v6_scripted50`) | shifted | 10600–10699 | 100 | 0/100 (0 %) | 0 %–4 % | – | [`results/eval_act_cpu_v6_scripted50_s10600.csv`](results/eval_act_cpu_v6_scripted50_s10600.csv) |
 <!-- sdp-report:success:end -->
 
 Failure labels (one per episode, defined in [`sdp/eval/taxonomy.py`](sdp/eval/taxonomy.py)):
@@ -94,6 +96,8 @@ Failure labels (one per episode, defined in [`sdp/eval/taxonomy.py`](sdp/eval/ta
 | ACT run 4 (`act_cpu_v4_scripted50`) | shifted | 0 | 1 | 99 | 0 | 0 | 0 | 0 |
 | ACT run 5 (`act_cpu_v5_scripted50_128px`) | nominal | 0 | 0 | 100 | 0 | 0 | 0 | 0 |
 | ACT run 5 (`act_cpu_v5_scripted50_128px`) | shifted | 0 | 3 | 97 | 0 | 0 | 0 | 0 |
+| ACT run 6 (`act_cpu_v6_scripted50`) | nominal | 0 | 15 | 82 | 2 | 0 | 1 | 0 |
+| ACT run 6 (`act_cpu_v6_scripted50`) | shifted | 0 | 68 | 32 | 0 | 0 | 0 | 0 |
 <!-- sdp-report:taxonomy:end -->
 
 <!-- sdp-report:training:begin -->
@@ -104,6 +108,7 @@ Failure labels (one per episode, defined in [`sdp/eval/taxonomy.py`](sdp/eval/ta
 | run 3 (`act_cpu_v3_scripted50`) | run 2 + 8000 steps instead of the spec'd 3000 | 8000 | 45.3 min | 0.063 | `sdp/train/configs/act_cpu_v3.yaml` |
 | run 4 (`act_cpu_v4_scripted50`) | run 2 + proprioceptive state withheld (cameras only) | 3000 | 17.2 min | 0.073 | `sdp/train/configs/act_cpu_v4.yaml` |
 | run 5 (`act_cpu_v5_scripted50_128px`) | run 4 + 128 px cameras (demos re-recorded) | 3000 | 21.5 min | 0.079 | `sdp/train/configs/act_cpu_v5.yaml` |
+| run 6 (`act_cpu_v6_scripted50`) | run 2 + lr 1e-5 and backbone lr 1e-5 (LeRobot defaults) | 3000 | 16.3 min | 0.114 | `sdp/train/configs/act_cpu_v6.yaml` |
 <!-- sdp-report:training:end -->
 
 Stage wall times (recording and eval timings are saved from run 5 on):
@@ -116,6 +121,7 @@ Stage wall times (recording and eval timings are saved from run 5 on):
 | run 3 (`act_cpu_v3_scripted50`) | – | 45.3 min | – |
 | run 4 (`act_cpu_v4_scripted50`) | – | 17.2 min | – |
 | run 5 (`act_cpu_v5_scripted50_128px`) | 55 s | 21.5 min | 5.0 min |
+| run 6 (`act_cpu_v6_scripted50`) | – | 16.3 min | 4.5 min |
 <!-- sdp-report:timing:end -->
 
 Training budget: 45 min per run on the laptop CPU. For run 3 only, Giri raised the cap
@@ -135,7 +141,7 @@ every row: [docs/results.md](docs/results.md).
 Every ACT row is 100 independent episodes. Each episode's starting cube pose is fixed
 by its seed. The 50 demonstrations use seeds 0–49, from the demo range 0–999. Eval
 seeds come from 10000–19999, so the ranges cannot overlap: `sdp/seeds.py` enforces it
-and `tests/test_seed_split.py` tests it. There were five training runs, and each
+and `tests/test_seed_split.py` tests it. There were six training runs, and each
 choice was made on data the later evaluation does not reuse:
 
 - **Run 1** (the spec'd CPU config, 3000 steps) scored 0/100 on seeds 10000–10099,
@@ -154,6 +160,12 @@ choice was made on data the later evaluation does not reuse:
   re-recorded at 128 px from the same seeds (the expert still scores 100/100). It was
   scored once on fresh seeds 10400–10499 (*test 4*), with the same pre-registered
   criterion.
+- **Run 6** is run 2 with the transformer and backbone learning rates set to 1e-5,
+  LeRobot's ACT defaults, instead of 1e-4. It tests one hypothesis: runs 1–5 all
+  trained the transformer at 1e-4, and that alone caused the collapse to a constant
+  action chunk (a LeRobot user saw the same collapse on a similar dataset at 1e-4 and
+  fixed it with these defaults). Swap sensitivity is checked at every saved checkpoint
+  (1000, 2000, 3000), and the run is scored once on fresh seeds 10600–10699 (*test 5*).
 
 No test seed range is reused across experiments. The headline reports the best run on
 its own test seeds and lists every run.
@@ -170,8 +182,8 @@ about seed-to-seed variance.
 
 ## Where it fails
 
-- **The ACT policy never reaches the cube.** All five CPU runs score 0/100, nominal
-  and shifted, each on its own test seeds. 87–100 % of the episodes are
+- **The ACT policy does not go to the cube.** All six CPU runs score 0/100, nominal
+  and shifted, each on its own test seeds. In runs 1–5, 87–100 % of the episodes are
   `never_reached` and the rest are `collision` (fingers pressed into the table). The
   policy descends straight down from the home pose instead of first moving over the
   cube. On its own training frames it reproduces the descend, close, lift and carry
@@ -179,8 +191,9 @@ about seed-to-seed variance.
   across 20 training episodes whose cubes sit in different places, while the recorded
   actions vary (std 0.38 in x, 0.55 in yaw) ([`results/openloop_*.json`](results/)).
   Each run also fails from its own training seeds (0/10 on demo seeds 0–9;
-  [`results/trainseeds_*.json`](results/), a diagnostic, not an eval). Each
-  experiment removed one suspect, and none changed the result:
+  [`results/trainseeds_*.json`](results/), a diagnostic, not an eval). Runs 2–5 each
+  changed one factor, but all of them trained the transformer at lr 1e-4, which run 6
+  tests separately. None changed the result:
   - **Run 2:** optimisation settings (backbone lr 1e-4, CVAE off).
   - **Run 3:** training length (8000 steps ≈ 11.6 epochs, final loss 0.063 vs 0.082).
   - **Run 4:** the proprioceptive shortcut (the 15-D state, which predicts every phase
@@ -193,12 +206,26 @@ about seed-to-seed variance.
     the cube ~8–13 px). Same picture: swap change 0.0001 in x and yaw, std 0.0000.
     Both runs 4 and 5 fail the pass criterion fixed before training (a ≥ 0.1 change
     and ≥ 0.1 std in x or yaw).
+  - **Run 6:** the learning rate (transformer and backbone at 1e-5, LeRobot's
+    defaults, instead of 1e-4; the hypothesis from a LeRobot user who saw the same
+    collapse at 1e-4). The images matter a little more but still far too little.
+    Image-swap sensitivity in x / yaw is 0.0031 / 0.0029 at step 1000, 0.0018 / 0.0018
+    at 2000 and 0.0009 / 0.0012 at 3000: 10–30× runs 1–5, but 30–100× below the 0.1
+    threshold, and it shrinks as training goes on. The criterion is not met at any
+    checkpoint. Its failures spread out (nominal: 82 `never_reached`, 15 `collision`,
+    2 `grasp_missed`, 1 `placed_outside`; shifted: 68 `collision`, 32 `never_reached`),
+    and in one nominal episode the cube was lifted. Since the approach still ignores
+    the images, that is most likely a cube lying under the average trajectory. At
+    lr 1e-5 the 3000-step budget also fits the arm's phases less tightly (episode-0
+    z / gripper errors 0.136 / 0.104 vs 0.083 / 0.012 for run 2).
 
-  What is left points at the data and the objective. The cube-dependent actions are
+  So the learning rate alone is not the cause. With the reference fix, the policy
+  still converges toward the mean approach action. What is left points at the data
+  and the objective. The cube-dependent actions are
   the approach frames: 13.1 per episode on average (8–18), 11.9 % of all targets.
   About a third of their x/yaw values sit at the ±0.6 saturation. An L1-trained policy
   reaches a low loss by predicting their mean, about 0, and nothing in 3000–8000 CPU
-  steps pushes it off that. This is a training failure, not distribution shift. The shifted
+  steps at either learning rate pushes it off that. This is a training failure, not distribution shift. The shifted
   condition says nothing yet, because there is no nominal success to lose.
 - **Only scripted data.** All 50 demos come from one deterministic waypoint expert, so
   every demonstration follows the same path with the same timing. That is the easiest
@@ -241,9 +268,12 @@ contact-rich task. The longer version, marked as a draft:
 
 ## What I'd do next
 
-- **Make ACT localise the cube** before anything else. Training length (run 3), the
-  state shortcut (run 4) and resolution (run 5) are ruled out at this scale. Next, in
-  order:
+- **Make ACT localise the cube** before anything else. At transformer lr 1e-4,
+  neither training length (run 3), nor withholding the state (run 4), nor resolution
+  (run 5) helped. Run 6 showed that LeRobot's default lr 1e-5 doesn't help on its own
+  either. Several factors are probably wrong at once, so the next steps are an
+  end-to-end proof first (a privileged-state baseline, overfitting a few demos), then
+  the data and objective:
   - oversample or up-weight the approach frames;
   - give the expert a slower, unsaturated approach, so there are more approach frames
     and their x/yaw targets vary smoothly with the cube's position;

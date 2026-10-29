@@ -42,6 +42,13 @@ All notable changes to this project are documented here. The format follows
   at 128 px into `pickplace_scripted_50_128px`, same seeds; approved by Giri): recording
   55 s, training 21.5 min, eval 5.0 min; 0/100 nominal and 0/100 shifted on fresh test
   seeds 10400–10499 (Wilson 95 % 0–4 %). Fails the same pre-registered criterion.
+- ACT run 6 (`act_cpu_v6.yaml`: run 2 with lr 1e-5 and backbone lr 1e-5, LeRobot's
+  defaults; tests the hypothesis that lr 1e-4 caused the collapse; approved by Giri):
+  16.3 min training, 4.5 min eval; 0/100 nominal and 0/100 shifted on fresh test seeds
+  10600–10699 (Wilson 95 % 0–4 %). Image-swap sensitivity in x/yaw 0.0031/0.0029 →
+  0.0009/0.0012 from step 1000 to 3000: the pre-registered criterion is not met.
+- `diagnose_openloop.py` names intermediate checkpoints `<run>_step<N>`; the diagnostics
+  table gains d_x/d_yaw swap columns and a criterion column.
 - `--image-size` for `sdp record`, `record_demos.sh` and `eval_expert.py`; eval,
   diagnostics and the GIF take the image size from the checkpoint; recording and eval
   wall times are saved and tabulated.

@@ -261,3 +261,16 @@ Run 5 = run 4 (cameras only) with both cameras at 128 px; demos re-recorded at 1
 | ACT run 5 | shifted | 10400–10499 (test 4) | 0/100 | 0–4 % | 97 never_reached, 3 collision |
 
 Pre-registered criterion: not met (image swap moves d_x/d_yaw by 0.0001; std 0.0000).
+
+## Addendum — ACT run 6 (30 Oct 2026, 00:45 IST, approved by Giri)
+
+Run 6 = run 2 with lr 1e-5 and backbone lr 1e-5 (LeRobot defaults). Training 977.2 s =
+16.3 min (one segment), eval 270.3 s.
+
+| Policy | Cube poses | Seeds | Success | Wilson 95 % | Labels |
+|---|---|---|---|---|---|
+| ACT run 6 | nominal | 10600–10699 (test 5) | 0/100 | 0–4 % | 82 never_reached, 15 collision, 2 grasp_missed, 1 placed_outside |
+| ACT run 6 | shifted | 10600–10699 (test 5) | 0/100 | 0–4 % | 68 collision, 32 never_reached |
+
+Swap sensitivity d_x / d_yaw: 0.0031 / 0.0029 (1k), 0.0018 / 0.0018 (2k), 0.0009 / 0.0012
+(3k). Pre-registered criterion: not met at any checkpoint.

@@ -1,13 +1,14 @@
 # MORNING — sim-demo-to-policy
 
-## STATUS (23:45 IST, 29 Oct)
+## STATUS (00:50 IST, 30 Oct)
 
-**v0.1 MUST list: done. CI: green. ACT: five CPU runs, all 0/100.** Run 5 (your
-approved experiment: run 4 at 128 px) recorded in 55 s, trained in 21.5 min and
-evaluated in 5.0 min. It fails the criterion fixed before training, exactly like run 4:
-the policy tracks the arm from the images but never uses them to find the cube.
-Training length, the state shortcut and resolution are now each ruled out at this
-scale. My recommendation for Sunday is to **ship v0.1 with the diagnosis**.
+**v0.1 MUST list: done. CI: green. ACT: six CPU runs, all 0/100.** Run 6 tested the
+retrospective's leading hypothesis (`experiments/RETROSPECTIVE.md`): that the
+transformer lr of 1e-4 in runs 1–5 caused the collapse. With LeRobot's defaults (lr
+1e-5, backbone 1e-5, clip 10) it scores 0/100 nominal and 0/100 shifted. The
+pre-registered criterion is not met at any checkpoint: image-swap sensitivity in x/yaw
+is 0.0031/0.0029 (1k) → 0.0018/0.0018 (2k) → 0.0009/0.0012 (3k), so 10–30× runs 1–5
+but shrinking. **The learning rate is not the sole cause.**
 
 | Run | Change from the spec'd CPU config | Steps | Training | Test seeds | Nominal | Shifted |
 |---|---|---|---|---|---|---|
@@ -16,9 +17,14 @@ scale. My recommendation for Sunday is to **ship v0.1 with the diagnosis**.
 | 3 | run 2 + 8000 steps (cap raised to 50 min) | 8000 | 45.3 min | 10200–10299 | 0/100 (0–4 %) | 0/100 (0–4 %) |
 | 4 | run 2 + proprioceptive state withheld | 3000 | 17.2 min | 10300–10399 | 0/100 (0–4 %) | 0/100 (0–4 %) |
 | 5 | run 4 + 128 px cameras (demos re-recorded) | 3000 | 21.5 min | 10400–10499 | 0/100 (0–4 %) | 0/100 (0–4 %) |
+| 6 | run 2 + lr 1e-5, backbone lr 1e-5 | 3000 | 16.3 min | 10600–10699 | 0/100 (0–4 %) | 0/100 (0–4 %) |
 
-Commits: run 3 (91bac96, eccfd43, 048856f); run 4 (05965f0, b574bb3, 043c036,
-7839069); run 5 in the commits pushed with this status (see `git log`). Earlier:
+Run 6 changed the failure mix (nominal: 82 never_reached, 15 collision, 2 grasp_missed,
+1 placed_outside, the first episode in any run that lifted the cube; shifted: 68
+collision). The approach is still image-blind, so that lift is most likely luck.
+
+Commits: run 6 in the commits pushed with this status (see `git log`); runs 3–5 in
+91bac96 … 17bf863. Earlier:
 
 | What | Commit(s) |
 |---|---|
@@ -31,17 +37,10 @@ Commits: run 3 (91bac96, eccfd43, 048856f); run 4 (05965f0, b574bb3, 043c036,
 | ACT runs 1 and 2 + results; diagnostics | 3c8851e, 6796baf, 06794f7, 57535a3, 768d54e, 5f4ed0f |
 
 CI: see the latest run on <https://github.com/giridhar-shenoy/sim-demo-to-policy/actions>.
+`experiments/` is untracked on purpose (other agents' work) and is not in any commit.
 
-Blocked (decisions below): release upload (#4), topics and branch protection (#1, #2),
-hardware-transfer draft (#6), what to do about ACT after Sunday (#8).
-
-Next three steps:
-
-1. Upload the release (`gh release create v0.1.0 outputs/release/*.tar.gz`: five
-   checkpoints and both datasets).
-2. Edit `docs/hardware_transfer.md` and the README's hardware paragraph in your voice.
-3. After Sunday, #8: approach-frame weighting or a slower expert approach first, then
-   an auxiliary cube-position loss, then a full-size GPU run.
+Blocked (decisions below): the next ACT step (#8, Giri is sending it), release upload
+(#4), topics and branch protection (#1, #2), hardware-transfer draft (#6).
 
 ## WAITING FOR GIRI
 
@@ -59,26 +58,21 @@ Next three steps:
    right after the OOM restart. Splitting it would be a history rewrite.
    Recommendation: leave it. Blocks: nothing.
 4. **Upload the v0.1 release assets** (over the 50 MB commit limit). Packed in
-   `outputs/release/`: act_cpu_scripted50 89 MB; act_cpu_v2/v3/v4_scripted50 and
-   act_cpu_v5_scripted50_128px 62 MB each; pickplace_scripted_50 5.2 MB;
+   `outputs/release/`: act_cpu_scripted50 89 MB; act_cpu_v2/v3/v4/v6_scripted50 and
+   act_cpu_v5_scripted50_128px ~62 MB each; pickplace_scripted_50 5.2 MB;
    pickplace_scripted_50_128px 6.6 MB. Command:
    `gh release create v0.1.0 outputs/release/*.tar.gz` (then
    `scripts/download_release_assets.sh` works). Until then the README's run path
-   retrains (~2 h for the five runs). Blocks: a download-only one-command demo.
+   retrains (~2.5 h for the six runs). Blocks: a download-only one-command demo.
 5. **Look at the dataset in the LeRobot visualiser** (`lerobot-dataset-viz`, needs a
    GUI and the `viz` extra). Blocks: nothing.
 6. **Edit `docs/hardware_transfer.md`** (marked DRAFT, first person, no employer names).
 7. **Keyboard teleop demos (SHOULD)**: skipped; needs you at the keyboard.
-8. **ACT after Sunday.** Runs 3 (8000 steps), 4 (state withheld) and 5 (128 px) each
-   ruled out one cause; all five runs are 0/100. What is left is the data and the
-   objective: the approach is 11.9 % of the targets, and L1 regression settles on their
-   mean. Options, in my order: (a) oversample or up-weight the approach frames (LeRobot
-   0.6.1 has a `--sample_weighting` config I have not verified yet); (b) a slower,
-   unsaturated expert approach (env/expert change plus re-record); (c) an auxiliary
-   cube-position loss during training (code in this repo); (d) a full-size GPU run.
-   Each is ~1 h end to end on the laptop, with no guarantee. Recommendation: ship v0.1
-   with the diagnosis on Sunday and do (a) then (b) next week. Blocks: a non-zero
-   headline.
+8. **Next ACT step: Giri is sending it** (after run 6). The retrospective's plan
+   continues with a pipeline proof (privileged-state ACT, integrity checks), a small
+   spatial-softmax BC, and an overnight ACT with the combined recipe. Seed ledger:
+   10500–10599 for those experiments, 10700–10999 for later runs, 11000–11099 the final
+   test (used once).
 
 The aborted run-3 attempts are kept, not reported: `outputs/train/act_cpu_v3_scripted50_aborted_1217*`
 and `…_aborted_1534*` (checkpoints 1000–4000). Delete them when you no longer need them.
