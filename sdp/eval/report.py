@@ -67,6 +67,21 @@ def _pct(x: float) -> str:
     return f"{100 * x:.0f} %"
 
 
+# Training runs in order: table label and how each differs from the spec'd ACT CPU
+# config (dim_model 256, 2 enc / 1 dec layers, chunk 20, 96x96, batch 8, 3000 steps).
+RUNS = {
+    "act_cpu_scripted50": ("run 1", "spec'd config; lr 1e-4, backbone lr 1e-5, CVAE on"),
+    "act_cpu_v2_scripted50": ("run 2", "run 1 + backbone lr 1e-4, CVAE off"),
+    "act_cpu_v3_scripted50": ("run 3", "run 2 + 8000 steps instead of the spec'd 3000"),
+}
+
+
+def _policy_name(condition: str) -> str:
+    if condition in RUNS:
+        return f"ACT {RUNS[condition][0]} (`{condition}`)"
+    return condition
+
+
 def _load_conditions(results: Path) -> list[tuple[str, dict]]:
     rows = []
     for path in _eval_files(results):
@@ -87,7 +102,8 @@ def success_table(results: Path) -> str:
         mean_txt = f"{mean_ok:.1f}" if mean_ok is not None else "–"
         csv_name = name.replace(".json", ".csv")
         lines.append(
-            f"| {c['condition']} | {c['distribution']} | {c['seed_min']}–{c['seed_max']} "
+            f"| {_policy_name(c['condition'])} | {c['distribution']} "
+            f"| {c['seed_min']}–{c['seed_max']} "
             f"| {c['trials']} | {c['successes']}/{c['trials']} ({_pct(c['success_rate'])}) "
             f"| {_pct(lo)}–{_pct(hi)} | {mean_txt} "
             f"| [`results/{csv_name}`](results/{csv_name}) |"
@@ -100,29 +116,34 @@ def taxonomy_table(results: Path) -> str:
     lines = [header, "|---|---|" + "---|" * len(LABELS)]
     for _name, c in _load_conditions(results):
         counts = " | ".join(str(c["labels"].get(label, 0)) for label in LABELS)
-        lines.append(f"| {c['condition']} | {c['distribution']} | {counts} |")
+        lines.append(f"| {_policy_name(c['condition'])} | {c['distribution']} | {counts} |")
     return "\n".join(lines)
+
+
+def _final_row(csv_path: Path) -> dict[str, str]:
+    lines = csv_path.read_text().strip().splitlines()
+    return dict(zip(lines[0].split(","), lines[-1].split(","), strict=False))
 
 
 def training_table(results: Path) -> str:
     lines = [
-        "| Run | Config | Steps | Wall time | Final loss | Machine |",
+        "| Run | Change from the spec'd CPU config | Steps | Wall time | Final loss | Config |",
         "|---|---|---|---|---|---|",
     ]
-    for path in sorted(results.glob("train_*.json")):
+    order = {run: i for i, run in enumerate(RUNS)}
+    paths = results.glob("train_*.json")
+    for path in sorted(paths, key=lambda p: order.get(p.stem.removeprefix("train_"), len(order))):
+        run = path.stem.removeprefix("train_")
         meta = json.loads(path.read_text())
-        csv_path = path.with_suffix(".csv")
         steps, loss = "–", "–"
-        if csv_path.is_file():
-            last = csv_path.read_text().strip().splitlines()
-            header, final = last[0].split(","), last[-1].split(",")
-            row = dict(zip(header, final, strict=False))
+        if path.with_suffix(".csv").is_file():
+            row = _final_row(path.with_suffix(".csv"))
             steps = str(int(float(row["step"])))
             loss = f"{float(row['loss']):.3f}"
-        wall = meta["wall_time_s"]
+        label, change = RUNS.get(run, (run, "–"))
         lines.append(
-            f"| {path.stem.removeprefix('train_')} | `{meta.get('config', '?')}` | {steps} "
-            f"| {wall / 60:.1f} min | {loss} | {meta.get('machine', '?')} |"
+            f"| {label} (`{run}`) | {change} | {steps} | {meta['wall_time_s'] / 60:.1f} min "
+            f"| {loss} | `{meta.get('config', '?')}` |"
         )
     return "\n".join(lines)
 
@@ -157,14 +178,14 @@ def speed_table(results: Path) -> str:
     )
 
 
-HEADLINE_FILE = "eval_act_cpu_v2_scripted50_s10100.json"
-
-
-def _act(results: Path) -> dict[str, dict]:
-    path = results / HEADLINE_FILE
-    if not path.is_file():
-        return {}
-    return {c["distribution"]: c for c in json.loads(path.read_text())["conditions"]}
+def _latest_run_eval(results: Path) -> tuple[str, dict[str, dict]] | None:
+    """The last run in RUNS that has an eval file, with its highest-seed eval."""
+    for run in reversed(RUNS):
+        files = sorted(results.glob(f"eval_{run}_s*.json"))
+        if files:
+            conds = json.loads(files[-1].read_text())["conditions"]
+            return run, {c["distribution"]: c for c in conds}
+    return None
 
 
 def _rate(c: dict) -> str:
@@ -176,16 +197,25 @@ def _rate(c: dict) -> str:
 
 
 def headline(results: Path) -> str:
-    act = _act(results)
-    if "nominal" not in act:
+    latest = _latest_run_eval(results)
+    if latest is None or "nominal" not in latest[1]:
         return "_ACT evaluation pending._"
+    run, act = latest
     c = act["nominal"]
-    train = results / "train_act_cpu_v2_scripted50.json"
-    minutes = json.loads(train.read_text())["wall_time_s"] / 60 if train.is_file() else None
-    budget = f", {minutes:.0f} min on the laptop CPU" if minutes else ""
+    train = results / f"train_{run}.json"
+    details = []
+    if train.with_suffix(".csv").is_file():
+        details.append(
+            f"{int(float(_final_row(train.with_suffix('.csv'))['step']))} training steps"
+        )
+    if train.is_file():
+        details.append(
+            f"{json.loads(train.read_text())['wall_time_s'] / 60:.0f} min on the laptop CPU"
+        )
+    details.append("50 scripted demonstrations")
     text = (
-        f"ACT (run 2: 3000 training steps{budget}, 50 scripted demonstrations) succeeds "
-        f"in {_rate(c)} held-out test episodes (seeds {c['seed_min']}–{c['seed_max']})"
+        f"ACT ({RUNS[run][0]}: {', '.join(details)}) succeeds in {_rate(c)} held-out test "
+        f"episodes (seeds {c['seed_min']}–{c['seed_max']})"
     )
     if "shifted" in act:
         text += f", and in {_rate(act['shifted'])} with the cube's start box shifted by 8 cm"

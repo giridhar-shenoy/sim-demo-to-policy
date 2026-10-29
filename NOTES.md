@@ -269,3 +269,29 @@ uv pip install --python .venv/bin/python --no-deps -e .
    or lead with the diagnosis?
 10. When can you do the keyboard-teleop session (SHOULD, 30 demos)?
 11. The README links to R1/R2 404 until those repos are public.
+
+## Session 2 — 29 Oct 2026, from 12:08 IST (Giri awake; overnight rules off)
+
+- Giri answered open question 1: option **(a)**, one more ACT CPU run identical to run 2
+  except for the step count (8000), within the 45-min cap, locks taken with `flock -o`,
+  ≥ 5 GB free first, evaluated on fresh test seeds 10200–10299. Open question 11 is
+  resolved: the R1/R2 links in the README return 200 (MORNING item dropped).
+- `sdp/train/configs/act_cpu_v3.yaml` = `act_cpu_v2.yaml` with `steps: 8000` (diff shows
+  only the header comment and that line).
+- Timing probe (150 steps, all three locks, 12:08:46–12:09:41): steady state `updt_s`
+  0.27–0.29 + `data_s` 0.004 → 0.28 s/step → 8000 steps ≈ 37.3 min + ~15 s startup ≈
+  38 min projected (< 45). Step-100 loss 0.282 = run 2's step-100 loss (same seed and
+  config up to that point).
+- Run 3 started 12:09:58 (`/tmp/r4/run_train_v3.sh`, log `/tmp/r4/train_v3.log`). Early
+  rate 0.32 s/step, slower than the probe because the desktop browser was using ~40 %
+  of a core; projected ~43 min. Rule I applied: if the projection (elapsed + remaining ×
+  3-min rate) exceeds 45 min after step 1000, stop the run and tell Giri
+  (`/tmp/r4/watch_v3.sh`).
+- **12:17 run 3 stopped at step ~1190 of 8000, projected over the 45-min cap.** INFO-line
+  timestamps: step 50 at 12:10:19, step 1000 at 12:15:50 → 0.348 s/step (200-step
+  windows 0.32, 0.38, 0.345, 0.365) → ~46.4 min of steps + startup + checkpoint saves ≈
+  47 min. The probe's 0.28 s/step was measured with an idle desktop; during the run the
+  browser used ~40 % of a core. The cap allows ≤ 0.3375 s/step. Not shortened, not
+  continued; asked Giri. The partial run is in `outputs/train/act_cpu_v3_scripted50/`
+  (checkpoint 001000), untouched. (The tail-of-log projection watcher was useless:
+  the log flushes only at newlines, so its step readings lag; use INFO timestamps.)

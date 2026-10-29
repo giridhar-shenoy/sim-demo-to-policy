@@ -1,0 +1,25 @@
+# ACT, CPU-sized, third run. Identical to act_cpu_v2.yaml except the step count:
+# 8000 instead of the spec'd 3000. Giri approved this departure on 29 Oct 2026 (option
+# (a) in MORNING.md) because runs 1 and 2 underfit at 3000 steps (~4.4 epochs): both
+# ignore the cube's position, even on their own training seeds. Budget: <= 45 min wall
+# time on the laptop, checked with a timing probe before the run.
+policy:
+  type: act
+  device: cpu
+  push_to_hub: false
+  dim_model: 256
+  n_encoder_layers: 2
+  n_decoder_layers: 1
+  chunk_size: 20        # 1 s of actions at 20 Hz
+  n_action_steps: 10    # execute half a chunk (0.5 s), then re-plan
+  optimizer_lr: 1.0e-4
+  optimizer_lr_backbone: 1.0e-4
+  use_vae: false
+batch_size: 8
+steps: 8000          # spec'd CPU config says 3000; see header
+num_workers: 1          # machine rule after the 03:32 OOM: 0 or 1 dataloader workers
+log_freq: 50
+save_freq: 1000
+seed: 1000
+wandb:
+  enable: false
