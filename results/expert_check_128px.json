@@ -1,0 +1,86 @@
+{
+  "meta": {
+    "python": "3.12.16",
+    "image_size": 128
+  },
+  "conditions": [
+    {
+      "condition": "expert_demo_seeds",
+      "distribution": "nominal",
+      "trials": 100,
+      "successes": 100,
+      "success_rate": 1.0,
+      "wilson95": [
+        0.9630065012310038,
+        1.0
+      ],
+      "mean_steps": 109.94,
+      "mean_steps_success": 109.94,
+      "labels": {
+        "success": 100,
+        "collision": 0,
+        "never_reached": 0,
+        "grasp_missed": 0,
+        "dropped": 0,
+        "placed_outside": 0,
+        "timeout": 0
+      },
+      "seed_min": 0,
+      "seed_max": 99,
+      "policy_ms_mean": 0.060489999999999995,
+      "policy_ms_max": 0.323
+    },
+    {
+      "condition": "expert_eval_seeds",
+      "distribution": "nominal",
+      "trials": 100,
+      "successes": 100,
+      "success_rate": 1.0,
+      "wilson95": [
+        0.9630065012310038,
+        1.0
+      ],
+      "mean_steps": 110.58,
+      "mean_steps_success": 110.58,
+      "labels": {
+        "success": 100,
+        "collision": 0,
+        "never_reached": 0,
+        "grasp_missed": 0,
+        "dropped": 0,
+        "placed_outside": 0,
+        "timeout": 0
+      },
+      "seed_min": 10000,
+      "seed_max": 10099,
+      "policy_ms_mean": 0.06255,
+      "policy_ms_max": 0.209
+    },
+    {
+      "condition": "expert_eval_seeds",
+      "distribution": "shifted",
+      "trials": 100,
+      "successes": 100,
+      "success_rate": 1.0,
+      "wilson95": [
+        0.9630065012310038,
+        1.0
+      ],
+      "mean_steps": 117.23,
+      "mean_steps_success": 117.23,
+      "labels": {
+        "success": 100,
+        "collision": 0,
+        "never_reached": 0,
+        "grasp_missed": 0,
+        "dropped": 0,
+        "placed_outside": 0,
+        "timeout": 0
+      },
+      "seed_min": 10000,
+      "seed_max": 10099,
+      "policy_ms_mean": 0.06037000000000001,
+      "policy_ms_max": 0.273
+    }
+  ]
+}

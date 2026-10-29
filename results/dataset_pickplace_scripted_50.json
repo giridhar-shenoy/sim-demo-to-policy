@@ -14,6 +14,7 @@
     0,
     49
   ],
+  "image_size": 96,
   "features": [
     "action",
     "episode_index",

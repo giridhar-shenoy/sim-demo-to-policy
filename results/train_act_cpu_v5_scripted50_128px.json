@@ -1,0 +1,7 @@
+{
+  "returncode": 0,
+  "wall_time_s": 1291.3,
+  "config": "sdp/train/configs/act_cpu_v5.yaml",
+  "machine": "i5-1135G7 (4C/8T), 14 GB RAM, CPU only, torch 4 threads",
+  "python": "3.12.16"
+}

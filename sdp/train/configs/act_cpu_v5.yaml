@@ -1,0 +1,31 @@
+# ACT, CPU-sized, fifth run. Identical to act_cpu_v4.yaml (cameras only, 3000 steps,
+# backbone lr 1e-4, CVAE off) except that both cameras are 128x128 instead of 96x96,
+# trained on datasets/pickplace_scripted_50_128px. Run 4 tracked the arm from the images
+# but its cube-dependent x/yaw actions never responded to them; at 96 px ResNet-18 gives a
+# 3x3 feature map for a 6-10 px cube, at 128 px a 4x4 map for a ~8-13 px cube. Approved
+# by Giri on 29 Oct 2026.
+policy:
+  type: act
+  device: cpu
+  push_to_hub: false
+  dim_model: 256
+  n_encoder_layers: 2
+  n_decoder_layers: 1
+  chunk_size: 20        # 1 s of actions at 20 Hz
+  n_action_steps: 10    # execute half a chunk (0.5 s), then re-plan
+  optimizer_lr: 1.0e-4
+  optimizer_lr_backbone: 1.0e-4
+  use_vae: false
+  # As in run 4, only the two cameras are policy inputs. The one change from run 4:
+  # 128 px images (the dataset is re-recorded at 128 px, same demo seeds 0-49).
+  input_features:
+    observation.images.front: {type: VISUAL, shape: [3, 128, 128]}
+    observation.images.wrist: {type: VISUAL, shape: [3, 128, 128]}
+batch_size: 8
+steps: 3000
+num_workers: 1          # machine rule after the 03:32 OOM: 0 or 1 dataloader workers
+log_freq: 50
+save_freq: 1000
+seed: 1000
+wandb:
+  enable: false

@@ -1,0 +1,65 @@
+{
+  "meta": {
+    "command": "sdp eval --checkpoint outputs/train/act_cpu_v5_scripted50_128px --condition act_cpu_v5_scripted50_128px --trials 100 --seed-start 400",
+    "checkpoint": "outputs/train/act_cpu_v5_scripted50_128px/checkpoints/last/pretrained_model",
+    "n_action_steps": 10,
+    "chunk_size": 20,
+    "image_size": 128,
+    "wall_time_s": 298.7,
+    "python": "3.12.16"
+  },
+  "conditions": [
+    {
+      "condition": "act_cpu_v5_scripted50_128px",
+      "distribution": "nominal",
+      "trials": 100,
+      "successes": 0,
+      "success_rate": 0.0,
+      "wilson95": [
+        0.0,
+        0.03699349876899627
+      ],
+      "mean_steps": 250.0,
+      "mean_steps_success": null,
+      "labels": {
+        "success": 0,
+        "collision": 0,
+        "never_reached": 100,
+        "grasp_missed": 0,
+        "dropped": 0,
+        "placed_outside": 0,
+        "timeout": 0
+      },
+      "seed_min": 10400,
+      "seed_max": 10499,
+      "policy_ms_mean": 2.6885800000000004,
+      "policy_ms_max": 33.684
+    },
+    {
+      "condition": "act_cpu_v5_scripted50_128px",
+      "distribution": "shifted",
+      "trials": 100,
+      "successes": 0,
+      "success_rate": 0.0,
+      "wilson95": [
+        0.0,
+        0.03699349876899627
+      ],
+      "mean_steps": 250.0,
+      "mean_steps_success": null,
+      "labels": {
+        "success": 0,
+        "collision": 3,
+        "never_reached": 97,
+        "grasp_missed": 0,
+        "dropped": 0,
+        "placed_outside": 0,
+        "timeout": 0
+      },
+      "seed_min": 10400,
+      "seed_max": 10499,
+      "policy_ms_mean": 2.7278599999999993,
+      "policy_ms_max": 33.249
+    }
+  ]
+}
