@@ -55,6 +55,12 @@ All notable changes to this project are documented here. The format follows
 - README GIF: scripted expert (reference) beside an ACT failure on the same seed.
 - CI: 50-step training smoke and 3-episode eval smoke (37 tests, ~40 s).
 
+- Absolute TCP-target actions (`sdp/envs/abs_target.py`): `abs_target`, `abs_to_delta`
+  and `AbsoluteTargetWrapper`, ported from `experiments/privileged/priv_common.py`;
+  `sdp record --action-mode abs_target` (5-D named action); the ACT eval adapter infers
+  the action mode from the checkpoint's action shape and wraps the env. Motivated by a
+  privileged-state experiment: delta actions 0/50, absolute targets 50/50.
+
 ### Fixed
 
 - Training CSV step column (lerobot prints `step:2K`); Wilson bounds exactly 0/1 at

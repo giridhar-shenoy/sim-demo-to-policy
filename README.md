@@ -248,6 +248,33 @@ about seed-to-seed variance.
 - **Only one kind of shift.** The shifted condition moves the cube's start box. The
   lighting, colours, camera poses, target position and object are never varied.
 
+### Delta vs absolute actions (follow-up in progress)
+
+All six ACT runs above predict the env's native action, a 7-D per-step delta of the TCP
+target. A follow-up isolated that choice. It is not one of the published runs: the
+code, logs and results are under `experiments/privileged/` and `experiments/integrity/`
+for now. The cameras were replaced by the true cube pose (privileged state), and run 2's
+architecture was trained at lr 1e-4 and batch 32 for 6000 steps:
+
+| Action representation | Eval seeds 10500–10549 | Wilson 95 % | Own demo seeds 0–9 |
+|---|---|---|---|
+| 7-D per-step delta (as in runs 1–6) | 0/50 | 0–7 % | 0/10 |
+| 5-D absolute TCP target `[x, y, z, yaw, gripper]` | 50/50 | 93–100 % | 10/10 |
+
+With deltas, the policy ignores even the cube pose: swapping in another episode's pose
+moves the first action by at most 0.0017. With absolute targets, the first action
+tracks the pose (correlation 0.997 in x, 0.974 in yaw). An integrity check found no
+pipeline fault: the cube position is recoverable from the pixels (R² ≥ 0.994), replay
+is exact, and normalisation matches between training and eval.
+
+So the action representation, not the vision path, is what the six runs got wrong.
+With deltas, the cube's position appears only in the ~13 approach frames per demo,
+mostly as saturated pulses, and L1 regression settles on their mean. The package now
+supports the absolute form: `sdp record --action-mode abs_target` records the target
+the env holds after each step, `AbsoluteTargetWrapper` (`sdp/envs/abs_target.py`)
+replays it, and the ACT eval adapter picks the mode from the checkpoint's action shape.
+A pixel-based ACT run with absolute targets is in progress.
+
 ## What transfers to hardware
 
 The state half of the observation transfers almost as-is: the joint angles, the finger

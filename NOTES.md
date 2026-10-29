@@ -471,3 +471,31 @@ Open questions:
 - Verdict on the hypothesis: lr 1e-4 was not the sole cause. The reference fix (lr 1e-5
   / 1e-5, clip 10 — clip was already 10) does not reproduce the issue's "responds to
   images within ~1.4k steps" on this dataset in 3000 steps.
+
+## Session 6 — 30 Oct 2026, ~01:00: absolute-target actions (branch feat/abs-actions)
+
+- Findings from the parallel experiments (read-only: `experiments/privileged/`,
+  `experiments/integrity/REPORT.md`):
+  - The pipeline is sound: the cube is in the pixels (R² ≥ 0.994), replay is exact, no
+    off-by-one, normalisation matches, and the codec mismatch is harmless.
+  - Privileged-state ACT (cube pose as `observation.environment_state`, no images,
+    run 2's architecture, lr 1e-4, batch 32, 6000 steps, 826 s):
+    - 7-D delta actions: 0/50 on seeds 10500–10549 (Wilson 0–7.1 %), 0/10 on demo
+      seeds; cube-pose swap moves the first action by ≤ 0.0017;
+    - 5-D absolute targets: 50/50 (Wilson 92.9–100 %), 10/10 on demo seeds;
+      first-action correlation with the data 0.997 (x) and 0.974 (yaw).
+  - Replay of the absolute targets through the wrapper: 50/50, max delta difference
+    2.3e-6.
+- Integrated in a worktree (`~/work/r4-abs`, branch `feat/abs-actions`), because another
+  agent's run 7 imports from the main tree. No training, eval or 50-episode recording
+  (the heavy lock is in use); tests run niced with `PYTHONPATH` set to the worktree.
+- `sdp/envs/abs_target.py` ports `priv_common.py`, with one fix: `wrap_pi` maps to
+  [−π, π), not (−π, π] as its docstring said. Recorder, CLI and writer take an
+  `action_mode`; the adapter infers it from `output_features.action.shape` (7 → delta,
+  5 → abs_target) and wraps the env in eval, `diagnose_train_seeds.py` and
+  `record_gifs.py`. `diagnose_openloop.py` reads action names from the dataset, and the
+  report's pass criterion (defined on normalised deltas) shows "–" for abs-mode runs.
+- Tests: replay of the expert through `AbsoluteTargetWrapper` on seeds 0, 1 and 7
+  (converted delta within 1e-5 of the expert's, same length, success), yaw wrapping
+  across ±π, adapter mode detection from shape and from config.json, and an abs-mode
+  recorder round trip. Worktree suite: 50 passed (training smoke left to CI).
