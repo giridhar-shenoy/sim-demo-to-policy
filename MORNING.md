@@ -1,11 +1,20 @@
 # MORNING — sim-demo-to-policy
 
-## STATUS (06:05 IST, 29 Oct)
+## STATUS (18:30 IST, 29 Oct)
 
-**v0.1 MUST list: done. CI: green. ACT success rate: 0/100 on every condition. It is
-diagnosed, and the fix needs your decision (#9 below).**
+**v0.1 MUST list: done. CI: green. ACT: three CPU runs, all 0/100.** Run 3 (your
+option (a): 8000 steps; cap raised to 50 min for this run) took 45.3 min in one segment
+and still ignores the cube's position, so training longer is not the fix at this scale.
 
-Done (commits on `main`, all pushed):
+| Run | Change from the spec'd CPU config | Steps | Wall time | Seeds | Nominal | Shifted |
+|---|---|---|---|---|---|---|
+| 1 | spec'd config; lr 1e-4, backbone 1e-5, CVAE on | 3000 | 21.0 min | 10000–10099 (dev), 10100–10199 | 0/100 (Wilson 0–4 %) | 0/100 (0–4 %) |
+| 2 | run 1 + backbone lr 1e-4, CVAE off | 3000 | 17.1 min | 10100–10199 | 0/100 (0–4 %) | 0/100 (0–4 %) |
+| 3 | run 2 + 8000 steps | 8000 | 45.3 min | 10200–10299 | 0/100 (0–4 %) | 0/100 (0–4 %) |
+
+Done since this morning (all pushed): run 3 config and three-run reporting (91bac96),
+run 3 results (eccfd43), docs for all three runs (048856f). Earlier commits are in the
+table below.
 
 | What | Commit(s) |
 |---|---|
@@ -15,26 +24,24 @@ Done (commits on `main`, all pushed):
 | Eval harness, taxonomy, seed split, Wilson | 479624b, 7d1fbb1, 75f3295 |
 | LeRobot v3.0 recorder + 50 scripted demos | 713a7aa, 4e9bc9e |
 | Training wrapper + ACT CPU config (bundled commit, see #3) | d8bde37 |
-| ACT run 1 (21.0 min) / run 2 (17.1 min) + results: 0/100 everywhere | 3c8851e, 6796baf, 06794f7 |
+| ACT runs 1 and 2 + results | 3c8851e, 6796baf, 06794f7 |
 | Diagnostics (open loop, image swap, training seeds) | 57535a3, 768d54e, 5f4ed0f |
-| GIF (expert reference vs ACT failure), README, docs | fbd15c4, 75e8500 |
-| CHECKPOINT 4 | 281e1f3 |
+| ACT run 3 + results + docs | 91bac96, eccfd43, 048856f |
 
-CI: latest run green, 37 passed in 40.74 s, job ~3 min:
-<https://github.com/giridhar-shenoy/sim-demo-to-policy/actions/runs/40794185957>
+CI: <https://github.com/giridhar-shenoy/sim-demo-to-policy/actions/runs/40877347214>
+(commit 048856f).
 
-Blocked (decisions below): a non-zero ACT number (#9), release upload (#4), topics and
-branch protection (#1, #2), hardware-transfer draft (#7).
+Blocked (decisions below): release upload (#4); topics and branch protection (#1, #2);
+hardware-transfer draft (#6); the next ACT experiment (#8).
 
 Next three steps:
 
-1. Decide #9. With (a), run `scripts/train_cpu.sh … act_cpu_v3.yaml` at 8000 steps
-   (~45 min), then `sdp eval … --seed-start 200` on fresh test seeds 10200–10299, and
-   `sdp report`.
+1. Decide #8. My recommendation is a run that withholds the proprioceptive state
+   from the policy, with everything else as in run 2. Accept it only if the open-loop
+   image-swap test moves the approach actions.
 2. Upload the release (`gh release create v0.1.0 outputs/release/*.tar.gz`), then add
    the download-only run path to the README.
-3. Edit `docs/hardware_transfer.md` and the README's hardware paragraph in your voice;
-   then make R1/R2 public so the README links resolve.
+3. Edit `docs/hardware_transfer.md` and the README's hardware paragraph in your voice.
 
 ## WAITING FOR GIRI
 
@@ -45,38 +52,31 @@ Next three steps:
    `gh repo edit giridhar-shenoy/sim-demo-to-policy --add-topic mujoco,lerobot,imitation-learning,robot-learning,behavior-cloning,franka-panda,pick-and-place,act-policy`.
    Blocks: nothing.
 2. **Branch protection on `main`** (require the `ci / build-test` check). Not enabled,
-   to match R1–R3 where you are deciding this; enabling it tonight would also block my
-   direct pushes. Recommendation: enable it once v0.1 is merged. Blocks: nothing.
-
+   to match R1–R3 where you are deciding this. Recommendation: enable it now that v0.1
+   is in. Blocks: nothing.
 3. **Commit d8bde37 bundles three changes** (training wrapper; eval adapter, report,
    GIF script; docs) under the training-wrapper message, because of a staging mistake
-   right after the OOM restart. Splitting it would be a history rewrite (not allowed
-   tonight). Recommendation: leave it. If you want it split, run
-   `git rebase -i d8bde37~1` before anyone else pulls. Blocks: nothing.
-
-4. **Upload the v0.1 release assets** (over the 50 MB commit limit). They are already
-   packed in `outputs/release/`: act_cpu_scripted50.tar.gz 89 MB,
-   act_cpu_v2_scripted50.tar.gz 62 MB, pickplace_scripted_50.tar.gz 5.2 MB. Command:
-   `gh release create v0.1.0 outputs/release/*.tar.gz` (then
-   `scripts/download_release_assets.sh` works). Until then the README's
-   run path retrains (~45 min for both runs). Blocks: a download-only one-command demo.
+   right after the OOM restart. Splitting it would be a history rewrite.
+   Recommendation: leave it. Blocks: nothing.
+4. **Upload the v0.1 release assets** (over the 50 MB commit limit). Packed in
+   `outputs/release/`: act_cpu_scripted50.tar.gz 89 MB, act_cpu_v2_scripted50.tar.gz
+   62 MB, act_cpu_v3_scripted50.tar.gz 62 MB, pickplace_scripted_50.tar.gz 5.2 MB.
+   Command: `gh release create v0.1.0 outputs/release/*.tar.gz` (then
+   `scripts/download_release_assets.sh` works). Until then the README's run path
+   retrains (~85 min for the three runs). Blocks: a download-only one-command demo.
 5. **Look at the dataset in the LeRobot visualiser** (`lerobot-dataset-viz`, needs a
-   GUI and the `viz` extra). Not done overnight. Blocks: nothing.
-6. **README links to R1 and R2 return 404 while those repos are private.** Blocks: nothing
-   once they are public.
-7. **Edit `docs/hardware_transfer.md`** (marked DRAFT, first person, no employer names).
-8. **Keyboard teleop demos (SHOULD)**: skipped; needs you at the keyboard.
+   GUI and the `viz` extra). Blocks: nothing.
+6. **Edit `docs/hardware_transfer.md`** (marked DRAFT, first person, no employer names).
+7. **Keyboard teleop demos (SHOULD)**: skipped; needs you at the keyboard.
+8. **Next ACT experiment** (item 9 from the night is resolved: option (a) was run 3, 0/100).
+   Options: (a) withhold or delay the proprioceptive state from the policy (keeps 3000
+   steps; a policy-input change, so it needs your OK); (b) randomise the arm's start pose
+   so the state stops encoding episode progress (an env change after the dataset exists,
+   so it needs your OK and a re-record); (c) leave v0.1 at 0 % with the diagnosis and do
+   the full-size Colab run next week. Recommendation: (a). Blocks: a non-zero headline.
 
-9. **ACT scores 0/100 on every condition (CHECKPOINT 3).** Both CPU runs learn the
-   state-predictable phases but ignore where the cube is (diagnosis in CHECKPOINTS.md
-   and README "Where it fails"). Options, in my order of preference:
-   (a) approve one more CPU run that departs from the spec'd 3000 steps, e.g. 8000
-   steps ≈ 45 min at run 2's speed (0.34 s/step), which is still inside the 45-min cap;
-   (b) approve a run that withholds the proprioceptive state from the policy (keeps
-   3000 steps; removes the shortcut, which is a dataset-feature change);
-   (c) leave v0.1 at 0 % with the diagnosis and do the full-size run on Colab next week.
-   Recommendation: (a) first, because it changes nothing but the step count. Blocks: a
-   non-zero headline number.
+The aborted run-3 attempts are kept, not reported: `outputs/train/act_cpu_v3_scripted50_aborted_1217*`
+and `…_aborted_1534*` (checkpoints 1000–4000). Delete them when you no longer need them.
 
 ## DECISIONS MADE OVERNIGHT (review)
 
