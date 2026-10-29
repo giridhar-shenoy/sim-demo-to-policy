@@ -45,9 +45,9 @@ lag, overshoot or joint-limit behaviour of a real controller.
 
 In sim, the observation is rendered and the action applied within the same control
 step, so latency is zero apart from the policy's own compute. The harness logs that
-compute per episode (`policy_ms_mean` and `policy_ms_max` in
-`results/eval_act_pickplace.csv`). Most steps just pop a queued action. Every 10th step
-runs the network, so the maximum is the number that matters. On hardware, add camera
+compute per episode (`policy_ms_mean` and `policy_ms_max` in `results/eval_act_*.csv`).
+Most steps just pop a queued action. Every 10th step runs the network, so the maximum
+is the number that matters. On hardware, add camera
 exposure and transport (tens of milliseconds), and expect the action chunk to be
 executed open-loop for 0.5 s. That is fine for a static cube and is the first thing
 that would fail for anything that moves.
