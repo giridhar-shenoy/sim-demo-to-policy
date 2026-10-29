@@ -37,7 +37,8 @@ Without Docker (Python 3.12; the venv is uv-managed because lerobot 0.6.1 caps t
 
 ```bash
 uv venv --python 3.12 .venv && source .venv/bin/activate
-uv pip install -r requirements.lock --extra-index-url https://download.pytorch.org/whl/cpu
+uv pip install -r requirements.lock --index-strategy unsafe-best-match \
+  --extra-index-url https://download.pytorch.org/whl/cpu   # CPU torch; both indexes official
 uv pip install --no-deps -e .
 scripts/fetch_menagerie.sh && export SDP_MENAGERIE_DIR=$PWD/third_party/mujoco_menagerie MUJOCO_GL=egl
 scripts/regenerate_all.sh   # ~70 min on a 4-core laptop CPU, ~40 min of it training

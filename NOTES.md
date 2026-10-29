@@ -211,3 +211,13 @@ uv pip install --python .venv/bin/python --no-deps -e .
   (written by `sdp report`), alongside the per-call files.
 - 05:28 queued `/tmp/r4/run_diag.sh` (open-loop with image-swap fields, training-seed
   rollouts, GIF) behind R2's `chain2.sh`, which holds all three locks.
+- 05:57 README install command verified by dry run in a throwaway venv
+  (`/tmp/r4/venvcheck`): `uv pip install -r requirements.lock --extra-index-url
+  https://download.pytorch.org/whl/cpu` FAILS (uv's first-index strategy finds certifi
+  on the PyTorch index at another version); adding `--index-strategy unsafe-best-match`
+  resolves 96 packages, torch 2.11.0+cpu, no nvidia wheels (torchcodec 0.11.1+cpu).
+- 05:52 ran the full pytest (incl. the 50-step training smoke) without the heavy lock;
+  checked afterwards that no session held any lock at the time. Full test runs now go
+  under heavy+build.
+- 05:54 release tarballs in `outputs/release/`: act_cpu_scripted50 89 MB,
+  act_cpu_v2_scripted50 62 MB, pickplace_scripted_50 5.2 MB.

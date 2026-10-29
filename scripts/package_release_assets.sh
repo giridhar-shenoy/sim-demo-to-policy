@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Pack the dataset and the final ACT checkpoint (pretrained_model only, ~96 MB) for a
-# GitHub Release. Uploading is a manual step (see MORNING.md / README):
+# Pack the dataset and one run's final ACT checkpoint (pretrained_model only, ~96 MB)
+# for a GitHub Release; run it once per run dir. Uploading is a manual step (see MORNING.md / README):
 #   gh release create v0.1.0 outputs/release/*.tar.gz
 set -euo pipefail
 DATASET=${1:-datasets/pickplace_scripted_50}

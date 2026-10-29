@@ -22,9 +22,11 @@
    tonight). Recommendation: leave it. If you want it split, run
    `git rebase -i d8bde37~1` before anyone else pulls. Blocks: nothing.
 
-4. **Upload the v0.1 release assets** (dataset 6 MB, ACT checkpoints ~96 MB each, over
-   the 50 MB commit limit). Run `scripts/package_release_assets.sh` (once per run dir),
-   then `gh release create v0.1.0 outputs/release/*.tar.gz`. Until then the README's
+4. **Upload the v0.1 release assets** (over the 50 MB commit limit). They are already
+   packed in `outputs/release/`: act_cpu_scripted50.tar.gz 89 MB,
+   act_cpu_v2_scripted50.tar.gz 62 MB, pickplace_scripted_50.tar.gz 5.2 MB. Command:
+   `gh release create v0.1.0 outputs/release/*.tar.gz` (then
+   `scripts/download_release_assets.sh` works). Until then the README's
    run path retrains (~45 min for both runs). Blocks: a download-only one-command demo.
 5. **Look at the dataset in the LeRobot visualiser** (`lerobot-dataset-viz`, needs a
    GUI and the `viz` extra). Not done overnight. Blocks: nothing.
