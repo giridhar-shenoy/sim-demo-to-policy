@@ -1,0 +1,32 @@
+{
+  "dataset": "pickplace_abs_dart_200",
+  "codebase_version": "v3.0",
+  "episodes": 198,
+  "frames": 22177,
+  "fps": 20,
+  "successful_episodes": 198,
+  "mean_episode_length_steps": 112.0050505050505,
+  "min_max_episode_length_steps": [
+    95,
+    130
+  ],
+  "seeds": [
+    0,
+    199
+  ],
+  "image_size": 96,
+  "features": [
+    "action",
+    "episode_index",
+    "frame_index",
+    "index",
+    "next.done",
+    "next.reward",
+    "next.success",
+    "observation.images.front",
+    "observation.images.wrist",
+    "observation.state",
+    "task_index",
+    "timestamp"
+  ]
+}

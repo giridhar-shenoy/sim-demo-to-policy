@@ -1,0 +1,66 @@
+{
+  "meta": {
+    "command": "sdp eval --checkpoint experiments/privileged/run8/train/act_cpu_v8_abs_dart/checkpoints/020000 --condition act_cpu_v8_abs_dart --trials 100 --seed-start 700 --distributions nominal shifted",
+    "checkpoint": "experiments/privileged/run8/train/act_cpu_v8_abs_dart/checkpoints/020000/pretrained_model",
+    "n_action_steps": 10,
+    "chunk_size": 20,
+    "image_size": 96,
+    "action_mode": "abs_target",
+    "wall_time_s": 206.3,
+    "python": "3.12.16"
+  },
+  "conditions": [
+    {
+      "condition": "act_cpu_v8_abs_dart",
+      "distribution": "nominal",
+      "trials": 100,
+      "successes": 63,
+      "success_rate": 0.63,
+      "wilson95": [
+        0.5322052950281534,
+        0.7181763952919077
+      ],
+      "mean_steps": 164.72,
+      "mean_steps_success": 114.63492063492063,
+      "labels": {
+        "success": 63,
+        "collision": 0,
+        "never_reached": 1,
+        "grasp_missed": 30,
+        "dropped": 5,
+        "placed_outside": 0,
+        "timeout": 1
+      },
+      "seed_min": 10700,
+      "seed_max": 10799,
+      "policy_ms_mean": 2.43881,
+      "policy_ms_max": 37.547
+    },
+    {
+      "condition": "act_cpu_v8_abs_dart",
+      "distribution": "shifted",
+      "trials": 100,
+      "successes": 16,
+      "success_rate": 0.16,
+      "wilson95": [
+        0.10095288451828571,
+        0.2442026946446318
+      ],
+      "mean_steps": 230.45,
+      "mean_steps_success": 127.8125,
+      "labels": {
+        "success": 16,
+        "collision": 0,
+        "never_reached": 69,
+        "grasp_missed": 14,
+        "dropped": 1,
+        "placed_outside": 0,
+        "timeout": 0
+      },
+      "seed_min": 10700,
+      "seed_max": 10799,
+      "policy_ms_mean": 2.3905100000000004,
+      "policy_ms_max": 36.221
+    }
+  ]
+}
