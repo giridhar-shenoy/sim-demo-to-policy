@@ -192,3 +192,22 @@ uv pip install --python .venv/bin/python --no-deps -e .
 - 04:45 post-run job (open-loop diagnosis of both runs, test-seed evals 10100–10199,
   GIF) queued on the heavy lock behind R2's chain (`/tmp/r4/run_post_v2.sh`, log
   `/tmp/r4/post_v2.log`).
+
+### Evals, diagnosis, CI (29 Oct, 04:45–05:45)
+
+- 05:04–05:16 test-seed evals (10100–10199): run 1 and run 2 both 0/100 nominal and
+  0/100 shifted. Run 2 labels: nominal 93 never_reached + 7 collision, shifted 95 + 5.
+- Image test (`/tmp/r4/debug_img.py`, run 05:17): same state, another episode's
+  images → output change ≤ 0.005; black / noise images → z, y, gripper change by up to
+  0.6–1.0. Image normalisation uses ImageNet stats (`dataset.use_imagenet_stats`
+  default). The images are used, but not to locate the cube.
+- Decision: no third run without Giri (it would need more than the spec'd 3000 steps
+  or a change to the policy inputs) → MORNING #9.
+- GIF fallback: with no ACT success, the left panel is the scripted expert on the
+  failure's seed, labelled "Scripted expert (reference)".
+- 05:30 CHECKPOINT 3 logged; pushed; CI run 40791132757 green: 37 passed in 39.75 s
+  incl. the 50-step train + 3-episode eval smoke; job ~3 min.
+- `results/eval_act_pickplace.{csv,json}` is now the combined file the spec names
+  (written by `sdp report`), alongside the per-call files.
+- 05:28 queued `/tmp/r4/run_diag.sh` (open-loop with image-swap fields, training-seed
+  rollouts, GIF) behind R2's `chain2.sh`, which holds all three locks.
