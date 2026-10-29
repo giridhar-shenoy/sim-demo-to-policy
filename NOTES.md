@@ -221,3 +221,51 @@ uv pip install --python .venv/bin/python --no-deps -e .
   under heavy+build.
 - 05:54 release tarballs in `outputs/release/`: act_cpu_scripted50 89 MB,
   act_cpu_v2_scripted50 62 MB, pickplace_scripted_50 5.2 MB.
+
+## Session 1 — CHANGELOG entry
+
+```markdown
+## [Unreleased] — session of 29 Oct 2026 (overnight)
+
+### Added
+- Repo skeleton (MIT, python:3.12-slim Dockerfile, devcontainer, CI, pre-commit, docs).
+- PandaPickPlace-v0 (Menagerie Panda, DLS-IK delta-TCP actions, 500/20 Hz, two 96 px
+  cameras, seedable nominal/shifted cube poses, 0.5 s settled success); 448 steps/s
+  with images on the laptop.
+- Scripted waypoint expert: 100/100 on demo and eval seeds, both pose distributions.
+- LeRobot v3.0 recorder with a per-episode success sidecar; 50 scripted demos.
+- lerobot-train wrapper; ACT CPU configs run 1 (act_cpu.yaml) and run 2 (act_cpu_v2.yaml).
+- Eval harness: disjoint seed split (dev/test), failure taxonomy, Wilson 95 % CIs,
+  policy timing; sdp record/eval/report; generated doc tables.
+- Diagnostics: open-loop + image-swap check, training-seed rollouts.
+- README GIF (scripted expert reference vs ACT failure), docs, release-asset scripts.
+
+### Results
+- ACT run 1 (21.0 min) and run 2 (17.1 min): 0/100 nominal and 0/100 shifted on dev
+  and test seeds; both ignore the cube's position (underfitting at 3000 steps).
+
+### Fixed
+- Training CSV step column (lerobot prints rounded "2K"), Wilson exact 0/1 bounds,
+  adapter warm-up for latency, README uv install command.
+```
+
+## Open questions for Giri
+
+1. **Third ACT run.** Which option from MORNING #9: (a) more than the spec'd 3000 steps
+   (e.g. 8000 ≈ 45 min), (b) withhold the proprioceptive state from the policy, or
+   (c) ship v0.1 at 0 % and do the full-size Colab run next week? I recommend (a).
+2. Was run 2 within what you approved? I read "the ACT training run (45 min or less)"
+   as a per-run budget. If you meant exactly one run, run 2 and its rows should go.
+3. Is the GIF substitution acceptable: scripted expert as the "success" panel, labelled
+   as the reference, because ACT has no success?
+4. OK to publish release v0.1.0 with the three tarballs in `outputs/release/` (157 MB)?
+5. Repo topics (proposed list in MORNING #1) and branch protection on `main`?
+6. Leave the bundled commit d8bde37 as is, or split it (history rewrite)?
+7. `docs/hardware_transfer.md` is a first-person DRAFT. Please edit; it uses only
+   "production 6-axis arms", no employer name.
+8. The ACT learning rate (1e-4; backbone 1e-5 in run 1, 1e-4 in run 2) was chosen
+   without an ablation. Do you want one?
+9. Presentation: the README's third sentence is the 0/100 headline. Keep it there,
+   or lead with the diagnosis?
+10. When can you do the keyboard-teleop session (SHOULD, 30 demos)?
+11. The README links to R1/R2 404 until those repos are public.

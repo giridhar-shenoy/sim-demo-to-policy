@@ -65,8 +65,9 @@ which no configuration choice has seen.
 | act_cpu_v2_scripted50 | shifted | 10100–10199 | 100 | 0/100 (0 %) | 0 %–4 % | – | [`results/eval_act_cpu_v2_scripted50_s10100.csv`](../results/eval_act_cpu_v2_scripted50_s10100.csv) |
 <!-- sdp-report:success:end -->
 
-Full-config rows (LeRobot defaults, 100k steps on a free GPU) are **not run**: the
-Colab/Kaggle notebook is deferred to "What's next", so there are no full-config numbers.
+| Policy / data | Config | Success |
+|---|---|---|
+| ACT, 50 scripted demos | full (LeRobot defaults, 100k steps, free GPU) | **pending Colab run** (the notebook is deferred to "What's next") |
 
 ## Diagnostics (not evaluations)
 

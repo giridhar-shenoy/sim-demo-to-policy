@@ -169,3 +169,54 @@ What is left: CI green with the smoke test (push now), the GIF, final README, ST
 
 Does Sunday 1 Nov hold? **Yes for the v0.1 deliverables; no for a working policy.** A
 non-zero ACT success rate needs a decision from Giri (WAITING FOR GIRI #9).
+
+## CHECKPOINT 4 — final — 29 Oct 2026 05:57 IST
+
+Wall-clock: 3 h 15 min (02:42 → 05:57), including ~30 min lost to the OOM kill and
+~1 h 05 min queued on locks held by R1/R2.
+
+### MUST list (sprint override)
+
+| Item | Status | Evidence |
+|---|---|---|
+| Plumbing (python:3.12-slim, MUJOCO_GL) | done | CI builds the image; `MUJOCO_GL=egl: ok`, `osmesa: ok` in CI and on the laptop |
+| PandaPickPlace-v0 + tests (determinism, bounds, scripted success) | done | `tests/test_env.py` (11 tests; `pytest --collect-only` → 37 in total) |
+| Scripted expert ≥ 90 % on 100 seeds | done: **100/100** | `results/expert_pickplace.csv` |
+| Recorder, 50 demos, v3.0, per-episode success flag, load-back test | done | `results/dataset_pickplace_scripted_50.json`, `tests/test_recorder.py` |
+| ACT CPU training ≤ 45 min, wall time recorded | done: run 1 21.0 min, run 2 17.1 min | `results/train_*.json`, NOTES, docs/results.md |
+| Eval ≥ 50 + ≥ 50, eval seeds disjoint (test), Wilson, length, taxonomy, CSV + JSON | done: 100 + 100 per call, 3 calls | `results/eval_*.csv`, `results/eval_act_pickplace.{csv,json}`, `tests/test_seed_split.py` |
+| One GIF, one success + one failure, labelled | done with a substitution: ACT has no success, so the success panel is the **scripted expert** on the same seed, labelled "reference" | `docs/assets/act_success_failure.gif` (0.87 MB) |
+| README shape + "Reading the numbers" + "What transfers to hardware"; architecture Mermaid; results.md | done | README.md, docs/ |
+| CI: ruff, pytest (env, recorder 2-episode round trip, taxonomy, seed split), 50-step train smoke, 3-episode eval smoke, < 10 min | done | run 40791132757: 37 passed in 39.75 s, job ~3 min |
+
+SHOULD (keyboard-teleop demos): skipped (needs Giri at the keyboard).
+
+### Headline result
+
+ACT, CPU config, 50 scripted demos: **0/100 nominal and 0/100 shifted** for both runs
+(Wilson 95 % 0–4 %). Diagnosis: the policies ignore the cube's position (first-step
+x/y/yaw std ≤ 0.003 vs 0.04–0.55 in the data; image swap moves outputs ≤ 0.0098), and
+they also fail from their own training seeds (0/10). This is underfitting under the
+spec'd 3000-step budget, not a pipeline bug. It is presented as the result, with the
+evidence, in README "Where it fails".
+
+### Verification commands run at this checkpoint
+
+```text
+$ pre-commit run --all-files          → all 7 hooks Passed
+$ for f in scripts/*.sh; do bash -n "$f"; done   → 8 × syntax ok
+$ flock heavy flock build pytest -q -rs → 37 passed, 8 warnings in 34.34s
+$ uv pip install --dry-run -r requirements.lock --index-strategy unsafe-best-match \
+    --extra-index-url https://download.pytorch.org/whl/cpu   → 96 packages, torch 2.11.0+cpu
+```
+
+### Not verified
+
+- `scripts/regenerate_all.sh` end to end (~70 min; not an approved overnight job). Each
+  step was run individually tonight.
+- `docker run --rm sdp scripts/regenerate_all.sh` (no Docker on the laptop).
+- The LeRobot visualiser (needs a GUI).
+
+Does Sunday 1 Nov hold? **Yes for v0.1 as specified** (everything in the MUST list is
+in place and CI is green). **No for a non-zero ACT success rate** without Giri's
+decision on a third run (MORNING.md, WAITING FOR GIRI #9).
