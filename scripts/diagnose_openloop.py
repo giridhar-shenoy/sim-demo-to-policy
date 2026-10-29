@@ -99,7 +99,13 @@ def main() -> None:
             zip(ACTION_NAMES, np.mean(err, axis=0).round(4).tolist(), strict=True)
         ),
     }
-    run = Path(args.checkpoint).name
+    ckpt = Path(args.checkpoint)
+    # A run dir gives openloop_<run>.json; a checkpoints/<step> dir gives
+    # openloop_<run>_step<N>.json, so intermediate checkpoints can be compared.
+    if ckpt.parent.name == "checkpoints":
+        run = f"{ckpt.parent.parent.name}_step{int(ckpt.name)}"
+    else:
+        run = ckpt.name
     path = Path("results") / f"openloop_{run}.json"
     path.write_text(json.dumps(out, indent=2) + "\n")
     for name in ("d_x", "d_y", "d_yaw"):

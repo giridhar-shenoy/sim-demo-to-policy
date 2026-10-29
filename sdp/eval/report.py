@@ -75,6 +75,7 @@ RUNS = {
     "act_cpu_v3_scripted50": ("run 3", "run 2 + 8000 steps instead of the spec'd 3000"),
     "act_cpu_v4_scripted50": ("run 4", "run 2 + proprioceptive state withheld (cameras only)"),
     "act_cpu_v5_scripted50_128px": ("run 5", "run 4 + 128 px cameras (demos re-recorded)"),
+    "act_cpu_v6_scripted50": ("run 6", "run 2 + lr 1e-5 and backbone lr 1e-5 (LeRobot defaults)"),
 }
 # Dataset each run was trained on (results/dataset_<name>.json).
 RUN_DATASET = {run: "pickplace_scripted_50" for run in RUNS} | {
@@ -298,11 +299,22 @@ def index_table(results: Path) -> str:
     return "\n".join(lines)
 
 
+def criterion_met(d: dict, threshold: float = 0.1) -> bool:
+    """The pass criterion fixed before runs 4-6: swapping images moves the first-step
+    d_x or d_yaw by >= 0.1, and their std across training episodes is >= 0.1."""
+    swap = d.get("image_swap_max_abs_change", {})
+    first = d["first_action_across_episodes"]
+    moved = max(swap.get("d_x", 0.0), swap.get("d_yaw", 0.0)) >= threshold
+    varies = max(first["d_x"]["pred_std"], first["d_yaw"]["pred_std"]) >= threshold
+    return moved and varies
+
+
 def diagnostics_table(results: Path) -> str:
     lines = [
-        "| Run | First-step d_x / d_y / d_yaw std, policy (data) | Max change, images swapped "
-        "| Max change, black images | Own demo seeds 0–9 |",
-        "|---|---|---|---|---|",
+        "| Run / checkpoint | First-step d_x / d_y / d_yaw std, policy (data) "
+        "| Swap change d_x / d_yaw | Max change, black images | Own demo seeds 0–9 "
+        "| Criterion |",
+        "|---|---|---|---|---|---|",
     ]
     for path in sorted(results.glob("openloop_*.json")):
         run = path.stem.removeprefix("openloop_")
@@ -311,15 +323,18 @@ def diagnostics_table(results: Path) -> str:
         dims = ("d_x", "d_y", "d_yaw")
         pred = " / ".join(f"{f[k]['pred_std']:.4f}" for k in dims)
         data = " / ".join(f"{f[k]['data_std']:.2f}" for k in dims)
-        swap = max(d.get("image_swap_max_abs_change", {"-": float("nan")}).values())
-        black = max(d.get("black_images_abs_change", {"-": float("nan")}).values())
+        swap = d.get("image_swap_max_abs_change")
+        swap_txt = f"{swap['d_x']:.4f} / {swap['d_yaw']:.4f}" if swap else "–"
+        black = d.get("black_images_abs_change")
+        black_txt = f"{max(black.values()):.2f}" if black else "–"
         seeds = results / f"trainseeds_{run}.json"
         own = "–"
         if seeds.is_file():
             t = json.loads(seeds.read_text())
             labels = ", ".join(f"{v} {k}" for k, v in t["labels"].items())
             own = f"{t['successes']}/{len(t['seeds'])} ({labels})"
-        lines.append(f"| {run} | {pred} ({data}) | {swap:.4f} | {black:.2f} | {own} |")
+        verdict = ("met" if criterion_met(d) else "not met") if swap else "–"
+        lines.append(f"| {run} | {pred} ({data}) | {swap_txt} | {black_txt} | {own} | {verdict} |")
     return "\n".join(lines)
 
 
