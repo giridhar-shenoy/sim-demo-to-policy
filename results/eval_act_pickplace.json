@@ -2,7 +2,8 @@
   "sources": [
     "eval_act_cpu_scripted50_s10000.json",
     "eval_act_cpu_scripted50_s10100.json",
-    "eval_act_cpu_v2_scripted50_s10100.json"
+    "eval_act_cpu_v2_scripted50_s10100.json",
+    "eval_act_cpu_v3_scripted50_s10200.json"
   ],
   "conditions": [
     {
@@ -166,6 +167,60 @@
       "policy_ms_mean": 2.74682,
       "policy_ms_max": 197.039,
       "source": "eval_act_cpu_v2_scripted50_s10100.json"
+    },
+    {
+      "condition": "act_cpu_v3_scripted50",
+      "distribution": "nominal",
+      "trials": 100,
+      "successes": 0,
+      "success_rate": 0.0,
+      "wilson95": [
+        0.0,
+        0.03699349876899627
+      ],
+      "mean_steps": 250.0,
+      "mean_steps_success": null,
+      "labels": {
+        "success": 0,
+        "collision": 13,
+        "never_reached": 87,
+        "grasp_missed": 0,
+        "dropped": 0,
+        "placed_outside": 0,
+        "timeout": 0
+      },
+      "seed_min": 10200,
+      "seed_max": 10299,
+      "policy_ms_mean": 2.43046,
+      "policy_ms_max": 36.664,
+      "source": "eval_act_cpu_v3_scripted50_s10200.json"
+    },
+    {
+      "condition": "act_cpu_v3_scripted50",
+      "distribution": "shifted",
+      "trials": 100,
+      "successes": 0,
+      "success_rate": 0.0,
+      "wilson95": [
+        0.0,
+        0.03699349876899627
+      ],
+      "mean_steps": 250.0,
+      "mean_steps_success": null,
+      "labels": {
+        "success": 0,
+        "collision": 13,
+        "never_reached": 87,
+        "grasp_missed": 0,
+        "dropped": 0,
+        "placed_outside": 0,
+        "timeout": 0
+      },
+      "seed_min": 10200,
+      "seed_max": 10299,
+      "policy_ms_mean": 2.45165,
+      "policy_ms_max": 51.774,
+      "source": "eval_act_cpu_v3_scripted50_s10200.json"
     }
   ]
 }

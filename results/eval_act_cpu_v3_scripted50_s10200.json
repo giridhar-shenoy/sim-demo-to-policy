@@ -1,0 +1,63 @@
+{
+  "meta": {
+    "command": "sdp eval --checkpoint outputs/train/act_cpu_v3_scripted50 --condition act_cpu_v3_scripted50 --trials 100 --seed-start 200",
+    "checkpoint": "outputs/train/act_cpu_v3_scripted50/checkpoints/last/pretrained_model",
+    "n_action_steps": 10,
+    "chunk_size": 20,
+    "python": "3.12.16"
+  },
+  "conditions": [
+    {
+      "condition": "act_cpu_v3_scripted50",
+      "distribution": "nominal",
+      "trials": 100,
+      "successes": 0,
+      "success_rate": 0.0,
+      "wilson95": [
+        0.0,
+        0.03699349876899627
+      ],
+      "mean_steps": 250.0,
+      "mean_steps_success": null,
+      "labels": {
+        "success": 0,
+        "collision": 13,
+        "never_reached": 87,
+        "grasp_missed": 0,
+        "dropped": 0,
+        "placed_outside": 0,
+        "timeout": 0
+      },
+      "seed_min": 10200,
+      "seed_max": 10299,
+      "policy_ms_mean": 2.43046,
+      "policy_ms_max": 36.664
+    },
+    {
+      "condition": "act_cpu_v3_scripted50",
+      "distribution": "shifted",
+      "trials": 100,
+      "successes": 0,
+      "success_rate": 0.0,
+      "wilson95": [
+        0.0,
+        0.03699349876899627
+      ],
+      "mean_steps": 250.0,
+      "mean_steps_success": null,
+      "labels": {
+        "success": 0,
+        "collision": 13,
+        "never_reached": 87,
+        "grasp_missed": 0,
+        "dropped": 0,
+        "placed_outside": 0,
+        "timeout": 0
+      },
+      "seed_min": 10200,
+      "seed_max": 10299,
+      "policy_ms_mean": 2.45165,
+      "policy_ms_max": 51.774
+    }
+  ]
+}
