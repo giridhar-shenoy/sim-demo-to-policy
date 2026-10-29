@@ -371,3 +371,30 @@ uv pip install --python .venv/bin/python --no-deps -e .
   path at 96 px (3×3 ResNet-18 feature map, cube 6–10 px, approach ≈ 9 % of targets)
   does not learn the cube's position within 3000–8000 CPU steps.
 - Run 4 does not beat run 3 (both 0/100), so the GIF was not regenerated (Giri's rule).
+
+## Current state and open questions (29 Oct 2026, 23:00 IST)
+
+Supersedes the session-1 list above (its Q1 led to runs 3 and 4, Q11 is resolved).
+
+- Four ACT CPU runs, all 0/100 nominal and shifted on their own test seeds (Wilson
+  95 % 0–4 %): run 1 (spec'd config) and run 2 (backbone lr 1e-4, CVAE off) on
+  10100–10199; run 3 (run 2 + 8000 steps, 45.3 min, cap raised to 50) on 10200–10299;
+  run 4 (run 2 with the state withheld, 17.2 min) on 10300–10399.
+- Diagnosis: no run uses the images to locate the cube. With the state, the networks
+  fit the state-predictable phases. Without it (run 4), they read the arm's progress
+  from the images but the cube-dependent x/yaw actions never respond to them. Likely
+  cause: a 3×3 ResNet-18 feature map at 96 px for a 6–10 px cube whose approach is ~9 %
+  of the targets.
+- Release tarballs (all four checkpoints + dataset) are packed in `outputs/release/`;
+  `scripts/download_release_assets.sh` fetches all four.
+
+Open questions:
+
+1. Next experiment (MORNING #8). Recommendation: run 4's config at 128 px (4×4 feature
+   maps; re-record the 50 demos at 128 px). Estimated training time ≈ 31 min (run 4's
+   17.2 min × (128/96)² ≈ 1.78), ≈ 40 min end to end. Confirm with a probe; same
+   image-swap pass criterion.
+2. Release upload and repo topics (commands in MORNING #1 and #4).
+3. Branch protection, the bundled commit d8bde37, the hardware-transfer draft, the
+   teleop session, the GIF substitution: unchanged from the session-1 list (Q3, Q5–Q7,
+   Q10).

@@ -41,11 +41,11 @@ uv pip install -r requirements.lock --index-strategy unsafe-best-match \
   --extra-index-url https://download.pytorch.org/whl/cpu   # CPU torch; both indexes official
 uv pip install --no-deps -e .
 scripts/fetch_menagerie.sh && export SDP_MENAGERIE_DIR=$PWD/third_party/mujoco_menagerie MUJOCO_GL=egl
-scripts/regenerate_all.sh   # ~2 h on a 4-core laptop CPU, ~85 min of it training
+scripts/regenerate_all.sh   # ~2.5 h on a 4-core laptop CPU, ~100 min of it training
 ```
 
 `regenerate_all.sh` measures env throughput, scores the scripted expert, records 50
-demos, trains the three ACT runs, evaluates them on their dev and test seeds, renders
+demos, trains the four ACT runs, evaluates them on their dev and test seeds, renders
 the GIF and rewrites the tables below. Each checkpoint is 60–96 MB, too large to
 commit. Until they are attached to a GitHub Release
 (`scripts/download_release_assets.sh`), the script retrains them rather than
