@@ -66,6 +66,7 @@ def main() -> None:
     ap.add_argument("--csv", default="results/eval_act_cpu_v2_scripted50_s10100.csv")
     ap.add_argument("--out", default="docs/assets/act_success_failure.gif")
     ap.add_argument("--every", type=int, default=2, help="keep every n-th frame (20 Hz -> 10 fps)")
+    ap.add_argument("--policy-label", default="ACT run 2", help="name shown on the policy panels")
     args = ap.parse_args()
 
     picked = pick_seeds(args.csv)
@@ -89,7 +90,7 @@ def main() -> None:
             if label != csv_label:
                 raise RuntimeError(f"seed {seed}: replay gave {label}, CSV says {csv_label}")
             colour = (110, 230, 110) if key == "success" else (255, 120, 100)
-            text = f"ACT seed {seed} ({dist}): {label.upper()} in {len(frames) - 1} steps"
+            text = f"{args.policy_label}, seed {seed}: {label.upper()} in {len(frames) - 1} steps"
             panels.append([annotate(f, w, text, colour) for f, w in frames[:: args.every]])
             print(f"{key}: seed {seed} {dist} -> {label}, {len(frames) - 1} steps")
     finally:

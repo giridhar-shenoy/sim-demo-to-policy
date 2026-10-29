@@ -2,7 +2,11 @@
 
 [![CI](https://github.com/giridhar-shenoy/sim-demo-to-policy/actions/workflows/ci.yml/badge.svg)](https://github.com/giridhar-shenoy/sim-demo-to-policy/actions/workflows/ci.yml)
 
-![ACT on PandaPickPlace-v0: one held-out success (left) and one failure (right)](docs/assets/act_success_failure.gif)
+![Left: the scripted expert on held-out seed 10100 places the cube. Right: ACT run 2 on the same seed descends in place and never reaches the cube](docs/assets/act_success_failure.gif)
+
+*Left: scripted expert (reference) on held-out seed 10100. Right: ACT run 2 on the same
+seed. It has learned the motion but not where the cube is (see "Where it fails").
+Inset: the 96 px wrist image the policy sees.*
 
 A MuJoCo pick-and-place environment on the Franka Panda, a scripted expert whose
 demonstrations are recorded as a LeRobot v3.0 dataset, an ACT policy trained on a laptop
@@ -114,12 +118,16 @@ seed-to-seed variance.
   rest are `collision` (fingers pressed into the table). The policy descends straight
   down from the home pose instead of first moving over the cube. On its own training
   frames it reproduces the descend, close, lift and carry actions. But its first x, y
-  and yaw outputs are identical (std 0.00) across 20 training episodes whose cubes sit
-  in different places, while the recorded actions vary (std 0.38 in x, 0.55 in yaw)
-  ([`results/openloop_*.json`](results/)). Swapping in another episode's images barely
-  moves the output, while black images change it a lot. So the network uses the
-  images, but not to find the cube. The 15-D proprioceptive state predicts every
-  phase except the ~10 approach frames per episode, and 3000 steps of batch 8
+  and yaw outputs are essentially identical (std ≤ 0.003) across 20 training episodes
+  whose cubes sit in different places, while the recorded actions vary (std 0.38 in
+  x, 0.55 in yaw)
+  ([`results/openloop_*.json`](results/)). Swapping in another episode's images moves
+  any output by at most 0.01, while black images move it by up to 0.6 (run 1) and 2.0
+  (run 2). So the network uses the images, but not to find the cube. It also fails
+  from its own training seeds: 0/10 for each run on demo seeds 0–9
+  ([`results/trainseeds_*.json`](results/), a diagnostic, not an eval). The 15-D
+  proprioceptive state predicts every phase except the ~10 approach frames per
+  episode, and 3000 steps of batch 8
   (≈ 4.4 epochs) did not learn that remaining, vision-only part from 96 px images.
   Run 2's changes (backbone lr 1e-4, CVAE off) did not change this. This is
   underfitting under the spec'd CPU budget, not distribution shift. The shifted
@@ -131,8 +139,10 @@ seed-to-seed variance.
   teleop row because teleop needs a person at the keyboard; that scripted-vs-teleop gap
   is unmeasured.
 - **Image resolution.** At 96×96 the 4 cm cube covers 41–59 pixels (a bounding box
-  6–10 px wide) in the front image, measured over 20 eval seeds per distribution. The policy finds it mostly from the wrist camera once the hand is close, and
-  the cube's yaw is barely resolvable from the front view.
+  6–10 px wide) in the front image, measured over 20 eval seeds per distribution, and
+  ResNet-18 reduces each 96 px image to a 3×3 feature map. Its yaw is barely
+  resolvable from the front view. The dilated last stage that would give a 6×6 map is
+  not available for ResNet-18 in torchvision.
 - **CPU-sized model and schedule.** dim_model 256, 2 encoder and 1 decoder layers,
   3000 steps of batch 8 is about 4.4 epochs over 5.5k frames, with one training seed.
   LeRobot's defaults are 100k steps. These rates describe this budget, not ACT.
