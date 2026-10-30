@@ -8,6 +8,31 @@ All notable changes to this project are documented here. The format follows
 
 ### Added
 
+- README "Use the trained policies": what each v0.1.0 archive contains, and a
+  verify-without-training recipe (curl `smallbc_abs1000_25k.tar.gz`, then `sdp eval` on
+  test seeds 10800–10899). The download + extract + eval path was tested on 5 nominal
+  episodes, which were identical to the official CSV.
+- `scripts/fetch_release_asset.sh`: fetch and extract one release archive (curl, no gh
+  auth).
+
+### Fixed
+
+- `scripts/regenerate_all.sh` failed on a fresh clone: it read ACT runs 7 and 8 from
+  gitignored `experiments/privileged/` paths. When those are missing, it now fetches
+  `act_cpu_v7_abs` and `act_cpu_v8_abs_dart` from the v0.1.0 release.
+- Stale docs: the README's regenerate time (about 6 h, not ~3 h) and its note that runs
+  7 and 8 were not yet released; the GIF name in `scripts/README.md`, `CHECKPOINTS.md`
+  and `record_gifs.py`'s default `--out`.
+
+## [0.1.0] - 2026-10-30
+
+Released as [v0.1.0](https://github.com/giridhar-shenoy/sim-demo-to-policy/releases/tag/v0.1.0)
+(tag on 7f766e0): 13 assets, 583262517 bytes. They are the eight ACT checkpoints, smallbc
+@ 25k with its config, and the four LeRobot v3.0 datasets. smallbc's 5.8 GB dataset is not
+attached; `python -m sdp.policies.smallbc.record` regenerates it from demo seeds 0–999.
+
+### Added
+
 - Repository skeleton: MIT license, Dockerfile (python:3.12-slim), devcontainer,
   GitHub Actions CI, pre-commit, docs and scripts placeholders.
 - `PandaPickPlace-v0` gymnasium env on the Menagerie Franka Panda: 500 Hz physics,
@@ -90,3 +115,6 @@ All notable changes to this project are documented here. The format follows
 
 - Training CSV step column (lerobot prints `step:2K`); Wilson bounds exactly 0/1 at
   0/n and n/n; ACT adapter warm-up so latency excludes torch initialisation.
+
+[Unreleased]: https://github.com/giridhar-shenoy/sim-demo-to-policy/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/giridhar-shenoy/sim-demo-to-policy/releases/tag/v0.1.0

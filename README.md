@@ -43,7 +43,7 @@ uv pip install -r requirements.lock --index-strategy unsafe-best-match \
   --extra-index-url https://download.pytorch.org/whl/cpu   # CPU torch; both indexes official
 uv pip install --no-deps -e .
 scripts/fetch_menagerie.sh && export SDP_MENAGERIE_DIR=$PWD/third_party/mujoco_menagerie MUJOCO_GL=egl
-scripts/regenerate_all.sh   # ~3 h on a 4-core laptop CPU, ~2 h of it training
+scripts/regenerate_all.sh   # about 6 h on a 4-core laptop CPU, ~4.5 h of it training
 ```
 
 smallbc: `python -m sdp.policies.smallbc.record` records its demos (uint8 memmap shards,
@@ -52,14 +52,67 @@ not shipped; regenerated deterministically from demo seeds 0–999),
 evaluates it (a `.pt` file selects smallbc, a directory selects ACT). The exact flags are
 in `scripts/regenerate_all.sh`.
 
-`regenerate_all.sh` measures env throughput, scores the scripted expert, records 50
-demos (at 96 and 128 px), trains ACT runs 1–6, evaluates them on their dev and test
-seeds, renders the GIF and rewrites the tables below. Runs 7 and 8 were recorded and
-trained by the scripts in `experiments/privileged/run7/` and `run8/` (exact commands
-in their `NOTES.txt`); `scripts/eval_all.sh` re-runs their official evals. Each checkpoint is 60–96 MB, too large to
-commit. Until they are attached to a GitHub Release
-(`scripts/download_release_assets.sh`), the script retrains them rather than
-downloading them.
+`regenerate_all.sh` measures env throughput, scores the scripted expert, records the
+demos (50 at 96 and 128 px for ACT runs 1–6, 1000 seeds for smallbc), trains ACT runs 1–6
+and smallbc, evaluates every policy on its dev and test seeds, renders the GIF and
+rewrites the tables below. It does not retrain ACT runs 7 and 8: it evaluates their
+checkpoints under `experiments/privileged/` if present, and on a fresh clone (where those
+are gitignored) fetches `act_cpu_v7_abs` and `act_cpu_v8_abs_dart` from the
+[v0.1.0 release](https://github.com/giridhar-shenoy/sim-demo-to-policy/releases/tag/v0.1.0)
+with `scripts/fetch_release_asset.sh`. Retraining them is done by the scripts in
+`experiments/privileged/run7/` and `run8/` (exact commands in their `NOTES.txt`).
+
+## Use the trained policies
+
+Every checkpoint and dataset behind the tables is attached to the
+[v0.1.0 release](https://github.com/giridhar-shenoy/sim-demo-to-policy/releases/tag/v0.1.0):
+13 `.tar.gz` archives, 583262517 bytes in total, each extracting to a directory of the same
+name. `scripts/download_release_assets.sh` fetches all of them.
+
+- `smallbc_abs1000_25k`: the headline policy, `ckpt_025000.pt` (573,650 parameters), and
+  its training run's `config.json`.
+- `act_cpu_v8_abs_dart` and `act_cpu_v7_abs`: ACT runs 8 (step 20000) and 7 (step 6000),
+  absolute TCP-target actions.
+- `act_cpu_scripted50`, `act_cpu_v2_scripted50`, `act_cpu_v3_scripted50`,
+  `act_cpu_v4_scripted50`, `act_cpu_v5_scripted50_128px`, `act_cpu_v6_scripted50`: ACT
+  runs 1–6 (per-step delta actions, 0/100 each), final checkpoints.
+  Each ACT archive is a LeRobot `pretrained_model/` directory.
+- `pickplace_abs_dart_200` (198 episodes, run 8), `pickplace_abs_50` (50, run 7),
+  `pickplace_scripted_50` (50, runs 1–4 and 6), `pickplace_scripted_50_128px` (50, run 5):
+  the LeRobot v3.0 datasets.
+
+smallbc's dataset (5.8 GB) is not attached: `python -m sdp.policies.smallbc.record`
+regenerates it deterministically from demo seeds 0–999 (flags in
+`scripts/regenerate_all.sh`).
+
+### Verify the headline without training
+
+After the install steps above (no GitHub login needed):
+
+```bash
+mkdir -p outputs && curl -fsSL https://github.com/giridhar-shenoy/sim-demo-to-policy/releases/download/v0.1.0/smallbc_abs1000_25k.tar.gz \
+  | tar -xz -C outputs
+sha256sum outputs/smallbc_abs1000_25k/ckpt_025000.pt
+# 2fe2485155b5aa96743b2f7b28e0d38793c35164f0bc9df836fefe7916bb296e
+sdp eval --checkpoint outputs/smallbc_abs1000_25k/ckpt_025000.pt --condition smallbc_verify \
+  --seed-start 800 --trials 100 --distributions nominal shifted --out outputs/verify/smallbc_s10800
+```
+
+`--seed-start` is an offset into the eval seeds, so this runs the official test seeds
+10800–10899. Expected, the official result:
+
+```text
+smallbc_verify nominal: 100/100 (100 %, Wilson 95 % 96-100 %)
+smallbc_verify shifted: 72/100 (72 %, Wilson 95 % 63-80 %)
+```
+
+It takes about 1.5 min on the laptop's CPU (the official runs took 36.3 s nominal and
+49.0 s shifted). `outputs/verify/smallbc_s10800.csv` can be compared episode by episode
+with `results/eval_smallbc_abs1000_25k_s10800_{nominal,shifted}.csv`; only the
+`policy_ms_*` timing columns should differ. `--out` keeps the run out of `results/`, so
+`sdp report` does not count it as a second official eval. On this laptop reruns are
+identical episode by episode; on a different CPU, floating-point differences in MuJoCo or
+PyTorch may change a few borderline episodes.
 
 ## Results
 

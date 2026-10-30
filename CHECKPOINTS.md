@@ -185,7 +185,7 @@ Wall-clock: 3 h 15 min (02:42 → 05:57), including ~30 min lost to the OOM kill
 | Recorder, 50 demos, v3.0, per-episode success flag, load-back test | done | `results/dataset_pickplace_scripted_50.json`, `tests/test_recorder.py` |
 | ACT CPU training ≤ 45 min, wall time recorded | done: run 1 21.0 min, run 2 17.1 min | `results/train_*.json`, NOTES, docs/results.md |
 | Eval ≥ 50 + ≥ 50, eval seeds disjoint (test), Wilson, length, taxonomy, CSV + JSON | done: 100 + 100 per call, 3 calls | `results/eval_*.csv`, `results/eval_act_pickplace.{csv,json}`, `tests/test_seed_split.py` |
-| One GIF, one success + one failure, labelled | done with a substitution: ACT has no success, so the success panel is the **scripted expert** on the same seed, labelled "reference" | `docs/assets/act_success_failure.gif` (0.87 MB) |
+| One GIF, one success + one failure, labelled | done with a substitution: ACT has no success, so the success panel is the **scripted expert** on the same seed, labelled "reference" | `docs/assets/act_success_failure.gif` (0.87 MB; since replaced by `docs/assets/rollouts.gif`, which shows smallbc) |
 | README shape + "Reading the numbers" + "What transfers to hardware"; architecture Mermaid; results.md | done | README.md, docs/ |
 | CI: ruff, pytest (env, recorder 2-episode round trip, taxonomy, seed split), 50-step train smoke, 3-episode eval smoke, < 10 min | done | run 40791132757: 37 passed in 39.75 s, job ~3 min |
 
