@@ -19,8 +19,8 @@ import numpy as np
 from PIL import Image, ImageDraw, ImageFont
 
 from sdp.envs import PandaPickPlaceEnv
-from sdp.eval.act_policy import ACTPolicyAdapter
 from sdp.eval.harness import read_csv
+from sdp.eval.policies import load_policy
 from sdp.expert.policy import ExpertPolicy
 
 PANEL_HW = (240, 320)
@@ -67,32 +67,46 @@ def main() -> None:
     ap.add_argument("--out", default="docs/assets/act_success_failure.gif")
     ap.add_argument("--every", type=int, default=2, help="keep every n-th frame (20 Hz -> 10 fps)")
     ap.add_argument("--policy-label", default="ACT run 2", help="name shown on the policy panels")
+    ap.add_argument(
+        "--expert-panel",
+        action="store_true",
+        help="first panel: the scripted expert on the policy's success seed (a reference)",
+    )
+    ap.add_argument(
+        "--shifted-csv",
+        default=None,
+        help="also show the first failure in this eval CSV (e.g. the shifted pose box)",
+    )
     args = ap.parse_args()
 
     picked = pick_seeds(args.csv)
-    policy = ACTPolicyAdapter(args.checkpoint)
+    policy, _ = load_policy(args.checkpoint)
     env = PandaPickPlaceEnv(
         render_mode="rgb_array", render_size=PANEL_HW, image_size=policy.image_size
     )
     panels = []
     try:
-        if "success" not in picked and "failure" in picked:
-            seed, dist, _ = picked["failure"]
+        if (args.expert_panel or "success" not in picked) and picked:
+            seed, dist, _ = picked.get("success") or picked["failure"]
             frames, info = rollout(env, ExpertPolicy(), seed, dist)
             label = label_episode(info["episode"], info)
             text = f"Scripted expert (reference) seed {seed}: {label.upper()}"
             panels.append([annotate(f, w, text, (150, 190, 255)) for f, w in frames[:: args.every]])
-            print(f"no ACT success in {args.csv}; left panel = expert on seed {seed} -> {label}")
-        for key in ("success", "failure"):
-            if key not in picked:
-                continue
-            seed, dist, csv_label = picked[key]
+            print(f"left panel = expert on seed {seed} -> {label}")
+        shown = [(key, picked[key]) for key in ("success", "failure") if key in picked]
+        if args.shifted_csv:
+            shifted = pick_seeds(args.shifted_csv)
+            if "failure" in shifted:
+                shown.append(("failure", shifted["failure"]))
+        for key, (seed, dist, csv_label) in shown:
             frames, info = rollout(policy.wrap_env(env), policy, seed, dist)
             label = label_episode(info["episode"], info)
             if label != csv_label:
                 raise RuntimeError(f"seed {seed}: replay gave {label}, CSV says {csv_label}")
             colour = (110, 230, 110) if key == "success" else (255, 120, 100)
-            text = f"{args.policy_label}, seed {seed}: {label.upper()} in {len(frames) - 1} steps"
+            text = (
+                f"{args.policy_label}, {dist} seed {seed}: {label.upper()}, {len(frames) - 1} steps"
+            )
             panels.append([annotate(f, w, text, colour) for f, w in frames[:: args.every]])
             print(f"{key}: seed {seed} {dist} -> {label}, {len(frames) - 1} steps")
     finally:

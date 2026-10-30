@@ -1,0 +1,1001 @@
+{
+  "checkpoint": "experiments/smallbc/runs/abs1000/ckpt_025000.pt",
+  "policy_type": "smallbc",
+  "csv": "results/eval_smallbc_abs1000_25k_s10800_shifted.csv",
+  "collision_episodes": 26,
+  "first_contact_body_counts": {
+    "left_finger": 26
+  },
+  "finger_press_episodes": 26,
+  "median_step_of_first_collision": 176.0,
+  "median_cube_xy_dist_m": 0.14379999999999998,
+  "collision_init_x_range_m": [
+    0.6112,
+    0.67926
+  ],
+  "success_init_x_range_m": [
+    0.53235,
+    0.64912
+  ],
+  "nominal_box_x_max_m": 0.6,
+  "episodes": [
+    {
+      "seed": 10800,
+      "init_x": 0.64801,
+      "init_y": -0.25384,
+      "step": 183,
+      "contacts": [
+        {
+          "body": "left_finger",
+          "normal_force_n": 23.68
+        },
+        {
+          "body": "left_finger",
+          "normal_force_n": 24.68
+        },
+        {
+          "body": "left_finger",
+          "normal_force_n": 26.61
+        },
+        {
+          "body": "left_finger",
+          "normal_force_n": 4.04
+        },
+        {
+          "body": "left_finger",
+          "normal_force_n": 5.24
+        },
+        {
+          "body": "left_finger",
+          "normal_force_n": 3.86
+        },
+        {
+          "body": "left_finger",
+          "normal_force_n": 4.38
+        },
+        {
+          "body": "right_finger",
+          "normal_force_n": 16.7
+        },
+        {
+          "body": "right_finger",
+          "normal_force_n": 15.02
+        },
+        {
+          "body": "right_finger",
+          "normal_force_n": 13.03
+        },
+        {
+          "body": "right_finger",
+          "normal_force_n": 1.84
+        },
+        {
+          "body": "right_finger",
+          "normal_force_n": 3.17
+        },
+        {
+          "body": "right_finger",
+          "normal_force_n": 0.96
+        },
+        {
+          "body": "right_finger",
+          "normal_force_n": 2.33
+        },
+        {
+          "body": "right_finger",
+          "normal_force_n": 2.86
+        },
+        {
+          "body": "right_finger",
+          "normal_force_n": 3.33
+        },
+        {
+          "body": "right_finger",
+          "normal_force_n": 2.43
+        },
+        {
+          "body": "right_finger",
+          "normal_force_n": 2.91
+        },
+        {
+          "body": "right_finger",
+          "normal_force_n": 2.01
+        },
+        {
+          "body": "right_finger",
+          "normal_force_n": 2.47
+        },
+        {
+          "body": "right_finger",
+          "normal_force_n": 1.57
+        },
+        {
+          "body": "right_finger",
+          "normal_force_n": 2.03
+        }
+      ],
+      "tcp_z_m": 0.0084,
+      "finger_gap_m": 0.0798,
+      "cube_xy_dist_m": 0.1797
+    },
+    {
+      "seed": 10805,
+      "init_x": 0.65239,
+      "init_y": -0.14803,
+      "step": 182,
+      "contacts": [
+        {
+          "body": "left_finger",
+          "normal_force_n": 2.49
+        },
+        {
+          "body": "left_finger",
+          "normal_force_n": 2.58
+        },
+        {
+          "body": "left_finger",
+          "normal_force_n": 2.69
+        },
+        {
+          "body": "right_finger",
+          "normal_force_n": 20.57
+        }
+      ],
+      "tcp_z_m": 0.0092,
+      "finger_gap_m": 0.0799,
+      "cube_xy_dist_m": 0.1285
+    },
+    {
+      "seed": 10818,
+      "init_x": 0.63124,
+      "init_y": -0.23105,
+      "step": 191,
+      "contacts": [
+        {
+          "body": "left_finger",
+          "normal_force_n": 21.62
+        },
+        {
+          "body": "left_finger",
+          "normal_force_n": 22.02
+        },
+        {
+          "body": "left_finger",
+          "normal_force_n": 23.24
+        },
+        {
+          "body": "right_finger",
+          "normal_force_n": 15.97
+        },
+        {
+          "body": "right_finger",
+          "normal_force_n": 14.29
+        },
+        {
+          "body": "right_finger",
+          "normal_force_n": 12.62
+        }
+      ],
+      "tcp_z_m": 0.0088,
+      "finger_gap_m": 0.0798,
+      "cube_xy_dist_m": 0.1719
+    },
+    {
+      "seed": 10822,
+      "init_x": 0.6588,
+      "init_y": -0.16864,
+      "step": 176,
+      "contacts": [
+        {
+          "body": "left_finger",
+          "normal_force_n": 30.98
+        },
+        {
+          "body": "left_finger",
+          "normal_force_n": 32.97
+        },
+        {
+          "body": "left_finger",
+          "normal_force_n": 37.2
+        },
+        {
+          "body": "right_finger",
+          "normal_force_n": 24.14
+        },
+        {
+          "body": "right_finger",
+          "normal_force_n": 22.8
+        },
+        {
+          "body": "right_finger",
+          "normal_force_n": 17.09
+        }
+      ],
+      "tcp_z_m": 0.009,
+      "finger_gap_m": 0.0799,
+      "cube_xy_dist_m": 0.1416
+    },
+    {
+      "seed": 10826,
+      "init_x": 0.62959,
+      "init_y": -0.256,
+      "step": 183,
+      "contacts": [
+        {
+          "body": "left_finger",
+          "normal_force_n": 34.75
+        },
+        {
+          "body": "left_finger",
+          "normal_force_n": 36.18
+        },
+        {
+          "body": "left_finger",
+          "normal_force_n": 38.94
+        },
+        {
+          "body": "right_finger",
+          "normal_force_n": 21.65
+        },
+        {
+          "body": "right_finger",
+          "normal_force_n": 18.6
+        },
+        {
+          "body": "right_finger",
+          "normal_force_n": 14.48
+        },
+        {
+          "body": "right_finger",
+          "normal_force_n": 2.2
+        },
+        {
+          "body": "right_finger",
+          "normal_force_n": 3.45
+        }
+      ],
+      "tcp_z_m": 0.0084,
+      "finger_gap_m": 0.0799,
+      "cube_xy_dist_m": 0.1914
+    },
+    {
+      "seed": 10829,
+      "init_x": 0.66773,
+      "init_y": -0.24265,
+      "step": 176,
+      "contacts": [
+        {
+          "body": "left_finger",
+          "normal_force_n": 44.36
+        },
+        {
+          "body": "left_finger",
+          "normal_force_n": 48.07
+        },
+        {
+          "body": "left_finger",
+          "normal_force_n": 54.39
+        },
+        {
+          "body": "right_finger",
+          "normal_force_n": 37.49
+        },
+        {
+          "body": "right_finger",
+          "normal_force_n": 33.15
+        },
+        {
+          "body": "right_finger",
+          "normal_force_n": 24.08
+        }
+      ],
+      "tcp_z_m": 0.0086,
+      "finger_gap_m": 0.0796,
+      "cube_xy_dist_m": 0.1745
+    },
+    {
+      "seed": 10838,
+      "init_x": 0.66478,
+      "init_y": -0.11501,
+      "step": 189,
+      "contacts": [
+        {
+          "body": "left_finger",
+          "normal_force_n": 27.67
+        },
+        {
+          "body": "left_finger",
+          "normal_force_n": 28.08
+        },
+        {
+          "body": "left_finger",
+          "normal_force_n": 26.44
+        },
+        {
+          "body": "right_finger",
+          "normal_force_n": 12.2
+        },
+        {
+          "body": "right_finger",
+          "normal_force_n": 10.15
+        },
+        {
+          "body": "right_finger",
+          "normal_force_n": 11.7
+        }
+      ],
+      "tcp_z_m": 0.0087,
+      "finger_gap_m": 0.0799,
+      "cube_xy_dist_m": 0.1036
+    },
+    {
+      "seed": 10839,
+      "init_x": 0.67065,
+      "init_y": -0.12953,
+      "step": 189,
+      "contacts": [
+        {
+          "body": "left_finger",
+          "normal_force_n": 27.16
+        },
+        {
+          "body": "left_finger",
+          "normal_force_n": 27.64
+        },
+        {
+          "body": "left_finger",
+          "normal_force_n": 26.12
+        },
+        {
+          "body": "right_finger",
+          "normal_force_n": 11.19
+        },
+        {
+          "body": "right_finger",
+          "normal_force_n": 9.24
+        },
+        {
+          "body": "right_finger",
+          "normal_force_n": 11.21
+        }
+      ],
+      "tcp_z_m": 0.0087,
+      "finger_gap_m": 0.0802,
+      "cube_xy_dist_m": 0.1107
+    },
+    {
+      "seed": 10845,
+      "init_x": 0.6492,
+      "init_y": -0.1797,
+      "step": 177,
+      "contacts": [
+        {
+          "body": "left_finger",
+          "normal_force_n": 18.03
+        },
+        {
+          "body": "left_finger",
+          "normal_force_n": 17.41
+        },
+        {
+          "body": "left_finger",
+          "normal_force_n": 17.6
+        },
+        {
+          "body": "right_finger",
+          "normal_force_n": 20.12
+        },
+        {
+          "body": "right_finger",
+          "normal_force_n": 19.44
+        },
+        {
+          "body": "right_finger",
+          "normal_force_n": 18.32
+        }
+      ],
+      "tcp_z_m": 0.0089,
+      "finger_gap_m": 0.0793,
+      "cube_xy_dist_m": 0.1436
+    },
+    {
+      "seed": 10846,
+      "init_x": 0.64262,
+      "init_y": -0.18321,
+      "step": 223,
+      "contacts": [
+        {
+          "body": "left_finger",
+          "normal_force_n": 19.14
+        },
+        {
+          "body": "left_finger",
+          "normal_force_n": 19.67
+        },
+        {
+          "body": "left_finger",
+          "normal_force_n": 21.39
+        },
+        {
+          "body": "right_finger",
+          "normal_force_n": 11.69
+        },
+        {
+          "body": "right_finger",
+          "normal_force_n": 10.27
+        },
+        {
+          "body": "right_finger",
+          "normal_force_n": 7.81
+        }
+      ],
+      "tcp_z_m": 0.0089,
+      "finger_gap_m": 0.0797,
+      "cube_xy_dist_m": 0.1303
+    },
+    {
+      "seed": 10849,
+      "init_x": 0.64181,
+      "init_y": -0.24765,
+      "step": 167,
+      "contacts": [
+        {
+          "body": "left_finger",
+          "normal_force_n": 25.55
+        },
+        {
+          "body": "left_finger",
+          "normal_force_n": 25.95
+        },
+        {
+          "body": "left_finger",
+          "normal_force_n": 27.1
+        },
+        {
+          "body": "right_finger",
+          "normal_force_n": 14.11
+        },
+        {
+          "body": "right_finger",
+          "normal_force_n": 11.93
+        },
+        {
+          "body": "right_finger",
+          "normal_force_n": 9.3
+        }
+      ],
+      "tcp_z_m": 0.0088,
+      "finger_gap_m": 0.0798,
+      "cube_xy_dist_m": 0.1761
+    },
+    {
+      "seed": 10856,
+      "init_x": 0.6112,
+      "init_y": -0.25479,
+      "step": 181,
+      "contacts": [
+        {
+          "body": "left_finger",
+          "normal_force_n": 24.85
+        },
+        {
+          "body": "left_finger",
+          "normal_force_n": 25.21
+        },
+        {
+          "body": "left_finger",
+          "normal_force_n": 22.64
+        },
+        {
+          "body": "right_finger",
+          "normal_force_n": 4.33
+        },
+        {
+          "body": "right_finger",
+          "normal_force_n": 4.18
+        },
+        {
+          "body": "right_finger",
+          "normal_force_n": 7.53
+        }
+      ],
+      "tcp_z_m": 0.0088,
+      "finger_gap_m": 0.08,
+      "cube_xy_dist_m": 0.1922
+    },
+    {
+      "seed": 10857,
+      "init_x": 0.67926,
+      "init_y": -0.18725,
+      "step": 176,
+      "contacts": [
+        {
+          "body": "left_finger",
+          "normal_force_n": 37.71
+        },
+        {
+          "body": "left_finger",
+          "normal_force_n": 40.21
+        },
+        {
+          "body": "left_finger",
+          "normal_force_n": 44.66
+        },
+        {
+          "body": "right_finger",
+          "normal_force_n": 33.62
+        },
+        {
+          "body": "right_finger",
+          "normal_force_n": 30.41
+        },
+        {
+          "body": "right_finger",
+          "normal_force_n": 23.34
+        }
+      ],
+      "tcp_z_m": 0.0087,
+      "finger_gap_m": 0.0797,
+      "cube_xy_dist_m": 0.148
+    },
+    {
+      "seed": 10865,
+      "init_x": 0.64697,
+      "init_y": -0.20527,
+      "step": 175,
+      "contacts": [
+        {
+          "body": "left_finger",
+          "normal_force_n": 20.03
+        },
+        {
+          "body": "left_finger",
+          "normal_force_n": 20.32
+        },
+        {
+          "body": "left_finger",
+          "normal_force_n": 21.56
+        },
+        {
+          "body": "right_finger",
+          "normal_force_n": 14.01
+        },
+        {
+          "body": "right_finger",
+          "normal_force_n": 12.49
+        },
+        {
+          "body": "right_finger",
+          "normal_force_n": 10.72
+        }
+      ],
+      "tcp_z_m": 0.0088,
+      "finger_gap_m": 0.0797,
+      "cube_xy_dist_m": 0.1425
+    },
+    {
+      "seed": 10867,
+      "init_x": 0.65337,
+      "init_y": -0.23081,
+      "step": 176,
+      "contacts": [
+        {
+          "body": "left_finger",
+          "normal_force_n": 36.07
+        },
+        {
+          "body": "left_finger",
+          "normal_force_n": 40.44
+        },
+        {
+          "body": "left_finger",
+          "normal_force_n": 47.44
+        },
+        {
+          "body": "left_finger",
+          "normal_force_n": 17.35
+        },
+        {
+          "body": "left_finger",
+          "normal_force_n": 14.9
+        },
+        {
+          "body": "right_finger",
+          "normal_force_n": 38.72
+        },
+        {
+          "body": "right_finger",
+          "normal_force_n": 34.23
+        },
+        {
+          "body": "right_finger",
+          "normal_force_n": 24.69
+        }
+      ],
+      "tcp_z_m": 0.0084,
+      "finger_gap_m": 0.0796,
+      "cube_xy_dist_m": 0.1735
+    },
+    {
+      "seed": 10870,
+      "init_x": 0.65299,
+      "init_y": -0.25871,
+      "step": 189,
+      "contacts": [
+        {
+          "body": "left_finger",
+          "normal_force_n": 23.13
+        },
+        {
+          "body": "left_finger",
+          "normal_force_n": 24.31
+        },
+        {
+          "body": "left_finger",
+          "normal_force_n": 23.17
+        },
+        {
+          "body": "right_finger",
+          "normal_force_n": 1.53
+        },
+        {
+          "body": "right_finger",
+          "normal_force_n": 1.92
+        },
+        {
+          "body": "right_finger",
+          "normal_force_n": 4.16
+        }
+      ],
+      "tcp_z_m": 0.0091,
+      "finger_gap_m": 0.08,
+      "cube_xy_dist_m": 0.1845
+    },
+    {
+      "seed": 10874,
+      "init_x": 0.67283,
+      "init_y": -0.11259,
+      "step": 183,
+      "contacts": [
+        {
+          "body": "left_finger",
+          "normal_force_n": 30.29
+        },
+        {
+          "body": "left_finger",
+          "normal_force_n": 31.65
+        },
+        {
+          "body": "right_finger",
+          "normal_force_n": 13.29
+        },
+        {
+          "body": "right_finger",
+          "normal_force_n": 11.77
+        },
+        {
+          "body": "right_finger",
+          "normal_force_n": 7.28
+        }
+      ],
+      "tcp_z_m": 0.0091,
+      "finger_gap_m": 0.0802,
+      "cube_xy_dist_m": 0.1057
+    },
+    {
+      "seed": 10875,
+      "init_x": 0.63771,
+      "init_y": -0.25624,
+      "step": 173,
+      "contacts": [
+        {
+          "body": "left_finger",
+          "normal_force_n": 19.15
+        },
+        {
+          "body": "left_finger",
+          "normal_force_n": 20.06
+        },
+        {
+          "body": "left_finger",
+          "normal_force_n": 18.21
+        },
+        {
+          "body": "right_finger",
+          "normal_force_n": 2.98
+        },
+        {
+          "body": "right_finger",
+          "normal_force_n": 3.05
+        },
+        {
+          "body": "right_finger",
+          "normal_force_n": 6.33
+        }
+      ],
+      "tcp_z_m": 0.0091,
+      "finger_gap_m": 0.08,
+      "cube_xy_dist_m": 0.1782
+    },
+    {
+      "seed": 10877,
+      "init_x": 0.66651,
+      "init_y": -0.17534,
+      "step": 168,
+      "contacts": [
+        {
+          "body": "left_finger",
+          "normal_force_n": 17.41
+        },
+        {
+          "body": "left_finger",
+          "normal_force_n": 16.77
+        },
+        {
+          "body": "left_finger",
+          "normal_force_n": 17.14
+        },
+        {
+          "body": "right_finger",
+          "normal_force_n": 20.57
+        },
+        {
+          "body": "right_finger",
+          "normal_force_n": 19.78
+        },
+        {
+          "body": "right_finger",
+          "normal_force_n": 18.45
+        }
+      ],
+      "tcp_z_m": 0.0088,
+      "finger_gap_m": 0.0796,
+      "cube_xy_dist_m": 0.1378
+    },
+    {
+      "seed": 10885,
+      "init_x": 0.65711,
+      "init_y": -0.11187,
+      "step": 199,
+      "contacts": [
+        {
+          "body": "left_finger",
+          "normal_force_n": 22.35
+        },
+        {
+          "body": "left_finger",
+          "normal_force_n": 23.16
+        },
+        {
+          "body": "left_finger",
+          "normal_force_n": 25.27
+        },
+        {
+          "body": "right_finger",
+          "normal_force_n": 13.55
+        },
+        {
+          "body": "right_finger",
+          "normal_force_n": 11.91
+        },
+        {
+          "body": "right_finger",
+          "normal_force_n": 7.33
+        }
+      ],
+      "tcp_z_m": 0.0088,
+      "finger_gap_m": 0.0798,
+      "cube_xy_dist_m": 0.1078
+    },
+    {
+      "seed": 10890,
+      "init_x": 0.65065,
+      "init_y": -0.22561,
+      "step": 167,
+      "contacts": [
+        {
+          "body": "left_finger",
+          "normal_force_n": 25.33
+        },
+        {
+          "body": "left_finger",
+          "normal_force_n": 25.76
+        },
+        {
+          "body": "left_finger",
+          "normal_force_n": 26.93
+        },
+        {
+          "body": "right_finger",
+          "normal_force_n": 15.75
+        },
+        {
+          "body": "right_finger",
+          "normal_force_n": 13.46
+        },
+        {
+          "body": "right_finger",
+          "normal_force_n": 10.24
+        }
+      ],
+      "tcp_z_m": 0.0088,
+      "finger_gap_m": 0.0799,
+      "cube_xy_dist_m": 0.1623
+    },
+    {
+      "seed": 10892,
+      "init_x": 0.66144,
+      "init_y": -0.17035,
+      "step": 176,
+      "contacts": [
+        {
+          "body": "left_finger",
+          "normal_force_n": 35.35
+        },
+        {
+          "body": "left_finger",
+          "normal_force_n": 37.87
+        },
+        {
+          "body": "left_finger",
+          "normal_force_n": 42.74
+        },
+        {
+          "body": "right_finger",
+          "normal_force_n": 34.25
+        },
+        {
+          "body": "right_finger",
+          "normal_force_n": 30.98
+        },
+        {
+          "body": "right_finger",
+          "normal_force_n": 23.62
+        }
+      ],
+      "tcp_z_m": 0.0087,
+      "finger_gap_m": 0.0797,
+      "cube_xy_dist_m": 0.1383
+    },
+    {
+      "seed": 10894,
+      "init_x": 0.65905,
+      "init_y": -0.20831,
+      "step": 175,
+      "contacts": [
+        {
+          "body": "left_finger",
+          "normal_force_n": 17.83
+        },
+        {
+          "body": "left_finger",
+          "normal_force_n": 18.56
+        },
+        {
+          "body": "left_finger",
+          "normal_force_n": 20.32
+        },
+        {
+          "body": "right_finger",
+          "normal_force_n": 10.82
+        },
+        {
+          "body": "right_finger",
+          "normal_force_n": 9.59
+        },
+        {
+          "body": "right_finger",
+          "normal_force_n": 7.18
+        }
+      ],
+      "tcp_z_m": 0.0091,
+      "finger_gap_m": 0.0799,
+      "cube_xy_dist_m": 0.1541
+    },
+    {
+      "seed": 10897,
+      "init_x": 0.66045,
+      "init_y": -0.13892,
+      "step": 173,
+      "contacts": [
+        {
+          "body": "left_finger",
+          "normal_force_n": 34.38
+        },
+        {
+          "body": "left_finger",
+          "normal_force_n": 35.26
+        },
+        {
+          "body": "left_finger",
+          "normal_force_n": 33.62
+        },
+        {
+          "body": "right_finger",
+          "normal_force_n": 15.2
+        },
+        {
+          "body": "right_finger",
+          "normal_force_n": 12.52
+        },
+        {
+          "body": "right_finger",
+          "normal_force_n": 13.8
+        }
+      ],
+      "tcp_z_m": 0.0085,
+      "finger_gap_m": 0.08,
+      "cube_xy_dist_m": 0.1154
+    },
+    {
+      "seed": 10898,
+      "init_x": 0.67749,
+      "init_y": -0.19991,
+      "step": 175,
+      "contacts": [
+        {
+          "body": "left_finger",
+          "normal_force_n": 24.44
+        },
+        {
+          "body": "left_finger",
+          "normal_force_n": 25.36
+        },
+        {
+          "body": "left_finger",
+          "normal_force_n": 27.2
+        },
+        {
+          "body": "right_finger",
+          "normal_force_n": 20.58
+        },
+        {
+          "body": "right_finger",
+          "normal_force_n": 18.43
+        },
+        {
+          "body": "right_finger",
+          "normal_force_n": 14.62
+        }
+      ],
+      "tcp_z_m": 0.0089,
+      "finger_gap_m": 0.0798,
+      "cube_xy_dist_m": 0.144
+    },
+    {
+      "seed": 10899,
+      "init_x": 0.67845,
+      "init_y": -0.15252,
+      "step": 165,
+      "contacts": [
+        {
+          "body": "left_finger",
+          "normal_force_n": 29.63
+        },
+        {
+          "body": "left_finger",
+          "normal_force_n": 30.54
+        },
+        {
+          "body": "left_finger",
+          "normal_force_n": 28.52
+        },
+        {
+          "body": "right_finger",
+          "normal_force_n": 13.93
+        },
+        {
+          "body": "right_finger",
+          "normal_force_n": 11.98
+        },
+        {
+          "body": "right_finger",
+          "normal_force_n": 13.87
+        }
+      ],
+      "tcp_z_m": 0.0086,
+      "finger_gap_m": 0.08,
+      "cube_xy_dist_m": 0.1217
+    }
+  ]
+}

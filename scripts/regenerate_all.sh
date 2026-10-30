@@ -42,5 +42,5 @@ echo "== ACT eval";        scripts/eval_all.sh "$RUN_DIR/act_cpu_scripted50" "$R
   "$RUN_DIR/smallbc_abs1000/ckpt_025000.pt"
 python scripts/smallbc_results_from_run.py --run "$RUN_DIR/smallbc_abs1000" --checkpoint-step 25000 \
   --data "$RUN_DIR/smallbc_main1000"
-echo "== GIF";             scripts/record_gifs.sh "$RUN_DIR/act_cpu_v3_scripted50"
+echo "== GIF";             scripts/record_gifs.sh "$RUN_DIR/smallbc_abs1000/ckpt_025000.pt"
 echo "== tables";           sdp report
