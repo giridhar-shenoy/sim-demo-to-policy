@@ -1,0 +1,16 @@
+{
+  "dataset": "smallbc_main1000",
+  "image_size": 96,
+  "episodes": 985,
+  "successful_episodes": 985,
+  "attempted_episodes": 1000,
+  "frames": 111064,
+  "mean_episode_length_steps": 112.75532994923857,
+  "seeds": [
+    0,
+    999
+  ],
+  "codebase_version": "smallbc memmap",
+  "format": "uint8 memmap shards (no video)",
+  "recording_wall_time_s": 140.22
+}

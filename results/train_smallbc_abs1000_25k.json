@@ -1,0 +1,9 @@
+{
+  "returncode": 0,
+  "wall_time_s": 7828.3,
+  "checkpoint_step": 25000,
+  "wall_time_to_checkpoint_s": 3989.7,
+  "config": "experiments/smallbc/runs/abs1000/config.json",
+  "machine": "i5-1135G7 (4C/8T), 14 GB RAM, CPU only, torch 4 threads",
+  "python": "3.12.16"
+}

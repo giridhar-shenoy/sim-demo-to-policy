@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Evaluate the ACT checkpoints (runs 1-8) and refresh the doc tables.
-#   usage: scripts/eval_all.sh [run1_dir] … [run6_dir] [run7_ckpt] [run8_ckpt]
+#   usage: scripts/eval_all.sh [run1_dir] … [run6_dir] [run7_ckpt] [run8_ckpt] [smallbc_ckpt]
 # Seeds (all from the eval range 10000-19999, disjoint from demo seeds 0-999):
 #   10000-10099 "dev": run 1's first eval; its result led to run 2's config.
 #   10100-10199 "test 1": runs 1 and 2, once each, after run 2's config was frozen.
@@ -11,7 +11,8 @@
 #   10600-10699 "test 5": run 6 (run 2 with lr 1e-5 / backbone 1e-5).
 #   10700-10799 "test 6": runs 7 and 8 (absolute targets), the same seeds for both
 #                         (paired); policies and seeds fixed in NOTES.md before testing.
-#   10800-10899: reserved for the smallbc eval; 11000+: untouched final check.
+#   10800-10899 "test 7": smallbc @ 25k (official); it is also scored on 10700-10799
+#                         for the paired comparison with runs 7 and 8. 11000+: untouched.
 # Every call runs 100 nominal + 100 shifted-pose episodes on the same (paired) seeds.
 set -euo pipefail
 RUN1=${1:-outputs/train/act_cpu_scripted50}
@@ -31,4 +32,13 @@ sdp eval --checkpoint "$RUN5" --condition act_cpu_v5_scripted50_128px --trials 1
 sdp eval --checkpoint "$RUN6" --condition act_cpu_v6_scripted50 --trials 100 --seed-start 600
 sdp eval --checkpoint "$RUN8" --condition act_cpu_v8_abs_dart --trials 100 --seed-start 700
 sdp eval --checkpoint "$RUN7" --condition act_cpu_v7_abs --trials 100 --seed-start 700
+# smallbc @ 25k (headline): official test 10800-10899, paired comparison 10700-10799.
+SMALLBC=${9:-experiments/smallbc/runs/abs1000/ckpt_025000.pt}
+for seed in 10800 10700; do
+  for dist in nominal shifted; do
+    python experiments/smallbc/eval.py --ckpt "$SMALLBC" --seed-start "$seed" --n 100 \
+      --distribution "$dist" --condition smallbc_abs1000_25k \
+      --out "results/eval_smallbc_abs1000_25k_s${seed}_${dist}"
+  done
+done
 sdp report

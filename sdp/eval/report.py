@@ -12,7 +12,9 @@ and ``sdp report`` regenerates all of them. Unknown markers are left untouched.
 
 from __future__ import annotations
 
+import csv
 import json
+import math
 import re
 from pathlib import Path
 
@@ -59,8 +61,20 @@ def write_combined(results: Path) -> None:
 
 
 def source_command(path: Path) -> str:
-    meta = json.loads(path.read_text()).get("meta", {})
-    return meta.get("command") or SOURCES.get(path.name, "scripts/eval_all.sh")
+    data = json.loads(path.read_text())
+    meta = data.get("meta", {})
+    if meta.get("command"):
+        return meta["command"]
+    if path.name in SOURCES:
+        return SOURCES[path.name]
+    if path.name.startswith("eval_smallbc_") and meta.get("checkpoint"):
+        c = data["conditions"][0]
+        return (
+            f"python experiments/smallbc/eval.py --ckpt {meta['checkpoint']} "
+            f"--seed-start {c['seed_min']} --n {c['trials']} --distribution {c['distribution']} "
+            f"--condition {c['condition']} --out results/{path.stem}"
+        )
+    return "scripts/eval_all.sh"
 
 
 def _pct(x: float) -> str:
@@ -78,21 +92,43 @@ RUNS = {
     "act_cpu_v6_scripted50": ("run 6", "run 2 + lr 1e-5 and backbone lr 1e-5 (LeRobot defaults)"),
     "act_cpu_v7_abs": ("run 7", "run 2 + absolute TCP-target actions"),
     "act_cpu_v8_abs_dart": ("run 8", "run 7 + 200 demos, half with DART noise"),
+    "smallbc_abs1000_25k": (
+        "smallbc",
+        "from-scratch CNN + spatial-softmax keypoints, MLP, absolute targets, "
+        "1000 demo seeds (half DART), batch 64",
+    ),
 }
-# The headline policy, fixed on dev seeds before any test eval (NOTES.md, session 7).
-HEADLINE_RUN = "act_cpu_v8_abs_dart"
+# The headline policy, fixed on dev seeds before any test eval (NOTES.md, session 8).
+HEADLINE_RUN = "smallbc_abs1000_25k"
 # Dataset each run was trained on (results/dataset_<name>.json).
 RUN_DATASET = {run: "pickplace_scripted_50" for run in RUNS} | {
     "act_cpu_v5_scripted50_128px": "pickplace_scripted_50_128px",
     "act_cpu_v7_abs": "pickplace_abs_50",
     "act_cpu_v8_abs_dart": "pickplace_abs_dart_200",
+    "smallbc_abs1000_25k": "smallbc_main1000",
 }
+
+
+def _label(run: str) -> str:
+    """'ACT run N' for the ACT runs, the plain label otherwise (e.g. 'smallbc')."""
+    label = RUNS[run][0]
+    return f"ACT {label}" if label.startswith("run ") else label
 
 
 def _policy_name(condition: str) -> str:
     if condition in RUNS:
-        return f"ACT {RUNS[condition][0]} (`{condition}`)"
+        return f"{_label(condition)} (`{condition}`)"
     return condition
+
+
+def _seed_groups(results: Path, run: str, ext: str = "json") -> dict[int, list[Path]]:
+    """A run's eval files grouped by their first seed (one or several distributions each)."""
+    groups: dict[int, list[Path]] = {}
+    for f in sorted(results.glob(f"eval_{run}_s*.{ext}")):
+        m = re.match(r"_s(\d+)(?:_[a-z]+)?$", f.stem[len(f"eval_{run}") :])
+        if m:
+            groups.setdefault(int(m.group(1)), []).append(f)
+    return groups
 
 
 def _load_conditions(results: Path) -> list[tuple[str, dict]]:
@@ -153,9 +189,16 @@ def training_table(results: Path) -> str:
             row = _final_row(path.with_suffix(".csv"))
             steps = str(int(float(row["step"])))
             loss = f"{float(row['loss']):.3f}"
+        wall = f"{meta['wall_time_s'] / 60:.1f} min"
+        if "checkpoint_step" in meta:  # the policy used is an intermediate checkpoint
+            steps = f"{meta['checkpoint_step']} of {steps}"
+            wall = f"{meta['wall_time_to_checkpoint_s'] / 60:.1f} min of {wall}"
+            rows = csv.DictReader(path.with_suffix(".csv").open())
+            at = next(r for r in rows if int(float(r["step"])) == meta["checkpoint_step"])
+            loss = f"{float(at['loss']):.3f}"
         label, change = RUNS.get(run, (run, "–"))
         lines.append(
-            f"| {label} (`{run}`) | {change} | {steps} | {meta['wall_time_s'] / 60:.1f} min "
+            f"| {label} (`{run}`) | {change} | {steps} | {wall} "
             f"| {loss} | `{meta.get('config', '?')}` |"
         )
     return "\n".join(lines)
@@ -173,7 +216,7 @@ def dataset_table(results: Path) -> str:
             f"| {d['dataset']} | {d['image_size']} px | {d['episodes']} "
             f"| {d['successful_episodes']} | {d['frames']} "
             f"| {d['mean_episode_length_steps']:.1f} steps | {d['seeds'][0]}–{d['seeds'][1]} "
-            f"| LeRobot {d['codebase_version']} |"
+            f"| {d.get('format', 'LeRobot ' + d['codebase_version'])} |"
         )
     return "\n".join(lines)
 
@@ -194,14 +237,14 @@ def speed_table(results: Path) -> str:
 
 
 def _test_evals(results: Path) -> dict[str, dict[str, dict]]:
-    """Each run's test-seed eval: its highest-seed eval file (run 1's dev file comes first)."""
+    """Each run's test-seed eval: its highest seed group (run 1's dev group comes first)."""
     out = {}
     for run in RUNS:
-        files = sorted(results.glob(f"eval_{run}_s*.json"))
-        if files:
-            out[run] = {
-                c["distribution"]: c for c in json.loads(files[-1].read_text())["conditions"]
-            }
+        groups = _seed_groups(results, run)
+        if groups:
+            files = groups[max(groups)]
+            conds = [c for f in files for c in json.loads(f.read_text())["conditions"]]
+            out[run] = {c["distribution"]: c for c in conds}
     return out
 
 
@@ -229,18 +272,23 @@ def _rate(c: dict) -> str:
 def _run_details(results: Path, run: str) -> str:
     details = []
     train = results / f"train_{run}.json"
+    meta = json.loads(train.read_text()) if train.is_file() else {}
     if train.with_suffix(".csv").is_file():
+        final = int(float(_final_row(train.with_suffix(".csv"))["step"]))
+        if "checkpoint_step" in meta:
+            details.append(f"checkpoint {meta['checkpoint_step']} of {final} training steps")
+        else:
+            details.append(f"{final} training steps")
+    if "checkpoint_step" in meta:
         details.append(
-            f"{int(float(_final_row(train.with_suffix('.csv'))['step']))} training steps"
+            f"{meta['wall_time_to_checkpoint_s'] / 60:.1f} min on the laptop CPU to that checkpoint"
         )
-    if train.is_file():
-        details.append(
-            f"{json.loads(train.read_text())['wall_time_s'] / 60:.1f} min on the laptop CPU"
-        )
+    elif meta:
+        details.append(f"{meta['wall_time_s'] / 60:.1f} min on the laptop CPU")
     ds = results / f"dataset_{RUN_DATASET.get(run, '')}.json"
     if ds.is_file():
         details.append(f"{json.loads(ds.read_text())['episodes']} demonstrations")
-    return f"{RUNS[run][0]} ({RUNS[run][1]}; {', '.join(details)})"
+    return f"{_label(run)} ({RUNS[run][1]}; {', '.join(details)})"
 
 
 def _run_list(runs: list[str]) -> str:
@@ -271,21 +319,22 @@ def headline(results: Path) -> str:
             f"8 cm ({runs})."
         )
     text = (
-        f"ACT {_run_details(results, run)} succeeds in {_rate(c)} held-out test episodes "
+        f"{_run_details(results, run)} succeeds in {_rate(c)} held-out test episodes "
         f"(seeds {c['seed_min']}–{c['seed_max']})"
     )
     if "shifted" in act:
         text += f", and in {_rate(act['shifted'])} with the cube's start box shifted by 8 cm"
     text += "."
-    same = [
-        r
-        for r, e in evals.items()
-        if r != run and e["nominal"]["seed_min"] == c["seed_min"] and e["nominal"]["successes"]
-    ]
-    for r in same:
+    others = [r for r, e in evals.items() if r != run and e["nominal"]["successes"]]
+    for r in reversed(others):
         e = evals[r]
+        where = (
+            "On the same seeds"
+            if e["nominal"]["seed_min"] == c["seed_min"]
+            else f"On its own test seeds {e['nominal']['seed_min']}–{e['nominal']['seed_max']}"
+        )
         text += (
-            f" On the same seeds, {_run_details(results, r)} succeeds in {_rate(e['nominal'])} "
+            f" {where}, {_run_details(results, r)} succeeds in {_rate(e['nominal'])} "
             f"nominal and {_rate(e['shifted'])} shifted episodes."
         )
     zero = [
@@ -301,36 +350,47 @@ def headline(results: Path) -> str:
     return text
 
 
+def mcnemar_exact_p(only_a: int, only_b: int) -> float:
+    """Two-sided exact McNemar test: a binomial(n, 1/2) test on the discordant pairs."""
+    n = only_a + only_b
+    if n == 0:
+        return 1.0
+    tail = sum(math.comb(n, i) for i in range(min(only_a, only_b) + 1)) / 2**n
+    return min(1.0, 2 * tail)
+
+
 def paired_table(results: Path) -> str:
     """Per-seed comparison of runs evaluated on exactly the same test seeds."""
-    import csv
-
-    outcomes = {}
+    outcomes: dict[str, dict[int, dict[tuple[str, str], bool]]] = {}
     for run in RUNS:
-        files = sorted(results.glob(f"eval_{run}_s*.csv"))
-        if files:
-            rows = csv.DictReader(files[-1].open())
-            outcomes[run] = {(r["distribution"], r["seed"]): r["success"] == "True" for r in rows}
+        for seed, files in _seed_groups(results, run, "csv").items():
+            rows = [r for f in files for r in csv.DictReader(f.open())]
+            outcomes.setdefault(run, {})[seed] = {
+                (r["distribution"], r["seed"]): r["success"] == "True" for r in rows
+            }
     lines = [
-        "| Run A | Run B | Cube poses | Both succeed | Only A | Only B | Neither |",
-        "|---|---|---|---|---|---|---|",
+        "| Run A | Run B | Seeds | Cube poses | Both succeed | Only A | Only B | Neither "
+        "| McNemar exact p |",
+        "|---|---|---|---|---|---|---|---|---|",
     ]
     runs = list(outcomes)
     for i, a in enumerate(runs):
         for b in runs[i + 1 :]:
-            if set(outcomes[a]) != set(outcomes[b]):
-                continue
-            if not any(outcomes[a].values()) and not any(outcomes[b].values()):
-                continue
-            for dist in sorted({d for d, _ in outcomes[a]}):
-                keys = [k for k in outcomes[a] if k[0] == dist]
-                both = sum(outcomes[a][k] and outcomes[b][k] for k in keys)
-                only_a = sum(outcomes[a][k] and not outcomes[b][k] for k in keys)
-                only_b = sum(outcomes[b][k] and not outcomes[a][k] for k in keys)
-                lines.append(
-                    f"| {RUNS[a][0]} | {RUNS[b][0]} | {dist} | {both} | {only_a} | {only_b} "
-                    f"| {len(keys) - both - only_a - only_b} |"
-                )
+            for seed in sorted(set(outcomes[a]) & set(outcomes[b])):
+                oa, ob = outcomes[a][seed], outcomes[b][seed]
+                if set(oa) != set(ob) or not (any(oa.values()) or any(ob.values())):
+                    continue
+                seeds = sorted(int(k[1]) for k in oa)
+                for dist in sorted({d for d, _ in oa}):
+                    keys = [k for k in oa if k[0] == dist]
+                    both = sum(oa[k] and ob[k] for k in keys)
+                    only_a = sum(oa[k] and not ob[k] for k in keys)
+                    only_b = sum(ob[k] and not oa[k] for k in keys)
+                    lines.append(
+                        f"| {_label(a)} | {_label(b)} | {seeds[0]}–{seeds[-1]} | {dist} | {both} "
+                        f"| {only_a} | {only_b} | {len(keys) - both - only_a - only_b} "
+                        f"| {mcnemar_exact_p(only_a, only_b):.4g} |"
+                    )
     return "\n".join(lines)
 
 
@@ -429,11 +489,12 @@ def timing_table(results: Path) -> str:
         if ds.is_file() and "recording_wall_time_s" in json.loads(ds.read_text()):
             rec = f"{json.loads(ds.read_text())['recording_wall_time_s']:.0f} s"
         ev = "–"
-        evals = sorted(results.glob(f"eval_{run}_s*.json"))
-        if evals:
-            meta = json.loads(evals[-1].read_text()).get("meta", {})
-            if "wall_time_s" in meta:
-                ev = f"{meta['wall_time_s'] / 60:.1f} min"
+        groups = _seed_groups(results, run)
+        if groups:
+            metas = [json.loads(f.read_text()).get("meta", {}) for f in groups[max(groups)]]
+            walls = [m.get("wall_time_s", m.get("wall_s")) for m in metas]
+            if all(w is not None for w in walls):
+                ev = f"{sum(walls) / 60:.1f} min"
         wall = json.loads(train.read_text())["wall_time_s"] / 60
         lines.append(f"| {label} (`{run}`) | {rec} | {wall:.1f} min | {ev} |")
     return "\n".join(lines)
