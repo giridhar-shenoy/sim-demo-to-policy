@@ -28,6 +28,10 @@ torch 2.11, 4 threads), MuJoCo offscreen rendering via EGL on the integrated GPU
 | act_cpu_v7_abs (shifted) | success, seeds 10700–10799 | 19/100 (19 %, Wilson 95 % 13 %–28 %) | `sdp eval --checkpoint experiments/privileged/run7/train/act_cpu_v7_abs/checkpoints/006000 --condition act_cpu_v7_abs --trials 100 --seed-start 700 --distributions nominal shifted` |
 | act_cpu_v8_abs_dart (nominal) | success, seeds 10700–10799 | 63/100 (63 %, Wilson 95 % 53 %–72 %) | `sdp eval --checkpoint experiments/privileged/run8/train/act_cpu_v8_abs_dart/checkpoints/020000 --condition act_cpu_v8_abs_dart --trials 100 --seed-start 700 --distributions nominal shifted` |
 | act_cpu_v8_abs_dart (shifted) | success, seeds 10700–10799 | 16/100 (16 %, Wilson 95 % 10 %–24 %) | `sdp eval --checkpoint experiments/privileged/run8/train/act_cpu_v8_abs_dart/checkpoints/020000 --condition act_cpu_v8_abs_dart --trials 100 --seed-start 700 --distributions nominal shifted` |
+| smallbc_abs1000_25k (nominal) | success, seeds 10700–10799 | 97/100 (97 %, Wilson 95 % 92 %–99 %) | `python experiments/smallbc/eval.py --ckpt experiments/smallbc/runs/abs1000/ckpt_025000.pt --seed-start 10700 --n 100 --distribution nominal --condition smallbc_abs1000_25k --out results/eval_smallbc_abs1000_25k_s10700_nominal` |
+| smallbc_abs1000_25k (shifted) | success, seeds 10700–10799 | 70/100 (70 %, Wilson 95 % 60 %–78 %) | `python experiments/smallbc/eval.py --ckpt experiments/smallbc/runs/abs1000/ckpt_025000.pt --seed-start 10700 --n 100 --distribution shifted --condition smallbc_abs1000_25k --out results/eval_smallbc_abs1000_25k_s10700_shifted` |
+| smallbc_abs1000_25k (nominal) | success, seeds 10800–10899 | 100/100 (100 %, Wilson 95 % 96 %–100 %) | `python experiments/smallbc/eval.py --ckpt experiments/smallbc/runs/abs1000/ckpt_025000.pt --seed-start 10800 --n 100 --distribution nominal --condition smallbc_abs1000_25k --out results/eval_smallbc_abs1000_25k_s10800_nominal` |
+| smallbc_abs1000_25k (shifted) | success, seeds 10800–10899 | 72/100 (72 %, Wilson 95 % 63 %–80 %) | `python experiments/smallbc/eval.py --ckpt experiments/smallbc/runs/abs1000/ckpt_025000.pt --seed-start 10800 --n 100 --distribution shifted --condition smallbc_abs1000_25k --out results/eval_smallbc_abs1000_25k_s10800_shifted` |
 | Training act_cpu_scripted50 | wall time | 21.0 min | `scripts/train_cpu.sh` |
 | Training act_cpu_v2_scripted50 | wall time | 17.1 min | `scripts/train_cpu.sh` |
 | Training act_cpu_v3_scripted50 | wall time | 45.3 min | `scripts/train_cpu.sh` |
@@ -36,10 +40,12 @@ torch 2.11, 4 threads), MuJoCo offscreen rendering via EGL on the integrated GPU
 | Training act_cpu_v6_scripted50 | wall time | 16.3 min | `scripts/train_cpu.sh` |
 | Training act_cpu_v7_abs | wall time | 32.4 min | `scripts/train_cpu.sh` |
 | Training act_cpu_v8_abs_dart | wall time | 113.4 min | `scripts/train_cpu.sh` |
+| Training smallbc_abs1000_25k | wall time | 130.5 min | `scripts/train_cpu.sh` |
 | Dataset pickplace_abs_50 | episodes (successful) / mean length | 50 (50) / 110.3 steps | `scripts/record_demos.sh` |
 | Dataset pickplace_abs_dart_200 | episodes (successful) / mean length | 198 (198) / 112.0 steps | `scripts/record_demos.sh` |
 | Dataset pickplace_scripted_50 | episodes (successful) / mean length | 50 (50) / 110.3 steps | `scripts/record_demos.sh` |
 | Dataset pickplace_scripted_50_128px | episodes (successful) / mean length | 50 (50) / 110.3 steps | `scripts/record_demos.sh` |
+| Dataset smallbc_main1000 | episodes (successful) / mean length | 985 (985) / 112.8 steps | `scripts/record_demos.sh` |
 <!-- sdp-report:index:end -->
 
 ## Seed split
@@ -55,8 +61,9 @@ torch 2.11, 4 threads), MuJoCo offscreen rendering via EGL on the integrated GPU
 | — test 4 | 10400–10499: run 5 only; chosen before run 5 was trained, never used for any choice | `scripts/eval_all.sh` |
 | — dev (experiments) | 10500–10599: the follow-up experiments' dev seeds; 10500–10549 picked the run 7 and run 8 checkpoints (not in these tables) | `experiments/` |
 | — test 5 | 10600–10699: run 6 only; chosen before run 6 was trained, never used for any choice | `scripts/eval_all.sh` |
-| — test 6 | 10700–10799: runs 7 and 8, the same seeds for both (paired); policies and seeds fixed in NOTES.md before any test eval | `scripts/eval_all.sh` |
-| — reserved | 10800–10899: the smallbc official eval; 11000+: untouched final check | – |
+| — test 6 | 10700–10799: runs 7 and 8, the same seeds for both (paired); policies and seeds fixed in NOTES.md before any test eval. smallbc was also scored here, after its own plan declared it, for the paired comparison | `scripts/eval_all.sh` |
+| — test 7 | 10800–10899: smallbc @ 25k (official); policy and seeds fixed in NOTES.md before any test eval | `scripts/eval_all.sh` |
+| — reserved | 11000+: untouched final check | – |
 | Overlap | none | `tests/test_seed_split.py` |
 
 A seed fully determines the cube's initial pose. Nominal and shifted evals use the
@@ -77,7 +84,15 @@ is run 2 (`act_cpu_v2.yaml`: backbone lr 1e-4 instead of 1e-5, CVAE off);
 `act_cpu_v3_scripted50` is run 3 (`act_cpu_v3.yaml`: run 2 with 8000 steps instead of
 the spec'd 3000, approved by Giri after runs 1 and 2 underfit); `act_cpu_v4_scripted50`
 is run 4 (`act_cpu_v4.yaml`: run 2 with the proprioceptive state withheld, so the policy
-sees only the two cameras); `act_cpu_v7_abs` is run 7 (`experiments/privileged/run7/act_cpu_v7_abs.yaml`: run 2
+sees only the two cameras); `smallbc_abs1000_25k` is smallbc @ 25k, the headline policy (`sdp/policies/smallbc/`,
+ported from `experiments/smallbc/`; 573,650 parameters; 985 demos from seeds 0–999,
+half with DART noise; batch 64; the 25k checkpoint of a 50000-step run). It was chosen on
+dev seeds 10500–10549 before testing. Its eval files are per distribution
+(`results/eval_smallbc_abs1000_25k_s<seed>_<distribution>.*`, written by
+`experiments/smallbc/eval.py`); `sdp eval` on the package port reproduces the dev result
+episode by episode (`results/repro/`). The shifted-box collisions are analysed in
+`results/collisions_smallbc_abs1000_25k_s10800_shifted.json`
+(`scripts/diagnose_collisions.py`). `act_cpu_v7_abs` is run 7 (`experiments/privileged/run7/act_cpu_v7_abs.yaml`: run 2
 with absolute TCP-target actions `[x, y, z, yaw, gripper]`, 6000 steps, 50 demos
 re-recorded with absolute targets) and `act_cpu_v8_abs_dart` is run 8
 (`experiments/privileged/run8/act_cpu_v8_abs_dart.yaml`: run 7 with 200 demos, half
@@ -120,6 +135,10 @@ its own test seeds, which no configuration choice has seen.
 | ACT run 7 (`act_cpu_v7_abs`) | shifted | 10700–10799 | 100 | 19/100 (19 %) | 13 %–28 % | 117.9 | [`results/eval_act_cpu_v7_abs_s10700.csv`](../results/eval_act_cpu_v7_abs_s10700.csv) |
 | ACT run 8 (`act_cpu_v8_abs_dart`) | nominal | 10700–10799 | 100 | 63/100 (63 %) | 53 %–72 % | 114.6 | [`results/eval_act_cpu_v8_abs_dart_s10700.csv`](../results/eval_act_cpu_v8_abs_dart_s10700.csv) |
 | ACT run 8 (`act_cpu_v8_abs_dart`) | shifted | 10700–10799 | 100 | 16/100 (16 %) | 10 %–24 % | 127.8 | [`results/eval_act_cpu_v8_abs_dart_s10700.csv`](../results/eval_act_cpu_v8_abs_dart_s10700.csv) |
+| smallbc (`smallbc_abs1000_25k`) | nominal | 10700–10799 | 100 | 97/100 (97 %) | 92 %–99 % | 114.7 | [`results/eval_smallbc_abs1000_25k_s10700_nominal.csv`](../results/eval_smallbc_abs1000_25k_s10700_nominal.csv) |
+| smallbc (`smallbc_abs1000_25k`) | shifted | 10700–10799 | 100 | 70/100 (70 %) | 60 %–78 % | 121.1 | [`results/eval_smallbc_abs1000_25k_s10700_shifted.csv`](../results/eval_smallbc_abs1000_25k_s10700_shifted.csv) |
+| smallbc (`smallbc_abs1000_25k`) | nominal | 10800–10899 | 100 | 100/100 (100 %) | 96 %–100 % | 115.8 | [`results/eval_smallbc_abs1000_25k_s10800_nominal.csv`](../results/eval_smallbc_abs1000_25k_s10800_nominal.csv) |
+| smallbc (`smallbc_abs1000_25k`) | shifted | 10800–10899 | 100 | 72/100 (72 %) | 63 %–80 % | 124.6 | [`results/eval_smallbc_abs1000_25k_s10800_shifted.csv`](../results/eval_smallbc_abs1000_25k_s10800_shifted.csv) |
 <!-- sdp-report:success:end -->
 
 | Policy / data | Config | Success |
@@ -159,10 +178,14 @@ with training.
 ## Paired comparison (runs on identical seeds)
 
 <!-- sdp-report:paired:begin -->
-| Run A | Run B | Cube poses | Both succeed | Only A | Only B | Neither |
-|---|---|---|---|---|---|---|
-| run 7 | run 8 | nominal | 40 | 17 | 23 | 20 |
-| run 7 | run 8 | shifted | 8 | 11 | 8 | 73 |
+| Run A | Run B | Seeds | Cube poses | Both succeed | Only A | Only B | Neither | McNemar exact p |
+|---|---|---|---|---|---|---|---|---|
+| ACT run 7 | ACT run 8 | 10700–10799 | nominal | 40 | 17 | 23 | 20 | 0.4296 |
+| ACT run 7 | ACT run 8 | 10700–10799 | shifted | 8 | 11 | 8 | 73 | 0.6476 |
+| ACT run 7 | smallbc | 10700–10799 | nominal | 57 | 0 | 40 | 3 | 1.819e-12 |
+| ACT run 7 | smallbc | 10700–10799 | shifted | 19 | 0 | 51 | 30 | 8.882e-16 |
+| ACT run 8 | smallbc | 10700–10799 | nominal | 62 | 1 | 35 | 2 | 1.077e-09 |
+| ACT run 8 | smallbc | 10700–10799 | shifted | 16 | 0 | 54 | 30 | 1.11e-16 |
 <!-- sdp-report:paired:end -->
 
 Runs 7 and 8 have no `results/openloop_*.json` rows. Their swap sensitivity was
@@ -198,6 +221,10 @@ Labels and their order are defined in `sdp/eval/taxonomy.py`; each episode gets 
 | ACT run 7 (`act_cpu_v7_abs`) | shifted | 19 | 0 | 69 | 12 | 0 | 0 | 0 |
 | ACT run 8 (`act_cpu_v8_abs_dart`) | nominal | 63 | 0 | 1 | 30 | 5 | 0 | 1 |
 | ACT run 8 (`act_cpu_v8_abs_dart`) | shifted | 16 | 0 | 69 | 14 | 1 | 0 | 0 |
+| smallbc (`smallbc_abs1000_25k`) | nominal | 97 | 0 | 0 | 0 | 3 | 0 | 0 |
+| smallbc (`smallbc_abs1000_25k`) | shifted | 70 | 28 | 0 | 0 | 2 | 0 | 0 |
+| smallbc (`smallbc_abs1000_25k`) | nominal | 100 | 0 | 0 | 0 | 0 | 0 | 0 |
+| smallbc (`smallbc_abs1000_25k`) | shifted | 72 | 26 | 0 | 0 | 2 | 0 | 0 |
 <!-- sdp-report:taxonomy:end -->
 
 ## Training
@@ -215,6 +242,7 @@ Regenerate with `scripts/train_cpu.sh` (the loss curve is in `results/train_*.cs
 | run 6 (`act_cpu_v6_scripted50`) | run 2 + lr 1e-5 and backbone lr 1e-5 (LeRobot defaults) | 3000 | 16.3 min | 0.114 | `sdp/train/configs/act_cpu_v6.yaml` |
 | run 7 (`act_cpu_v7_abs`) | run 2 + absolute TCP-target actions | 6000 | 32.4 min | 0.065 | `experiments/privileged/run7/act_cpu_v7_abs.yaml` |
 | run 8 (`act_cpu_v8_abs_dart`) | run 7 + 200 demos, half with DART noise | 20000 | 113.4 min | 0.070 | `experiments/privileged/run8/act_cpu_v8_abs_dart.yaml` |
+| smallbc (`smallbc_abs1000_25k`) | from-scratch CNN + spatial-softmax keypoints, MLP, absolute targets, 1000 demo seeds (half DART), batch 64 | 25000 of 50000 | 66.5 min of 130.5 min | 0.057 | `experiments/smallbc/runs/abs1000/config.json` |
 <!-- sdp-report:training:end -->
 
 Stage wall times (recording and eval timings are saved from run 5 on):
@@ -230,6 +258,7 @@ Stage wall times (recording and eval timings are saved from run 5 on):
 | run 6 (`act_cpu_v6_scripted50`) | – | 16.3 min | 4.5 min |
 | run 7 (`act_cpu_v7_abs`) | 44 s | 32.4 min | 3.5 min |
 | run 8 (`act_cpu_v8_abs_dart`) | – | 113.4 min | 3.4 min |
+| smallbc (`smallbc_abs1000_25k`) | 140 s | 130.5 min | 1.4 min |
 <!-- sdp-report:timing:end -->
 
 Training budget: 45 min per run on the laptop CPU. For run 3 only, Giri raised the cap
@@ -252,6 +281,7 @@ Regenerate with `scripts/record_demos.sh`.
 | pickplace_abs_dart_200 | 96 px | 198 | 198 | 22177 | 112.0 steps | 0–199 | LeRobot v3.0 |
 | pickplace_scripted_50 | 96 px | 50 | 50 | 5513 | 110.3 steps | 0–49 | LeRobot v3.0 |
 | pickplace_scripted_50_128px | 128 px | 50 | 50 | 5513 | 110.3 steps | 0–49 | LeRobot v3.0 |
+| smallbc_main1000 | 96 px | 985 | 985 | 111064 | 112.8 steps | 0–999 | uint8 memmap shards (no video) |
 <!-- sdp-report:dataset:end -->
 
 ## Env throughput

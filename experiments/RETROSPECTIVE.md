@@ -117,3 +117,24 @@ Test seeds 10700–10799, the same seeds for both policies:
   - Nominal is mostly grasp_missed: run 8 30, run 7 37; never_reached 1–3.
   - Shifted is mostly never_reached, 69 for each run.
 - **Selection optimism:** dev → test was 72 → 63 % for run 8 and 62 → 57 % for run 7.
+
+## smallbc results (30 Oct 2026, ~06:15–07:00 IST; appended after the overnight run)
+
+- **Checkpoint choice:** smallbc picked 25k on dev seeds 10500–10549 with the rule fixed
+  in `run_full.sh` (25k 49/50, 40k 48/50, last 48/50). It was pre-registered as the
+  repo's headline policy before any test eval (NOTES.md, session 8; commit 0d9b50d).
+- **Official test, seeds 10800–10899:** nominal **100/100** (Wilson 95 % 96–100 %);
+  shifted **72/100** (63–80 %; 26 collision, 2 dropped).
+- **Paired seeds 10700–10799** (where ACT runs 7 and 8 were scored): nominal 97/100
+  (92–99 %), shifted 70/100 (60–78 %). Against run 8, nominal: 35 seeds succeed only
+  with smallbc and 1 only with run 8, exact McNemar p 1.077e-09. Shifted: 54 vs 0,
+  p 1.11e-16 (`sdp report`, paired table).
+- **Collisions:** all 26 shifted collisions on 10800–10899 are open fingers pressed
+  into the table short of a cube that started beyond the nominal box (start x
+  0.6112–0.67926 m; the box ends at 0.60). Source:
+  `results/collisions_smallbc_abs1000_25k_s10800_shifted.json`.
+- **Caveat:** this is a recipe comparison, not an architecture one. smallbc had ~5×
+  the demos, batch 64 vs 8, a 16/8 chunk vs 20/10, and the commanded TCP target as an
+  extra input.
+- **Into the package:** the code is now in `sdp/policies/smallbc/`; this folder stays
+  as the record.

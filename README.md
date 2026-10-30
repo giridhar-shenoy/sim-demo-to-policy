@@ -2,21 +2,22 @@
 
 [![CI](https://github.com/giridhar-shenoy/sim-demo-to-policy/actions/workflows/ci.yml/badge.svg)](https://github.com/giridhar-shenoy/sim-demo-to-policy/actions/workflows/ci.yml)
 
-![Left: the scripted expert on held-out seed 10200 places the cube. Right: ACT run 3 on the same seed descends in place and never reaches the cube](docs/assets/act_success_failure.gif)
+![Left: the scripted expert on held-out seed 10800. Middle: smallbc on the same seed places the cube. Right: smallbc on a shifted-box seed presses its open fingers into the table short of the cube](docs/assets/rollouts.gif)
 
-*Left: scripted expert (reference) on held-out seed 10200. Right: ACT run 3, one of the
-six delta-action runs, on the same seed. It learned the motion but not where the cube
-is ("How the 0 % was debugged"). A GIF of run 8 replaces this after the next render
-pass. Inset: the 96 px wrist image the policy sees.*
+*Left: scripted expert (reference) on held-out seed 10800. Middle: smallbc, the headline
+policy, on the same seed. Right: smallbc's first failure in the shifted pose box (seed
+10800 shifted): the cube starts beyond the training box, and the policy presses its
+open fingers into the table short of it. Inset: the 96 px wrist image the policy sees.*
 
 A MuJoCo pick-and-place environment on the Franka Panda, a scripted expert whose
-demonstrations are recorded as a LeRobot v3.0 dataset, an ACT policy trained on a laptop
-CPU with `lerobot-train`, and an evaluation harness with held-out seeds, a failure taxonomy
-and confidence intervals.
+demonstrations are recorded as LeRobot v3.0 datasets, two kinds of policy trained on a
+laptop CPU (ACT through `lerobot-train`, and smallbc, a small from-scratch spatial-softmax
+BC policy), and an evaluation harness with held-out seeds, a failure taxonomy and
+confidence intervals.
 It shows the whole demonstration-to-policy loop running end to end on a CPU, with every
 success rate traceable to a per-episode CSV whose seeds never overlap the demonstrations.
 <!-- sdp-report:headline:begin -->
-ACT run 8 (run 7 + 200 demos, half with DART noise; 20000 training steps, 113.4 min on the laptop CPU, 198 demonstrations) succeeds in 63/100 (63 %, Wilson 95 % 53 %–72 %) held-out test episodes (seeds 10700–10799), and in 16/100 (16 %, Wilson 95 % 10 %–24 %) with the cube's start box shifted by 8 cm. On the same seeds, run 7 (run 2 + absolute TCP-target actions; 6000 training steps, 32.4 min on the laptop CPU, 50 demonstrations) succeeds in 57/100 (57 %, Wilson 95 % 47 %–66 %) nominal and 19/100 (19 %, Wilson 95 % 13 %–28 %) shifted episodes. The earlier runs 1–6, with per-step delta actions, score 0/100 each on their own test seeds.
+smallbc (from-scratch CNN + spatial-softmax keypoints, MLP, absolute targets, 1000 demo seeds (half DART), batch 64; checkpoint 25000 of 50000 training steps, 66.5 min on the laptop CPU to that checkpoint, 985 demonstrations) succeeds in 100/100 (100 %, Wilson 95 % 96 %–100 %) held-out test episodes (seeds 10800–10899), and in 72/100 (72 %, Wilson 95 % 63 %–80 %) with the cube's start box shifted by 8 cm. On its own test seeds 10700–10799, ACT run 8 (run 7 + 200 demos, half with DART noise; 20000 training steps, 113.4 min on the laptop CPU, 198 demonstrations) succeeds in 63/100 (63 %, Wilson 95 % 53 %–72 %) nominal and 16/100 (16 %, Wilson 95 % 10 %–24 %) shifted episodes. On its own test seeds 10700–10799, ACT run 7 (run 2 + absolute TCP-target actions; 6000 training steps, 32.4 min on the laptop CPU, 50 demonstrations) succeeds in 57/100 (57 %, Wilson 95 % 47 %–66 %) nominal and 19/100 (19 %, Wilson 95 % 13 %–28 %) shifted episodes. The earlier runs 1–6, with per-step delta actions, score 0/100 each on their own test seeds.
 <!-- sdp-report:headline:end -->
 
 **Language split:** Python only. The imitation-learning stack (LeRobot, PyTorch,
@@ -44,6 +45,12 @@ uv pip install --no-deps -e .
 scripts/fetch_menagerie.sh && export SDP_MENAGERIE_DIR=$PWD/third_party/mujoco_menagerie MUJOCO_GL=egl
 scripts/regenerate_all.sh   # ~3 h on a 4-core laptop CPU, ~2 h of it training
 ```
+
+smallbc: `python -m sdp.policies.smallbc.record` records its demos (uint8 memmap shards,
+not shipped; regenerated deterministically from demo seeds 0–999),
+`python -m sdp.policies.smallbc.train` trains it, and `sdp eval --checkpoint <ckpt.pt>`
+evaluates it (a `.pt` file selects smallbc, a directory selects ACT). The exact flags are
+in `scripts/regenerate_all.sh`.
 
 `regenerate_all.sh` measures env throughput, scores the scripted expert, records 50
 demos (at 96 and 128 px), trains ACT runs 1–6, evaluates them on their dev and test
@@ -80,6 +87,10 @@ downloading them.
 | ACT run 7 (`act_cpu_v7_abs`) | shifted | 10700–10799 | 100 | 19/100 (19 %) | 13 %–28 % | 117.9 | [`results/eval_act_cpu_v7_abs_s10700.csv`](results/eval_act_cpu_v7_abs_s10700.csv) |
 | ACT run 8 (`act_cpu_v8_abs_dart`) | nominal | 10700–10799 | 100 | 63/100 (63 %) | 53 %–72 % | 114.6 | [`results/eval_act_cpu_v8_abs_dart_s10700.csv`](results/eval_act_cpu_v8_abs_dart_s10700.csv) |
 | ACT run 8 (`act_cpu_v8_abs_dart`) | shifted | 10700–10799 | 100 | 16/100 (16 %) | 10 %–24 % | 127.8 | [`results/eval_act_cpu_v8_abs_dart_s10700.csv`](results/eval_act_cpu_v8_abs_dart_s10700.csv) |
+| smallbc (`smallbc_abs1000_25k`) | nominal | 10700–10799 | 100 | 97/100 (97 %) | 92 %–99 % | 114.7 | [`results/eval_smallbc_abs1000_25k_s10700_nominal.csv`](results/eval_smallbc_abs1000_25k_s10700_nominal.csv) |
+| smallbc (`smallbc_abs1000_25k`) | shifted | 10700–10799 | 100 | 70/100 (70 %) | 60 %–78 % | 121.1 | [`results/eval_smallbc_abs1000_25k_s10700_shifted.csv`](results/eval_smallbc_abs1000_25k_s10700_shifted.csv) |
+| smallbc (`smallbc_abs1000_25k`) | nominal | 10800–10899 | 100 | 100/100 (100 %) | 96 %–100 % | 115.8 | [`results/eval_smallbc_abs1000_25k_s10800_nominal.csv`](results/eval_smallbc_abs1000_25k_s10800_nominal.csv) |
+| smallbc (`smallbc_abs1000_25k`) | shifted | 10800–10899 | 100 | 72/100 (72 %) | 63 %–80 % | 124.6 | [`results/eval_smallbc_abs1000_25k_s10800_shifted.csv`](results/eval_smallbc_abs1000_25k_s10800_shifted.csv) |
 <!-- sdp-report:success:end -->
 
 Failure labels (one per episode, defined in [`sdp/eval/taxonomy.py`](sdp/eval/taxonomy.py)):
@@ -108,6 +119,10 @@ Failure labels (one per episode, defined in [`sdp/eval/taxonomy.py`](sdp/eval/ta
 | ACT run 7 (`act_cpu_v7_abs`) | shifted | 19 | 0 | 69 | 12 | 0 | 0 | 0 |
 | ACT run 8 (`act_cpu_v8_abs_dart`) | nominal | 63 | 0 | 1 | 30 | 5 | 0 | 1 |
 | ACT run 8 (`act_cpu_v8_abs_dart`) | shifted | 16 | 0 | 69 | 14 | 1 | 0 | 0 |
+| smallbc (`smallbc_abs1000_25k`) | nominal | 97 | 0 | 0 | 0 | 3 | 0 | 0 |
+| smallbc (`smallbc_abs1000_25k`) | shifted | 70 | 28 | 0 | 0 | 2 | 0 | 0 |
+| smallbc (`smallbc_abs1000_25k`) | nominal | 100 | 0 | 0 | 0 | 0 | 0 | 0 |
+| smallbc (`smallbc_abs1000_25k`) | shifted | 72 | 26 | 0 | 0 | 2 | 0 | 0 |
 <!-- sdp-report:taxonomy:end -->
 
 <!-- sdp-report:training:begin -->
@@ -121,6 +136,7 @@ Failure labels (one per episode, defined in [`sdp/eval/taxonomy.py`](sdp/eval/ta
 | run 6 (`act_cpu_v6_scripted50`) | run 2 + lr 1e-5 and backbone lr 1e-5 (LeRobot defaults) | 3000 | 16.3 min | 0.114 | `sdp/train/configs/act_cpu_v6.yaml` |
 | run 7 (`act_cpu_v7_abs`) | run 2 + absolute TCP-target actions | 6000 | 32.4 min | 0.065 | `experiments/privileged/run7/act_cpu_v7_abs.yaml` |
 | run 8 (`act_cpu_v8_abs_dart`) | run 7 + 200 demos, half with DART noise | 20000 | 113.4 min | 0.070 | `experiments/privileged/run8/act_cpu_v8_abs_dart.yaml` |
+| smallbc (`smallbc_abs1000_25k`) | from-scratch CNN + spatial-softmax keypoints, MLP, absolute targets, 1000 demo seeds (half DART), batch 64 | 25000 of 50000 | 66.5 min of 130.5 min | 0.057 | `experiments/smallbc/runs/abs1000/config.json` |
 <!-- sdp-report:training:end -->
 
 Stage wall times (recording and eval timings are saved from run 5 on):
@@ -136,6 +152,7 @@ Stage wall times (recording and eval timings are saved from run 5 on):
 | run 6 (`act_cpu_v6_scripted50`) | – | 16.3 min | 4.5 min |
 | run 7 (`act_cpu_v7_abs`) | 44 s | 32.4 min | 3.5 min |
 | run 8 (`act_cpu_v8_abs_dart`) | – | 113.4 min | 3.4 min |
+| smallbc (`smallbc_abs1000_25k`) | 140 s | 130.5 min | 1.4 min |
 <!-- sdp-report:timing:end -->
 
 Runs 7 and 8 were trained overnight with the laptop otherwise idle: run 8's 20000
@@ -144,10 +161,14 @@ steps (113.4 min) are outside the 45-min daytime budget by design.
 Paired comparison on identical seeds (generated from the per-episode CSVs):
 
 <!-- sdp-report:paired:begin -->
-| Run A | Run B | Cube poses | Both succeed | Only A | Only B | Neither |
-|---|---|---|---|---|---|---|
-| run 7 | run 8 | nominal | 40 | 17 | 23 | 20 |
-| run 7 | run 8 | shifted | 8 | 11 | 8 | 73 |
+| Run A | Run B | Seeds | Cube poses | Both succeed | Only A | Only B | Neither | McNemar exact p |
+|---|---|---|---|---|---|---|---|---|
+| ACT run 7 | ACT run 8 | 10700–10799 | nominal | 40 | 17 | 23 | 20 | 0.4296 |
+| ACT run 7 | ACT run 8 | 10700–10799 | shifted | 8 | 11 | 8 | 73 | 0.6476 |
+| ACT run 7 | smallbc | 10700–10799 | nominal | 57 | 0 | 40 | 3 | 1.819e-12 |
+| ACT run 7 | smallbc | 10700–10799 | shifted | 19 | 0 | 51 | 30 | 8.882e-16 |
+| ACT run 8 | smallbc | 10700–10799 | nominal | 62 | 1 | 35 | 2 | 1.077e-09 |
+| ACT run 8 | smallbc | 10700–10799 | shifted | 16 | 0 | 54 | 30 | 1.11e-16 |
 <!-- sdp-report:paired:end -->
 
 Training budget: 45 min per run on the laptop CPU. For run 3 only, Giri raised the cap
@@ -162,13 +183,46 @@ running: 45.3 min (2719.1 s) in one continuous segment, inside the 50-min cap
 More tables (dataset, env throughput, seed ranges, pose boxes) and the command behind
 every row: [docs/results.md](docs/results.md).
 
+### smallbc: the headline policy
+
+Code: [`sdp/policies/smallbc/`](sdp/policies/smallbc/), ported from
+[`experiments/smallbc/`](experiments/smallbc/), the overnight experiment, kept as the
+record. `sdp eval` on the package port reproduces the experiment's dev result episode by
+episode (49/50 on all 50 seeds; [`results/repro/`](results/repro/)).
+
+- **Model** (573,650 parameters, `results/config_smallbc_abs1000_25k.json`): per camera
+  (front and wrist, 96 px), a from-scratch CNN with GroupNorm and strides 2-2-2-1,
+  giving a 12×12 map, then a spatial-softmax head of 32 keypoints. An MLP takes the
+  keypoints and a normalised 19-D proprio vector (the 15-D robot state plus the env's
+  commanded TCP target [x, y, z, yaw]). It outputs a 16-step chunk of absolute targets
+  [x, y, z, yaw, gripper]; 8 are executed, through the same abs→delta conversion as
+  `AbsoluteTargetWrapper`, with the gripper binarised. It never sees the cube pose.
+- **Data:** demo seeds 0–999, half with DART noise (std 0.3 on the executed x, y, z
+  and yaw; labels stay the clean expert targets). 985 successful episodes are kept,
+  111064 frames, split by episode into 100075 training and 10989 validation frames.
+- **Training:** L1 loss on normalised targets, augmented with random shift only
+  (replicate-pad 4 px, random crop back, independently per sample and per camera).
+  Adam at lr 3e-4 with 500 warmup steps, then cosine; batch 64; 50000 steps in 130.5 min
+  on the laptop CPU. The policy is the 25k checkpoint (66.5 min in), picked on dev seeds
+  10500–10549 by a rule fixed before training.
+
+### ACT vs smallbc is a recipe comparison
+
+The gap between smallbc and ACT run 8 on the same seeds 10700–10799 (paired table above:
+35 vs 1 discordant nominal, McNemar p 1.077e-09) is real, but it is not an architecture
+result. smallbc had about 5× the demos (985 vs 198 episodes), batch 64 instead of 8
+(25000 steps vs 20000, so about 10× as many training samples), a different chunk (16,
+executing 8, vs ACT's 20, executing 10), and an extra proprio input (the commanded TCP
+target). A clean comparison would train ACT on the same 1000-demo set with a comparable
+sample budget, and smallbc on run 8's 198 episodes.
+
 ### Reading the numbers
 
 Every ACT row is 100 independent episodes. Each episode's starting cube pose is fixed
 by its seed. The 50 demonstrations use seeds 0–49, from the demo range 0–999. Eval
 seeds come from 10000–19999, so the ranges cannot overlap: `sdp/seeds.py` enforces it
-and `tests/test_seed_split.py` tests it. There were eight training runs, and each
-choice was made on data the later evaluation does not reuse:
+and `tests/test_seed_split.py` tests it. There were eight ACT runs and one smallbc run,
+and each choice was made on data the later evaluation does not reuse:
 
 - **Run 1** (the spec'd CPU config, 3000 steps) scored 0/100 on seeds 10000–10099,
   which therefore became the *dev* seeds.
@@ -201,9 +255,14 @@ choice was made on data the later evaluation does not reuse:
   headline policy, run 7 @ 6k as the minimal change, and seeds 10700–10799 as the test
   set for both (*test 6*, paired). It also fixed a rule: no re-runs and no checkpoint
   swaps after seeing test results.
+- **smallbc** @ 25k was picked on dev seeds 10500–10549 by a rule fixed before training
+  (25k 49/50, 40k 48/50, last 48/50). Before any test eval, NOTES.md fixed it as the
+  headline policy, with seeds 10800–10899 as its official test (*test 7*). It was also
+  scored on 10700–10799, the ACT runs' test seeds, for the paired comparison.
 
-No test seed range is reused across experiments. The headline is run 8, the policy
-fixed before testing, with run 7 on the same seeds.
+No test seed range is reused for selection. 10700–10799 is shared on purpose, for the
+paired comparison, and it was declared in advance. The headline is smallbc on its own
+test seeds; ACT run 8 and run 7 follow on theirs.
 
 The shifted condition reuses the same seeds with the cube's start box moved by
 (+8 cm, −8 cm), so each shifted episode is a paired twin of a nominal one; about 22 %
@@ -217,27 +276,34 @@ about seed-to-seed variance.
 
 ## Where it fails
 
-- **Grasping, in the nominal box.** Run 8 fails 37 of 100 test episodes: 30
-  `grasp_missed` and 5 `dropped`, then 1 `never_reached` and 1 `timeout`. Run 7 fails
-  43: 37 `grasp_missed`, 3 `dropped` and 3 `never_reached`. Both policies now go to the
-  cube; most failures happen at the pinch or during the carry.
-- **No extrapolation past the training pose box.** With the cube's start box moved by
-  (+8 cm, −8 cm), run 8 succeeds in 16/100 and run 7 in 19/100. Each has 69
-  `never_reached`. Only about 22 % of the shifted box overlaps the box the demos were
-  drawn from, and both policies stop short of cubes outside it.
-- **Run 8 vs run 7 is not settled.** 63/100 vs 57/100 on the same seeds; the paired
-  table shows 23 seeds that only run 8 solves and 17 that only run 7 solves. The
-  intervals overlap, and each run has one training seed, so seed-to-seed variance is
-  unmeasured.
-- **CPU-sized model and schedule.** dim_model 256, 2 encoder and 1 decoder layers,
-  batch 8, ResNet-18 on 96 px images (a 3×3 feature map per camera); 6000 steps for
-  run 7 and 20000 for run 8, against LeRobot's 100k defaults.
-- **Only scripted data.** The demos come from one deterministic waypoint expert (plus
-  DART noise in half of run 8's). Teleoperated demos are slower, noisier and
-  multimodal, and they are what the method has to handle on a real robot. That gap is
-  unmeasured.
-- **Per-step delta actions failed completely (runs 1–6).** All six score 0/100 on
-  their own test seeds; see "How the 0 % was debugged".
+- **smallbc outside the training pose box.** With the cube's start box moved by
+  (+8 cm, −8 cm), smallbc succeeds in 72/100 (seeds 10800–10899) and 70/100
+  (10700–10799). On 10800–10899 the failures are 26 `collision` and 2 `dropped`.
+  Replaying the 26 collisions ([`results/collisions_smallbc_abs1000_25k_s10800_shifted.json`](results/collisions_smallbc_abs1000_25k_s10800_shifted.json))
+  shows the same thing every time: the open fingers press into the table, a median 0.1438
+  m short of a cube it never touches. Every one of those cubes started beyond the
+  nominal box (start x 0.6112–0.67926 m, against the box's 0.60). Successes reach start
+  x 0.64912 m. The policy interpolates inside the demo distribution and does not
+  extrapolate far past it.
+- **smallbc in the nominal box:** 100/100 on 10800–10899, and 97/100 on 10700–10799,
+  where all 3 failures are `dropped`.
+- **ACT, grasping.** Run 8 fails 37 of 100 nominal test episodes: 30 `grasp_missed`
+  and 5 `dropped`, then 1 `never_reached` and 1 `timeout`. Run 7 fails 43: 37
+  `grasp_missed`, 3 `dropped` and 3 `never_reached`. Shifted, both have 69
+  `never_reached`.
+- **One training seed per configuration,** so seed-to-seed variance is unmeasured,
+  and the run 8 vs run 7 difference is not resolved (23 vs 17 discordant seeds, McNemar
+  p 0.4296).
+- **The ACT vs smallbc gap is a recipe comparison** (data, batch, chunk, inputs; see
+  above), not a clean architecture comparison.
+- **CPU-sized everything.** ACT: dim_model 256, 2/1 layers, ResNet-18 at 96 px (a 3×3
+  map per camera), up to 20000 steps against LeRobot's 100k. smallbc: 573,650 parameters,
+  50000 steps.
+- **Only scripted data.** The demos come from one deterministic waypoint expert, plus
+  DART noise in half of run 8's and smallbc's. Teleoperated demos are slower, noisier
+  and multimodal, and that gap is unmeasured.
+- **Per-step delta actions failed completely (runs 1–6),** all 0/100; see the next
+  section.
 - **No peg insertion and no So-101 yet.** The contact-rich task and the low-cost
   5-DoF arm are deferred.
 - **Only one kind of shift.** The shifted condition moves the cube's start box. The
@@ -304,13 +370,16 @@ contact-rich task. The longer version, marked as a draft:
 
 ## What I'd do next
 
-- **Fix the grasp** first: most nominal failures are `grasp_missed`. Look at the
-  failed pinches in the per-episode CSVs, then try chunk-relative actions and more
-  DART demos around the grasp.
-- **Cover the shifted box**: widen the demo pose distribution, or add demos from the
-  shifted box, then re-test on fresh seeds.
-- **Seeds and scale**: several training seeds per configuration, and a full-size run
-  on a free GPU.
+- **A clean ACT vs smallbc comparison:** ACT on smallbc's 1000-demo set with a
+  comparable sample budget, and smallbc on run 8's 198 episodes, on the same fresh
+  seeds.
+- **Cover the shifted box:** widen the demo pose distribution, or add demos beyond
+  x 0.60, then re-test on fresh seeds. smallbc's collisions all come from cubes outside
+  the box it was trained on.
+- **ACT's grasp:** most of its nominal failures are `grasp_missed`. Try chunk-relative
+  actions and more DART demos around the grasp.
+- **Seeds and scale:** several training seeds per configuration, and a full-size run on
+  a free GPU.
 - **Teleoperated data**: keyboard teleop in the gym_hil key layout, then SpaceMouse,
   then the R3 retargeting pipeline as the teleop device. That would give a
   scripted-vs-teleop data comparison on the same eval seeds.
@@ -332,9 +401,11 @@ contact-rich task. The longer version, marked as a draft:
 | `sdp/expert/` | scripted waypoint expert |
 | `sdp/record/` | LeRobot v3.0 writer + recorder (per-episode success sidecar) |
 | `sdp/train/` | `lerobot-train` wrapper and the ACT CPU config |
+| `sdp/policies/smallbc/` | smallbc: model, data, policy, `record` and `train` entry points |
 | `sdp/eval/` | harness, failure taxonomy, Wilson intervals, ACT adapter, report generator |
 | `scripts/` | one script per number or GIF; `regenerate_all.sh` runs them all |
 | `results/` | per-episode CSVs and JSON summaries behind every table |
+| `experiments/` | the debugging work: [retrospective](experiments/RETROSPECTIVE.md), integrity checks, privileged-state runs, runs 7/8, the original smallbc |
 | `docs/` | [architecture](docs/architecture.md), [results](docs/results.md), [tasks](docs/tasks.md), [hardware transfer](docs/hardware_transfer.md) |
 
 ## License

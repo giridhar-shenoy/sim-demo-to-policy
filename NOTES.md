@@ -591,3 +591,37 @@ Open questions:
   `python experiments/smallbc/eval.py --ckpt experiments/smallbc/runs/abs1000/ckpt_025000.pt
   --seed-start {10800,10700} --n 100 --distribution {nominal,shifted}
   --condition smallbc_abs1000_25k --out results/eval_smallbc_abs1000_25k_s{seed}_{dist}`.
+- 06:13:43 pre-registration pushed (0d9b50d).
+- 06:13:49–06:16:45 official evals, `experiments/smallbc/eval.py` (outputs written
+  straight to `results/` with `--out`, no copying):
+  - 10800–10899: nominal **100/100** (Wilson 96–100 %); shifted **72/100** (63–80 %),
+    26 collision, 2 dropped.
+  - 10700–10799: nominal **97/100** (92–99 %), 3 dropped; shifted **70/100** (60–78 %),
+    28 collision, 2 dropped.
+- Paired (report, exact McNemar):
+  - vs run 8, nominal: 62 both, 1 only run 8, 35 only smallbc, p 1.077e-09;
+  - vs run 8, shifted: 16 / 0 / 54, p 1.11e-16;
+  - vs run 7, nominal: 57 / 0 / 40, p 1.819e-12;
+  - vs run 7, shifted: 19 / 0 / 51, p 8.882e-16.
+- Facts from smallbc's own files: batch 64 (not 8), Adam lr 3e-4, warmup 500 + cosine;
+  random-shift augmentation only (replicate-pad 4, per sample and per camera); 573,650
+  parameters; 985 kept of 1000 attempted (480 of 495 noised); 100075 train / 10989 val
+  frames (98 val episodes); recording 140.22 s with 4 workers; training 7828.3 s for
+  50k, 3989.7 s to the 25k checkpoint. smallbc's own `abs_to_delta` binarises the
+  gripper (the package `AbsoluteTargetWrapper` clips); the port copies smallbc's.
+- Package port `sdp/policies/smallbc/` (84bd8c0): the maths is copied, the `sys.path`
+  hacks replaced, and the `~/work/menagerie` default dropped. `sdp eval` dispatches
+  on checkpoint type (`.pt` → smallbc with 1 torch thread, dir → ACT).
+  **Repro: 49/50 on dev 10500–10549, identical on all 50 episodes** to
+  `experiments/smallbc/results/eval_abs1000_ckpt_025000_x8_nominal_s10500_n50.csv`;
+  re-checked identical after the mypy annotation fixes.
+- Tests (`tests/test_smallbc.py`, 7) and mypy (2.4.1, `[tool.mypy]` on
+  `sdp/policies`, `follow_imports = "silent"`, now in the CI lint step) (1155004).
+- Collision diagnostic (cc66a3f): every one of the 26 shifted collisions on
+  10800–10899 is a finger press, first contact `left_finger`, gripper open (gap
+  0.0793–0.0802 m), TCP z 0.0084–0.0092 m, a median 0.1438 m short of the cube.
+  Their cubes started at x 0.6112–0.67926 m (nominal box max 0.60); successes reach
+  0.64912 m.
+- GIF re-rendered as `docs/assets/rollouts.gif` (1.30 MB): the expert, smallbc on
+  nominal seed 10800 (success, 117 steps), and smallbc on shifted seed 10800
+  (collision).

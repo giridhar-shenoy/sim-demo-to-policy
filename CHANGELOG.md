@@ -73,6 +73,19 @@ All notable changes to this project are documented here. The format follows
 - Report: paired-comparison table; the headline uses the policy fixed before testing.
 - `scripts/package_release_abs.sh`; `package_release_assets.sh` takes a checkpoint step.
 
+- **smallbc is the headline policy.** It is a from-scratch spatial-softmax BC
+  (573,650 params, 985 demos, batch 64, the 25k checkpoint of a 50k-step run), chosen on
+  dev before testing. Official test, seeds 10800–10899: 100/100 nominal (Wilson 95 %
+  96–100 %) and 72/100 shifted (63–80 %). On ACT's test seeds 10700–10799: 97/100 and
+  70/100. The ACT runs are reported alongside; the gap is a recipe comparison.
+- `sdp/policies/smallbc/` (ported from `experiments/smallbc/`, kept as the record):
+  `python -m sdp.policies.smallbc.record` / `.train`; `sdp eval` dispatches `.pt`
+  checkpoints to it and reproduces the experiment's dev episodes exactly.
+- Paired McNemar table in the report; `scripts/diagnose_collisions.py`;
+  `scripts/smallbc_results_from_run.py`; mypy on `sdp/policies` in CI.
+- README GIF renamed `docs/assets/rollouts.gif`: the expert, smallbc nominal and
+  smallbc shifted.
+
 ### Fixed
 
 - Training CSV step column (lerobot prints `step:2K`); Wilson bounds exactly 0/1 at
