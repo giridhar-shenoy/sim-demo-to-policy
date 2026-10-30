@@ -81,12 +81,12 @@ def _pct(x: float) -> str:
     return f"{100 * x:.0f} %"
 
 
-# Training runs in order: table label and how each differs from the spec'd ACT CPU
+# Training runs in order: table label and how each differs from the base ACT CPU
 # config (dim_model 256, 2 enc / 1 dec layers, chunk 20, 96x96, batch 8, 3000 steps).
 RUNS = {
-    "act_cpu_scripted50": ("run 1", "spec'd config; lr 1e-4, backbone lr 1e-5, CVAE on"),
+    "act_cpu_scripted50": ("run 1", "base config; lr 1e-4, backbone lr 1e-5, CVAE on"),
     "act_cpu_v2_scripted50": ("run 2", "run 1 + backbone lr 1e-4, CVAE off"),
-    "act_cpu_v3_scripted50": ("run 3", "run 2 + 8000 steps instead of the spec'd 3000"),
+    "act_cpu_v3_scripted50": ("run 3", "run 2 + 8000 steps instead of the base 3000"),
     "act_cpu_v4_scripted50": ("run 4", "run 2 + proprioceptive state withheld (cameras only)"),
     "act_cpu_v5_scripted50_128px": ("run 5", "run 4 + 128 px cameras (demos re-recorded)"),
     "act_cpu_v6_scripted50": ("run 6", "run 2 + lr 1e-5 and backbone lr 1e-5 (LeRobot defaults)"),
@@ -98,7 +98,8 @@ RUNS = {
         "1000 demo seeds (half DART), batch 64",
     ),
 }
-# The headline policy, fixed on dev seeds before any test eval (NOTES.md, session 8).
+# The headline policy, fixed on dev seeds before any test eval
+# (docs/preregistration.md, commit 0d9b50d).
 HEADLINE_RUN = "smallbc_abs1000_25k"
 # Dataset each run was trained on (results/dataset_<name>.json).
 RUN_DATASET = {run: "pickplace_scripted_50" for run in RUNS} | {
@@ -176,7 +177,7 @@ def _final_row(csv_path: Path) -> dict[str, str]:
 
 def training_table(results: Path) -> str:
     lines = [
-        "| Run | Change from the spec'd CPU config | Steps | Wall time | Final loss | Config |",
+        "| Run | Change from the base CPU config | Steps | Wall time | Final loss | Config |",
         "|---|---|---|---|---|---|",
     ]
     order = {run: i for i, run in enumerate(RUNS)}

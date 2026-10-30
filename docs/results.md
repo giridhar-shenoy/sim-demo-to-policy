@@ -61,8 +61,8 @@ torch 2.11, 4 threads), MuJoCo offscreen rendering via EGL on the integrated GPU
 | — test 4 | 10400–10499: run 5 only; chosen before run 5 was trained, never used for any choice | `scripts/eval_all.sh` |
 | — dev (experiments) | 10500–10599: the follow-up experiments' dev seeds; 10500–10549 picked the run 7 and run 8 checkpoints (not in these tables) | `experiments/` |
 | — test 5 | 10600–10699: run 6 only; chosen before run 6 was trained, never used for any choice | `scripts/eval_all.sh` |
-| — test 6 | 10700–10799: runs 7 and 8, the same seeds for both (paired); policies and seeds fixed in NOTES.md before any test eval. smallbc was also scored here, after its own plan declared it, for the paired comparison | `scripts/eval_all.sh` |
-| — test 7 | 10800–10899: smallbc @ 25k (official); policy and seeds fixed in NOTES.md before any test eval | `scripts/eval_all.sh` |
+| — test 6 | 10700–10799: runs 7 and 8, the same seeds for both (paired); policies and seeds fixed in docs/preregistration.md (commit 8060419) before any test eval. smallbc was also scored here, after its own plan declared it, for the paired comparison | `scripts/eval_all.sh` |
+| — test 7 | 10800–10899: smallbc @ 25k (official); policy and seeds fixed in docs/preregistration.md (commit 0d9b50d) before any test eval | `scripts/eval_all.sh` |
 | — reserved | 11000+: untouched final check | – |
 | Overlap | none | `tests/test_seed_split.py` |
 
@@ -78,38 +78,39 @@ About 22 % of the shifted box overlaps the nominal box ((7 cm × 7 cm) / (15 cm 
 
 ## Success rates (Wilson 95 % intervals)
 
-Regenerate with `scripts/eval_all.sh` (ACT) and `python scripts/eval_expert.py` (expert).
-`act_cpu_scripted50` is run 1 (`sdp/train/configs/act_cpu.yaml`); `act_cpu_v2_scripted50`
-is run 2 (`act_cpu_v2.yaml`: backbone lr 1e-4 instead of 1e-5, CVAE off);
-`act_cpu_v3_scripted50` is run 3 (`act_cpu_v3.yaml`: run 2 with 8000 steps instead of
-the spec'd 3000, approved by Giri after runs 1 and 2 underfit); `act_cpu_v4_scripted50`
-is run 4 (`act_cpu_v4.yaml`: run 2 with the proprioceptive state withheld, so the policy
-sees only the two cameras); `smallbc_abs1000_25k` is smallbc @ 25k, the headline policy (`sdp/policies/smallbc/`,
-ported from `experiments/smallbc/`; 573,650 parameters; 985 demos from seeds 0–999,
-half with DART noise; batch 64; the 25k checkpoint of a 50000-step run). It was chosen on
-dev seeds 10500–10549 before testing. Its eval files are per distribution
+Regenerate with `scripts/eval_all.sh` (ACT) and `python scripts/eval_expert.py`
+(expert). `act_cpu_scripted50` is run 1 (`sdp/train/configs/act_cpu.yaml`);
+`act_cpu_v2_scripted50` is run 2 (`act_cpu_v2.yaml`: backbone lr 1e-4 instead of 1e-5,
+CVAE off); `act_cpu_v3_scripted50` is run 3 (`act_cpu_v3.yaml`: run 2 with 8000 steps
+instead of the base 3000; I raised it after runs 1 and 2 underfit);
+`act_cpu_v4_scripted50` is run 4 (`act_cpu_v4.yaml`: run 2 with the proprioceptive state
+withheld, so the policy sees only the two cameras); `smallbc_abs1000_25k` is smallbc @
+25k, the headline policy (`sdp/policies/smallbc/`, ported from `experiments/smallbc/`;
+573,650 parameters; 985 demos from seeds 0–999, half with DART noise; batch 64; the 25k
+checkpoint of a 50000-step run). It was chosen on dev seeds 10500–10549 before testing.
+Its eval files are per distribution
 (`results/eval_smallbc_abs1000_25k_s<seed>_<distribution>.*`, written by
 `experiments/smallbc/eval.py`); `sdp eval` on the package port reproduces the dev result
 episode by episode (`results/repro/`). The shifted-box collisions are analysed in
 `results/collisions_smallbc_abs1000_25k_s10800_shifted.json`
-(`scripts/diagnose_collisions.py`). `act_cpu_v7_abs` is run 7 (`experiments/privileged/run7/act_cpu_v7_abs.yaml`: run 2
-with absolute TCP-target actions `[x, y, z, yaw, gripper]`, 6000 steps, 50 demos
-re-recorded with absolute targets) and `act_cpu_v8_abs_dart` is run 8
-(`experiments/privileged/run8/act_cpu_v8_abs_dart.yaml`: run 7 with 200 demos, half
-with DART noise, 198 kept, 20000 steps). Both run through `AbsoluteTargetWrapper`; the
-eval adapter detects the 5-D action. Run 8 @ 20k is the headline policy, fixed on dev
-seeds before testing. `act_cpu_v6_scripted50` is run 6 (`act_cpu_v6.yaml`: run 2 with lr 1e-5 and
-backbone lr 1e-5, LeRobot's ACT defaults; it tests whether the 1e-4 used by runs 1–5
-caused the collapse); `act_cpu_v5_scripted50_128px` is run 5 (`act_cpu_v5.yaml`:
-run 4 with both cameras at 128 px, trained on `pickplace_scripted_50_128px`, the same 50
-demo seeds re-recorded at 128 px). With 128 px rendering the scripted expert still
-scores 100/100 on demo seeds 0–99 and on eval seeds 10000–10099 under both pose
-distributions (`python scripts/eval_expert.py --image-size 128 --out
-results/expert_check_128px`). Run 2 exists
-because run 1 scored 0/100 on the dev seeds; a training-set check showed its first-step
-x/y/yaw actions did not vary with the cube's position (std ≤ 0.003 over 20 training
-episodes, against 0.38 / 0.04 / 0.55 in the data). The headline reports the best run on
-its own test seeds, which no configuration choice has seen.
+(`scripts/diagnose_collisions.py`). `act_cpu_v7_abs` is run 7
+(`experiments/privileged/run7/act_cpu_v7_abs.yaml`: run 2 with absolute TCP-target
+actions `[x, y, z, yaw, gripper]`, 6000 steps, 50 demos re-recorded with absolute
+targets) and `act_cpu_v8_abs_dart` is run 8
+(`experiments/privileged/run8/act_cpu_v8_abs_dart.yaml`: run 7 with 200 demos, half with
+DART noise, 198 kept, 20000 steps). Both run through `AbsoluteTargetWrapper`; the eval
+adapter detects the 5-D action. Run 8 @ 20k is the headline policy, fixed on dev seeds
+before testing. `act_cpu_v6_scripted50` is run 6 (`act_cpu_v6.yaml`: run 2 with lr 1e-5
+and backbone lr 1e-5, LeRobot's ACT defaults; it tests whether the 1e-4 used by runs 1–5
+caused the collapse); `act_cpu_v5_scripted50_128px` is run 5 (`act_cpu_v5.yaml`: run 4
+with both cameras at 128 px, trained on `pickplace_scripted_50_128px`, the same 50 demo
+seeds re-recorded at 128 px). With 128 px rendering the scripted expert still scores
+100/100 on demo seeds 0–99 and on eval seeds 10000–10099 under both pose distributions
+(`python scripts/eval_expert.py --image-size 128 --out results/expert_check_128px`). Run
+2 exists because run 1 scored 0/100 on the dev seeds; a training-set check showed its
+first-step x/y/yaw actions did not vary with the cube's position (std ≤ 0.003 over 20
+training episodes, against 0.38 / 0.04 / 0.55 in the data). The headline reports the
+best run on its own test seeds, which no configuration choice has seen.
 
 <!-- sdp-report:success:begin -->
 | Policy / data | Cube poses | Seeds | Trials | Success | Wilson 95 % CI | Mean length, successes (steps) | Per-episode CSV |
@@ -232,11 +233,11 @@ Labels and their order are defined in `sdp/eval/taxonomy.py`; each episode gets 
 Regenerate with `scripts/train_cpu.sh` (the loss curve is in `results/train_*.csv`).
 
 <!-- sdp-report:training:begin -->
-| Run | Change from the spec'd CPU config | Steps | Wall time | Final loss | Config |
+| Run | Change from the base CPU config | Steps | Wall time | Final loss | Config |
 |---|---|---|---|---|---|
-| run 1 (`act_cpu_scripted50`) | spec'd config; lr 1e-4, backbone lr 1e-5, CVAE on | 3000 | 21.0 min | 0.096 | `sdp/train/configs/act_cpu.yaml` |
+| run 1 (`act_cpu_scripted50`) | base config; lr 1e-4, backbone lr 1e-5, CVAE on | 3000 | 21.0 min | 0.096 | `sdp/train/configs/act_cpu.yaml` |
 | run 2 (`act_cpu_v2_scripted50`) | run 1 + backbone lr 1e-4, CVAE off | 3000 | 17.1 min | 0.082 | `sdp/train/configs/act_cpu_v2.yaml` |
-| run 3 (`act_cpu_v3_scripted50`) | run 2 + 8000 steps instead of the spec'd 3000 | 8000 | 45.3 min | 0.063 | `sdp/train/configs/act_cpu_v3.yaml` |
+| run 3 (`act_cpu_v3_scripted50`) | run 2 + 8000 steps instead of the base 3000 | 8000 | 45.3 min | 0.063 | `sdp/train/configs/act_cpu_v3.yaml` |
 | run 4 (`act_cpu_v4_scripted50`) | run 2 + proprioceptive state withheld (cameras only) | 3000 | 17.2 min | 0.073 | `sdp/train/configs/act_cpu_v4.yaml` |
 | run 5 (`act_cpu_v5_scripted50_128px`) | run 4 + 128 px cameras (demos re-recorded) | 3000 | 21.5 min | 0.079 | `sdp/train/configs/act_cpu_v5.yaml` |
 | run 6 (`act_cpu_v6_scripted50`) | run 2 + lr 1e-5 and backbone lr 1e-5 (LeRobot defaults) | 3000 | 16.3 min | 0.114 | `sdp/train/configs/act_cpu_v6.yaml` |
@@ -261,14 +262,8 @@ Stage wall times (recording and eval timings are saved from run 5 on):
 | smallbc (`smallbc_abs1000_25k`) | 140 s | 130.5 min | 1.4 min |
 <!-- sdp-report:timing:end -->
 
-Training budget: 45 min per run on the laptop CPU. For run 3 only, Giri raised the cap
-from 45 to 50 min because the laptop was in use. Run 3 took three attempts at the same
-config. Attempt 1 (45-min cap) was stopped at step ~1190 when it projected ~47 min.
-Attempt 2 (50-min cap, laptop busy with another ROS project) was stopped at step ~4065
-when it projected ~55 min. Neither was evaluated; their partial outputs are kept but
-not reported. The run in the tables is attempt 3, from scratch, with only a browser
-running: 45.3 min (2719.1 s) in one continuous segment, inside the 50-min cap
-(0.3 min over the original 45), so the resume-from-checkpoint fallback was not needed.
+Training budget: 45 min per run on the laptop CPU. For run 3 only, I raised the cap from
+45 to 50 min because the laptop was in use.
 
 ## Dataset
 

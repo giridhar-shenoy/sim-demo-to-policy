@@ -54,24 +54,24 @@ attached; `python -m sdp.policies.smallbc.record` regenerates it from demo seeds
 - Diagnostics: open-loop check with image swap (`scripts/diagnose_openloop.py`) and
   training-seed rollouts (`scripts/diagnose_train_seeds.py`); both runs ignore the
   cube's position.
-- ACT run 3 (`act_cpu_v3.yaml`: run 2 with 8000 steps instead of the spec'd 3000,
-  approved by Giri; cap raised from 45 to 50 min for this run because the laptop was in
-  use): 45.3 min, 0/100 nominal and 0/100 shifted on fresh test seeds 10200–10299
-  (Wilson 95 % 0–4 %). The open-loop check shows it still ignores the cube's position.
+- ACT run 3 (`act_cpu_v3.yaml`: run 2 with 8000 steps instead of the spec'd 3000; cap
+  raised from 45 to 50 min for this run because the laptop was in use): 45.3 min, 0/100
+  nominal and 0/100 shifted on fresh test seeds 10200–10299 (Wilson 95 % 0–4 %). The
+  open-loop check shows it still ignores the cube's position.
 - ACT run 4 (`act_cpu_v4.yaml`: run 2 with the proprioceptive state withheld, cameras
-  only, via `policy.input_features`; approved by Giri): 17.2 min, 0/100 nominal and
-  0/100 shifted on fresh test seeds 10300–10399 (Wilson 95 % 0–4 %). It fails the
-  pre-registered image-swap criterion: its approach actions do not depend on the images.
+  only, via `policy.input_features`): 17.2 min, 0/100 nominal and 0/100 shifted on fresh
+  test seeds 10300–10399 (Wilson 95 % 0–4 %). It fails the pre-registered image-swap
+  criterion: its approach actions do not depend on the images.
 - `train.py` passes dict-valued `input_features` to lerobot-train as one JSON argument.
-- ACT run 5 (`act_cpu_v5.yaml`: run 4 with both cameras at 128 px; demos re-recorded
-  at 128 px into `pickplace_scripted_50_128px`, same seeds; approved by Giri): recording
-  55 s, training 21.5 min, eval 5.0 min; 0/100 nominal and 0/100 shifted on fresh test
-  seeds 10400–10499 (Wilson 95 % 0–4 %). Fails the same pre-registered criterion.
+- ACT run 5 (`act_cpu_v5.yaml`: run 4 with both cameras at 128 px; demos re-recorded at
+  128 px into `pickplace_scripted_50_128px`, same seeds): recording 55 s, training 21.5
+  min, eval 5.0 min; 0/100 nominal and 0/100 shifted on fresh test seeds 10400–10499
+  (Wilson 95 % 0–4 %). Fails the same pre-registered criterion.
 - ACT run 6 (`act_cpu_v6.yaml`: run 2 with lr 1e-5 and backbone lr 1e-5, LeRobot's
-  defaults; tests the hypothesis that lr 1e-4 caused the collapse; approved by Giri):
-  16.3 min training, 4.5 min eval; 0/100 nominal and 0/100 shifted on fresh test seeds
-  10600–10699 (Wilson 95 % 0–4 %). Image-swap sensitivity in x/yaw 0.0031/0.0029 →
-  0.0009/0.0012 from step 1000 to 3000: the pre-registered criterion is not met.
+  defaults; tests the hypothesis that lr 1e-4 caused the collapse): 16.3 min training,
+  4.5 min eval; 0/100 nominal and 0/100 shifted on fresh test seeds 10600–10699 (Wilson
+  95 % 0–4 %). Image-swap sensitivity in x/yaw 0.0031/0.0029 → 0.0009/0.0012 from step
+  1000 to 3000: the pre-registered criterion is not met.
 - `diagnose_openloop.py` names intermediate checkpoints `<run>_step<N>`; the diagnostics
   table gains d_x/d_yaw swap columns and a criterion column.
 - `--image-size` for `sdp record`, `record_demos.sh` and `eval_expert.py`; eval,

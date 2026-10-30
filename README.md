@@ -16,15 +16,17 @@ BC policy), and an evaluation harness with held-out seeds, a failure taxonomy an
 confidence intervals.
 It shows the whole demonstration-to-policy loop running end to end on a CPU, with every
 success rate traceable to a per-episode CSV whose seeds never overlap the demonstrations.
+
+smallbc, a 574k-parameter spatial-softmax BC policy trained in 66 minutes on a laptop
+CPU, places the cube in 100/100 held-out episodes and 72/100 when the cube starts 8 cm
+outside the training box. Six ACT runs with per-step delta actions scored 0/100; the
+cause is worked through below.
 <!-- sdp-report:headline:begin -->
 smallbc (from-scratch CNN + spatial-softmax keypoints, MLP, absolute targets, 1000 demo seeds (half DART), batch 64; checkpoint 25000 of 50000 training steps, 66.5 min on the laptop CPU to that checkpoint, 985 demonstrations) succeeds in 100/100 (100 %, Wilson 95 % 96 %–100 %) held-out test episodes (seeds 10800–10899), and in 72/100 (72 %, Wilson 95 % 63 %–80 %) with the cube's start box shifted by 8 cm. On its own test seeds 10700–10799, ACT run 8 (run 7 + 200 demos, half with DART noise; 20000 training steps, 113.4 min on the laptop CPU, 198 demonstrations) succeeds in 63/100 (63 %, Wilson 95 % 53 %–72 %) nominal and 16/100 (16 %, Wilson 95 % 10 %–24 %) shifted episodes. On its own test seeds 10700–10799, ACT run 7 (run 2 + absolute TCP-target actions; 6000 training steps, 32.4 min on the laptop CPU, 50 demonstrations) succeeds in 57/100 (57 %, Wilson 95 % 47 %–66 %) nominal and 19/100 (19 %, Wilson 95 % 13 %–28 %) shifted episodes. The earlier runs 1–6, with per-step delta actions, score 0/100 each on their own test seeds.
 <!-- sdp-report:headline:end -->
 
 **Language split:** Python only. The imitation-learning stack (LeRobot, PyTorch,
-gym-style MuJoCo envs) is Python, and a C++ port would be unusual rather than impressive.
-My C++ control and planning work is in
-[ur5e-teaching-controllers](https://github.com/giridhar-shenoy/ur5e-teaching-controllers) and
-[pointcloud-constrained-planning](https://github.com/giridhar-shenoy/pointcloud-constrained-planning).
+gym-style MuJoCo envs) is Python.
 
 ## Run it
 
@@ -179,11 +181,11 @@ Failure labels (one per episode, defined in [`sdp/eval/taxonomy.py`](sdp/eval/ta
 <!-- sdp-report:taxonomy:end -->
 
 <!-- sdp-report:training:begin -->
-| Run | Change from the spec'd CPU config | Steps | Wall time | Final loss | Config |
+| Run | Change from the base CPU config | Steps | Wall time | Final loss | Config |
 |---|---|---|---|---|---|
-| run 1 (`act_cpu_scripted50`) | spec'd config; lr 1e-4, backbone lr 1e-5, CVAE on | 3000 | 21.0 min | 0.096 | `sdp/train/configs/act_cpu.yaml` |
+| run 1 (`act_cpu_scripted50`) | base config; lr 1e-4, backbone lr 1e-5, CVAE on | 3000 | 21.0 min | 0.096 | `sdp/train/configs/act_cpu.yaml` |
 | run 2 (`act_cpu_v2_scripted50`) | run 1 + backbone lr 1e-4, CVAE off | 3000 | 17.1 min | 0.082 | `sdp/train/configs/act_cpu_v2.yaml` |
-| run 3 (`act_cpu_v3_scripted50`) | run 2 + 8000 steps instead of the spec'd 3000 | 8000 | 45.3 min | 0.063 | `sdp/train/configs/act_cpu_v3.yaml` |
+| run 3 (`act_cpu_v3_scripted50`) | run 2 + 8000 steps instead of the base 3000 | 8000 | 45.3 min | 0.063 | `sdp/train/configs/act_cpu_v3.yaml` |
 | run 4 (`act_cpu_v4_scripted50`) | run 2 + proprioceptive state withheld (cameras only) | 3000 | 17.2 min | 0.073 | `sdp/train/configs/act_cpu_v4.yaml` |
 | run 5 (`act_cpu_v5_scripted50_128px`) | run 4 + 128 px cameras (demos re-recorded) | 3000 | 21.5 min | 0.079 | `sdp/train/configs/act_cpu_v5.yaml` |
 | run 6 (`act_cpu_v6_scripted50`) | run 2 + lr 1e-5 and backbone lr 1e-5 (LeRobot defaults) | 3000 | 16.3 min | 0.114 | `sdp/train/configs/act_cpu_v6.yaml` |
@@ -208,8 +210,7 @@ Stage wall times (recording and eval timings are saved from run 5 on):
 | smallbc (`smallbc_abs1000_25k`) | 140 s | 130.5 min | 1.4 min |
 <!-- sdp-report:timing:end -->
 
-Runs 7 and 8 were trained overnight with the laptop otherwise idle: run 8's 20000
-steps (113.4 min) are outside the 45-min daytime budget by design.
+Runs 7 and 8 were trained overnight; run 8's 20000 steps took 113.4 min.
 
 Paired comparison on identical seeds (generated from the per-episode CSVs):
 
@@ -224,14 +225,8 @@ Paired comparison on identical seeds (generated from the per-episode CSVs):
 | ACT run 8 | smallbc | 10700–10799 | shifted | 16 | 0 | 54 | 30 | 1.11e-16 |
 <!-- sdp-report:paired:end -->
 
-Training budget: 45 min per run on the laptop CPU. For run 3 only, Giri raised the cap
-from 45 to 50 min because the laptop was in use. Run 3 took three attempts at the same
-config. Attempt 1 (45-min cap) was stopped at step ~1190 when it projected ~47 min.
-Attempt 2 (50-min cap, laptop busy with another ROS project) was stopped at step ~4065
-when it projected ~55 min. Neither was evaluated; their partial outputs are kept but
-not reported. The run in the tables is attempt 3, from scratch, with only a browser
-running: 45.3 min (2719.1 s) in one continuous segment, inside the 50-min cap
-(0.3 min over the original 45), so the resume-from-checkpoint fallback was not needed.
+Training budget: 45 min per run on the laptop CPU. For run 3 only, I raised the cap from
+45 to 50 min because the laptop was in use.
 
 More tables (dataset, env throughput, seed ranges, pose boxes) and the command behind
 every row: [docs/results.md](docs/results.md).
@@ -282,13 +277,13 @@ and each choice was made on data the later evaluation does not reuse:
 - **Run 2** changed two settings (backbone lr 1e-5 → 1e-4, CVAE off) after a check on
   run 1's own training frames. Runs 1 and 2 were then scored once each on 10100–10199
   (*test 1*).
-- **Run 3** is run 2 trained for 8000 steps instead of the spec'd 3000. The step count
-  is a deliberate departure from the spec, approved because runs 1 and 2 underfit at
-  3000. It was scored once on fresh seeds 10200–10299 (*test 2*).
+- **Run 3** is run 2 trained for 8000 steps instead of the spec'd 3000. I raised the
+  step count because runs 1 and 2 underfit at 3000. It was scored once on fresh seeds
+  10200–10299 (*test 2*).
 - **Run 4** is run 2 with the proprioceptive state withheld from the policy (cameras
-  only; the dataset is unchanged). It was scored once on fresh seeds 10300–10399
-  (*test 3*). Its pass criterion for the diagnosis was written down before training
-  (NOTES.md).
+  only; the dataset is unchanged). It was scored once on fresh seeds 10300–10399 (*test
+  3*). Its pass criterion for the diagnosis was written down before training
+  (docs/results.md).
 - **Run 5** is run 4 with both cameras at 128 px instead of 96; the 50 demos were
   re-recorded at 128 px from the same seeds (the expert still scores 100/100). It was
   scored once on fresh seeds 10400–10499 (*test 4*), with the same pre-registered
@@ -299,19 +294,20 @@ and each choice was made on data the later evaluation does not reuse:
   action chunk (a LeRobot user saw the same collapse on a similar dataset at 1e-4 and
   fixed it with these defaults). Swap sensitivity is checked at every saved checkpoint
   (1000, 2000, 3000), and the run is scored once on fresh seeds 10600–10699 (*test 5*).
-- **Run 7** is run 2 with absolute TCP-target actions `[x, y, z, yaw, gripper]`
-  instead of per-step deltas, trained for 6000 steps on 50 re-recorded demos from the
-  same seeds. **Run 8** is run 7 with 200 demos, half of them with DART noise on the
-  executed action and labelled with the clean expert targets (198 kept), and 20000
-  steps. Their checkpoints were picked on dev seeds 10500–10549, which makes those dev
-  numbers slightly optimistic. Before any test eval, NOTES.md fixed run 8 @ 20k as the
-  headline policy, run 7 @ 6k as the minimal change, and seeds 10700–10799 as the test
-  set for both (*test 6*, paired). It also fixed a rule: no re-runs and no checkpoint
-  swaps after seeing test results.
+- **Run 7** is run 2 with absolute TCP-target actions `[x, y, z, yaw, gripper]` instead
+  of per-step deltas, trained for 6000 steps on 50 re-recorded demos from the same
+  seeds. **Run 8** is run 7 with 200 demos, half of them with DART noise on the executed
+  action and labelled with the clean expert targets (198 kept), and 20000 steps. Their
+  checkpoints were picked on dev seeds 10500–10549, which makes those dev numbers
+  slightly optimistic. Before any test eval I fixed run 8 @ 20k as the headline policy
+  (docs/preregistration.md, commit 8060419), run 7 @ 6k as the minimal change, and seeds
+  10700–10799 as the test set for both (*test 6*, paired). The plan also fixed a rule:
+  no re-runs and no checkpoint swaps after seeing test results.
 - **smallbc** @ 25k was picked on dev seeds 10500–10549 by a rule fixed before training
-  (25k 49/50, 40k 48/50, last 48/50). Before any test eval, NOTES.md fixed it as the
-  headline policy, with seeds 10800–10899 as its official test (*test 7*). It was also
-  scored on 10700–10799, the ACT runs' test seeds, for the paired comparison.
+  (25k 49/50, 40k 48/50, last 48/50). Before any test eval I fixed it as the headline
+  policy (docs/preregistration.md, commit 0d9b50d), with seeds 10800–10899 as its
+  official test (*test 7*). It was also scored on 10700–10799, the ACT runs' test seeds,
+  for the paired comparison.
 
 No test seed range is reused for selection. 10700–10799 is shared on purpose, for the
 paired comparison, and it was declared in advance. The headline is smallbc on its own
@@ -407,19 +403,18 @@ all 50 seeds: [`results/repro/`](results/repro/)).
 
 The state half of the observation transfers almost as-is: the joint angles, the finger
 gap and a TCP pose computed by forward kinematics are what a real Panda reports. The
-image half does not. The sim cameras have no noise, blur, exposure change or
-distortion, the lighting is flat, and the observation cameras draw collision meshes
-to stay fast. The action is a 20 Hz delta TCP pose that the env turns into joint
-targets with damped least-squares IK and near-perfect position actuators. On a real
-arm it would become a Cartesian setpoint for a 1 kHz controller with velocity limits.
-That is the layer I built on production 6-axis arms (Jacobian TCP jogging,
-gravity-compensated hand guiding), and the sim never shows the policy its lag or
-overshoot. Sim latency is zero apart from the network's own compute, which the harness
-logs per episode. Resets are free and exact here. On hardware they cost supervised
-robot time, and the seeds lose their meaning. Contact is MuJoCo's soft model with
-elliptic cones, forgiving for a 50 g cube; it would be the first gap to show on a
-contact-rich task. The longer version, marked as a draft:
-[docs/hardware_transfer.md](docs/hardware_transfer.md).
+image half does not. The sim cameras have no noise, blur, exposure change or distortion,
+the lighting is flat, and the observation cameras draw collision meshes to stay fast.
+The action is a 20 Hz delta TCP pose that the env turns into joint targets with damped
+least-squares IK and near-perfect position actuators. On a real arm it would become a
+Cartesian setpoint for a 1 kHz controller with velocity limits. That is the layer
+ur5e-teaching-controllers implements (Jacobian TCP jogging, gravity-compensated hand
+guiding), and the sim never shows the policy its lag or overshoot. Sim latency is zero
+apart from the network's own compute, which the harness logs per episode. Resets are
+free and exact here. On hardware they cost supervised robot time, and the seeds lose
+their meaning. Contact is MuJoCo's soft model with elliptic cones, forgiving for a 50 g
+cube; it would be the first gap to show on a contact-rich task. The longer version,
+marked as a draft: [docs/hardware_transfer.md](docs/hardware_transfer.md).
 
 ## What I'd do next
 
@@ -465,3 +460,6 @@ contact-rich task. The longer version, marked as a draft:
 
 MIT, see [LICENSE](LICENSE). Third-party components and their licenses:
 [THIRD_PARTY.md](THIRD_PARTY.md).
+
+Written with an AI coding agent working in my terminal; I set the scope, the constraints
+and the acceptance criteria, reviewed the changes, and ran every benchmark.

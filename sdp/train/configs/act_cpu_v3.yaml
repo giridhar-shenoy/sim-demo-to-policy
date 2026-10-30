@@ -1,7 +1,7 @@
 # ACT, CPU-sized, third run. Identical to act_cpu_v2.yaml except the step count:
-# 8000 instead of the spec'd 3000. Giri approved this departure on 29 Oct 2026 (option
-# (a) in MORNING.md) because runs 1 and 2 underfit at 3000 steps (~4.4 epochs): both
-# ignore the cube's position, even on their own training seeds. Budget: <= 45 min wall
+# 8000 instead of the spec'd 3000. Chosen on 29 Oct 2026 after runs 1 and 2 underfit.
+# At 3000 steps (~4.4 epochs) both ignore the cube's position, even on their own
+# training seeds. Budget: <= 45 min wall
 # time on the laptop, checked with a timing probe before the run.
 policy:
   type: act

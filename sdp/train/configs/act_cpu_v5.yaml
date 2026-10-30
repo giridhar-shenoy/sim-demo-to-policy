@@ -2,8 +2,8 @@
 # backbone lr 1e-4, CVAE off) except that both cameras are 128x128 instead of 96x96,
 # trained on datasets/pickplace_scripted_50_128px. Run 4 tracked the arm from the images
 # but its cube-dependent x/yaw actions never responded to them; at 96 px ResNet-18 gives a
-# 3x3 feature map for a 6-10 px cube, at 128 px a 4x4 map for a ~8-13 px cube. Approved
-# by Giri on 29 Oct 2026.
+# 3x3 feature map for a 6-10 px cube, at 128 px a 4x4 map for a ~8-13 px cube. Chosen
+# on 29 Oct 2026.
 policy:
   type: act
   device: cpu

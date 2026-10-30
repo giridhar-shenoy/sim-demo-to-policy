@@ -122,7 +122,7 @@ Test seeds 10700–10799, the same seeds for both policies:
 
 - **Checkpoint choice:** smallbc picked 25k on dev seeds 10500–10549 with the rule fixed
   in `run_full.sh` (25k 49/50, 40k 48/50, last 48/50). It was pre-registered as the
-  repo's headline policy before any test eval (NOTES.md, session 8; commit 0d9b50d).
+  repo's headline policy before any test eval (docs/preregistration.md, commit 0d9b50d).
 - **Official test, seeds 10800–10899:** nominal **100/100** (Wilson 95 % 96–100 %);
   shifted **72/100** (63–80 %; 26 collision, 2 dropped).
 - **Paired seeds 10700–10799** (where ACT runs 7 and 8 were scored): nominal 97/100

@@ -6,7 +6,7 @@
 # same collapse on a similar dataset at lr 1e-4, fixed by these defaults.
 # Pass criterion, fixed before training (same as runs 4-5): swapping images moves the
 # first-step d_x or d_yaw by >= 0.1, AND the first-step d_x or d_yaw std across 20
-# training episodes is >= 0.1 (scripts/diagnose_openloop.py). Approved by Giri, 30 Oct.
+# training episodes is >= 0.1 (scripts/diagnose_openloop.py). Chosen on 30 Oct 2026.
 policy:
   type: act
   device: cpu
