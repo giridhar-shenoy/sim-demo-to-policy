@@ -2,13 +2,24 @@
 # Regenerate every number and the GIF in README.md and docs/results.md from scratch.
 # Needs: the repo venv active, SDP_MENAGERIE_DIR set (scripts/fetch_menagerie.sh), MUJOCO_GL=egl.
 # Wall time on a 4-core laptop CPU: about 6 h, of which training is ~4.5 h (ACT runs 1-6
-# ~2.5 h, smallbc ~2.2 h; ACT runs 7-8 are trained by experiments/privileged/ and not here).
-# The dataset and checkpoint go to a fresh directory, so nothing existing is overwritten.
+# ~2.5 h, smallbc ~2.2 h).
+# ACT runs 7 and 8 are not retrained here (experiments/privileged/run7/ and run8/ do that).
+# Their evals use the checkpoints under experiments/privileged/ if present, otherwise (a
+# fresh clone, where those are gitignored) the act_cpu_v7_abs and act_cpu_v8_abs_dart
+# archives fetched from the v0.1.0 release by scripts/fetch_release_asset.sh.
+# Datasets and checkpoints go to a fresh directory, so nothing existing is overwritten.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 RUN_DIR=${RUN_DIR:-outputs/regen-$(date +%Y%m%d-%H%M%S)}
 mkdir -p "$RUN_DIR"
 echo "== run dir: $RUN_DIR"
+
+RUN7=experiments/privileged/run7/train/act_cpu_v7_abs/checkpoints/006000
+RUN8=experiments/privileged/run8/train/act_cpu_v8_abs_dart/checkpoints/020000
+[[ -d $RUN7 ]] || RUN7=$(scripts/fetch_release_asset.sh act_cpu_v7_abs "$RUN_DIR/release_v0.1.0")
+[[ -d $RUN8 ]] || RUN8=$(scripts/fetch_release_asset.sh act_cpu_v8_abs_dart "$RUN_DIR/release_v0.1.0")
+echo "== ACT run 7: $RUN7"
+echo "== ACT run 8: $RUN8"
 
 echo "== env throughput";   python scripts/bench_env_speed.py
 echo "== scripted expert";  python scripts/eval_expert.py
@@ -37,8 +48,7 @@ for c in ckpt_025000 ckpt_040000 last; do   # dev-seed checkpoint choice (25k wa
   sdp eval --checkpoint "$RUN_DIR/smallbc_abs1000/$c.pt" --condition "smallbc_$c" --trials 50 \
     --seed-start 500 --distributions nominal --out "$RUN_DIR/eval_smallbc_${c}_dev10500"; done
 echo "== ACT eval";        scripts/eval_all.sh "$RUN_DIR/act_cpu_scripted50" "$RUN_DIR/act_cpu_v2_scripted50" "$RUN_DIR/act_cpu_v3_scripted50" "$RUN_DIR/act_cpu_v4_scripted50" "$RUN_DIR/act_cpu_v5_scripted50_128px" "$RUN_DIR/act_cpu_v6_scripted50" \
-  experiments/privileged/run7/train/act_cpu_v7_abs/checkpoints/006000 \
-  experiments/privileged/run8/train/act_cpu_v8_abs_dart/checkpoints/020000 \
+  "$RUN7" "$RUN8" \
   "$RUN_DIR/smallbc_abs1000/ckpt_025000.pt"
 python scripts/smallbc_results_from_run.py --run "$RUN_DIR/smallbc_abs1000" --checkpoint-step 25000 \
   --data "$RUN_DIR/smallbc_main1000"

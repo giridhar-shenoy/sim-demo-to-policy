@@ -64,7 +64,7 @@ def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--checkpoint", default="outputs/train/act_cpu_v2_scripted50")
     ap.add_argument("--csv", default="results/eval_act_cpu_v2_scripted50_s10100.csv")
-    ap.add_argument("--out", default="docs/assets/act_success_failure.gif")
+    ap.add_argument("--out", default="docs/assets/rollouts.gif")
     ap.add_argument("--every", type=int, default=2, help="keep every n-th frame (20 Hz -> 10 fps)")
     ap.add_argument("--policy-label", default="ACT run 2", help="name shown on the policy panels")
     ap.add_argument(
