@@ -22,7 +22,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = ["pytest>=8", "ruff==0.17.3", "pre-commit>=4"]
+dev = ["pytest>=8", "ruff==0.17.3", "pre-commit>=4", "mypy==2.4.1"]
 diffusion = ["lerobot[diffusion]==0.6.1"]
 
 [project.scripts]
@@ -41,6 +41,15 @@ force-exclude = true  # also honour the excludes when pre-commit passes file nam
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "B", "UP", "NPY"]
+
+[tool.mypy]
+# Type-checked: the smallbc policy package. The rest of sdp predates the mypy setting.
+python_version = "3.12"
+files = ["sdp/policies"]
+ignore_missing_imports = true
+follow_imports = "silent"
+check_untyped_defs = true
+warn_unused_ignores = true
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

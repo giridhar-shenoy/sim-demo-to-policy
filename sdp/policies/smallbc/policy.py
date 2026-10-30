@@ -30,6 +30,8 @@ from sdp.policies.smallbc.common import abs_to_delta, target_xyzyaw, wrap_pi
 
 
 class SmallBCPolicy:
+    image_size: int | None  # None only for the predictor (no network) mode
+
     def __init__(
         self,
         checkpoint: str | Path | None = None,
@@ -96,11 +98,13 @@ class SmallBCPolicy:
 
     def _warm_up(self) -> None:
         s = self.image_size
+        assert s is not None
         blank = np.zeros((s, s, 3), np.uint8)
         obs = {"front": blank, "wrist": blank, "state": np.zeros(15, np.float32)}
         self._network(obs, np.zeros(4))
 
     def _network(self, obs: dict, t_obs: np.ndarray) -> np.ndarray:
+        assert self.model is not None
         torch = self._torch
         proprio = np.concatenate([obs["state"], t_obs]).astype(np.float32)[None]
         front = torch.from_numpy(np.ascontiguousarray(obs["front"]))[None]

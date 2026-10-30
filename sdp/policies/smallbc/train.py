@@ -128,7 +128,7 @@ def main() -> None:
     )
     model.set_stats(y_stats["mean"], y_stats["std"], p_stats["mean"], p_stats["std"])
     if not args.no_channels_last:
-        model = model.to(memory_format=torch.channels_last)
+        model = model.to(memory_format=torch.channels_last)  # type: ignore[call-overload]
     model.train()
     n_params = sum(p.numel() for p in model.parameters())
     va_eval = (

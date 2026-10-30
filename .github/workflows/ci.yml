@@ -28,7 +28,7 @@ jobs:
         run: docker run --rm sdp-ci:latest python scripts/probe_render.py
 
       - name: Lint
-        run: docker run --rm sdp-ci:latest bash -c "ruff check . && ruff format --check ."
+        run: docker run --rm sdp-ci:latest bash -c "ruff check . && ruff format --check . && mypy"
 
       - name: Test
         run: docker run --rm sdp-ci:latest pytest -q -rs

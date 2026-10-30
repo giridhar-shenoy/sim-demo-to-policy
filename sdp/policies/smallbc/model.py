@@ -29,6 +29,8 @@ def conv_gn(cin: int, cout: int, k: int, s: int, groups: int = 8) -> list[nn.Mod
 
 
 class SpatialSoftmax(nn.Module):
+    pos: torch.Tensor  # registered buffer
+
     def __init__(self, in_ch: int, h: int, w: int, num_kp: int = 32):
         super().__init__()
         self.kp = nn.Conv2d(in_ch, num_kp, 1)
@@ -76,6 +78,12 @@ def random_shift(x: torch.Tensor, pad: int) -> torch.Tensor:
 
 
 class SmallBC(nn.Module):
+    # registered buffers (normalisation stats saved with the checkpoint)
+    y_mean: torch.Tensor
+    y_std: torch.Tensor
+    p_mean: torch.Tensor
+    p_std: torch.Tensor
+
     def __init__(
         self,
         image_size: int = 96,

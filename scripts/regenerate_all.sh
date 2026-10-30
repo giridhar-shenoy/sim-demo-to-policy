@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # Regenerate every number and the GIF in README.md and docs/results.md from scratch.
 # Needs: the repo venv active, SDP_MENAGERIE_DIR set (scripts/fetch_menagerie.sh), MUJOCO_GL=egl.
-# Wall time on a 4-core laptop CPU: about 3.5 h, of which training (six runs) is ~2.5 h.
+# Wall time on a 4-core laptop CPU: about 6 h, of which training is ~4.5 h (ACT runs 1-6
+# ~2.5 h, smallbc ~2.2 h; ACT runs 7-8 are trained by experiments/privileged/ and not here).
 # The dataset and checkpoint go to a fresh directory, so nothing existing is overwritten.
 set -euo pipefail
 cd "$(dirname "$0")/.."
@@ -26,6 +27,20 @@ python scripts/diagnose_openloop.py --checkpoint "$RUN_DIR/act_cpu_v5_scripted50
 for step in 001000 002000; do   # run 6: intermediate checkpoints too
   python scripts/diagnose_openloop.py --checkpoint "$RUN_DIR/act_cpu_v6_scripted50/checkpoints/$step" --dataset "$RUN_DIR/pickplace_scripted_50"; done
 python scripts/diagnose_openloop.py --checkpoint "$RUN_DIR/act_cpu_v6_scripted50" --dataset "$RUN_DIR/pickplace_scripted_50"
-echo "== ACT eval";        scripts/eval_all.sh "$RUN_DIR/act_cpu_scripted50" "$RUN_DIR/act_cpu_v2_scripted50" "$RUN_DIR/act_cpu_v3_scripted50" "$RUN_DIR/act_cpu_v4_scripted50" "$RUN_DIR/act_cpu_v5_scripted50_128px" "$RUN_DIR/act_cpu_v6_scripted50"
+echo "== smallbc demos";  python -m sdp.policies.smallbc.record --out "$RUN_DIR/smallbc_main1000" \
+  --episodes 1000 --seed-start 0 --noise-std 0.3 --noise-frac 0.5 --noise-dims 0,1,2,5 \
+  --workers 4 --log-every 50
+echo "== smallbc train";  python -m sdp.policies.smallbc.train --data "$RUN_DIR/smallbc_main1000" \
+  --out "$RUN_DIR/smallbc_abs1000" --steps 50000 --target abs --ckpt-every 5000 \
+  --val-every 1000 --max-minutes 190
+for c in ckpt_025000 ckpt_040000 last; do   # dev-seed checkpoint choice (25k was chosen)
+  sdp eval --checkpoint "$RUN_DIR/smallbc_abs1000/$c.pt" --condition "smallbc_$c" --trials 50 \
+    --seed-start 500 --distributions nominal --out "$RUN_DIR/eval_smallbc_${c}_dev10500"; done
+echo "== ACT eval";        scripts/eval_all.sh "$RUN_DIR/act_cpu_scripted50" "$RUN_DIR/act_cpu_v2_scripted50" "$RUN_DIR/act_cpu_v3_scripted50" "$RUN_DIR/act_cpu_v4_scripted50" "$RUN_DIR/act_cpu_v5_scripted50_128px" "$RUN_DIR/act_cpu_v6_scripted50" \
+  experiments/privileged/run7/train/act_cpu_v7_abs/checkpoints/006000 \
+  experiments/privileged/run8/train/act_cpu_v8_abs_dart/checkpoints/020000 \
+  "$RUN_DIR/smallbc_abs1000/ckpt_025000.pt"
+python scripts/smallbc_results_from_run.py --run "$RUN_DIR/smallbc_abs1000" --checkpoint-step 25000 \
+  --data "$RUN_DIR/smallbc_main1000"
 echo "== GIF";             scripts/record_gifs.sh "$RUN_DIR/act_cpu_v3_scripted50"
 echo "== tables";           sdp report

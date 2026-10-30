@@ -45,7 +45,7 @@ def _conj(q: np.ndarray) -> np.ndarray:
 def target_yaw(env, quat: np.ndarray) -> tuple[float, np.ndarray]:
     """(yaw about world z relative to home, residual tilt rotation vector)."""
     rel = quat_mul(quat, _conj(env._home_quat))
-    mat = np.empty(9)
+    mat: np.ndarray = np.empty(9)
     mujoco.mju_quat2Mat(mat, rel)
     mat = mat.reshape(3, 3)
     yaw = float(np.arctan2(mat[1, 0], mat[0, 0]))

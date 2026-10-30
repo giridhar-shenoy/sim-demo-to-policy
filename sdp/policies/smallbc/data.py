@@ -43,6 +43,13 @@ def make_chunks(target_abs, target_obs, ep_start, ep_len, t_in_ep, chunk, mode):
 
 
 class Demos:
+    # Per-frame arrays, concatenated over shards in __init__ (set with setattr).
+    state: np.ndarray
+    target_obs: np.ndarray
+    target_abs: np.ndarray
+    action_clean: np.ndarray
+    phase: np.ndarray
+
     def __init__(self, roots, chunk: int = 16, mode: str = "abs"):
         roots = [Path(r) for r in ([roots] if isinstance(roots, (str, Path)) else roots)]
         shards = []
@@ -52,7 +59,9 @@ class Demos:
         if not shards:
             raise FileNotFoundError(f"no shards under {roots}")
         self.front, self.wrist = [], []
-        small = {k: [] for k in ("state", "target_obs", "target_abs", "action_clean", "phase")}
+        small: dict[str, list] = {
+            k: [] for k in ("state", "target_obs", "target_abs", "action_clean", "phase")
+        }
         eps = []
         shard_of, local_of = [], []
         g = 0

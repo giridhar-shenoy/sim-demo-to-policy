@@ -36,6 +36,7 @@ import shutil
 import time
 from collections import Counter
 from pathlib import Path
+from typing import Any
 
 import numpy as np
 
@@ -86,7 +87,7 @@ def record_episode(env, expert, seed, distribution, noised, noise_std, noise_dim
     obs, info = env.reset(seed=seed, options={"distribution": distribution})
     expert.reset()
     rng = np.random.default_rng([seed, 0xDA27])
-    buf = {k: [] for k in FIELDS}
+    buf: dict[str, list] = {k: [] for k in FIELDS}
     max_label_err = 0.0
     t = 0
     while True:
@@ -179,7 +180,7 @@ def record_seeds(
     out_p = Path(out)
     env = PandaPickPlaceEnv(distribution=distribution, image_size=image_size)
     expert = WaypointExpert()
-    stats = {
+    stats: dict[str, Any] = {
         "attempted": 0,
         "kept": 0,
         "noised_attempted": 0,
@@ -292,7 +293,7 @@ def main() -> None:
         k: sum(r[k] for r in results)
         for k in ("attempted", "kept", "noised_attempted", "noised_kept", "frames")
     }
-    labels = Counter()
+    labels: Counter[str] = Counter()
     for r in results:
         labels.update(r["labels"])
     clean_att = total["attempted"] - total["noised_attempted"]
