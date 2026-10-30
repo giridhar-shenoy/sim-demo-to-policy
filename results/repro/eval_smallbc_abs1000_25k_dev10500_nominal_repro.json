@@ -1,0 +1,41 @@
+{
+  "meta": {
+    "command": "sdp eval --checkpoint experiments/smallbc/runs/abs1000/ckpt_025000.pt --condition smallbc_abs1000_25k_dev10500_repro --trials 50 --seed-start 500 --distributions nominal --out results/repro/eval_smallbc_abs1000_25k_dev10500_nominal_repro",
+    "checkpoint": "experiments/smallbc/runs/abs1000/ckpt_025000.pt",
+    "policy_type": "smallbc",
+    "n_action_steps": 8,
+    "chunk_size": 16,
+    "image_size": 96,
+    "action_mode": "abs_target",
+    "wall_time_s": 19.3,
+    "python": "3.12.16"
+  },
+  "conditions": [
+    {
+      "condition": "smallbc_abs1000_25k_dev10500_repro",
+      "distribution": "nominal",
+      "trials": 50,
+      "successes": 49,
+      "success_rate": 0.98,
+      "wilson95": [
+        0.8950455630610349,
+        0.9964607407674954
+      ],
+      "mean_steps": 116.2,
+      "mean_steps_success": 113.46938775510205,
+      "labels": {
+        "success": 49,
+        "collision": 0,
+        "never_reached": 0,
+        "grasp_missed": 0,
+        "dropped": 1,
+        "placed_outside": 0,
+        "timeout": 0
+      },
+      "seed_min": 10500,
+      "seed_max": 10549,
+      "policy_ms_mean": 0.3697200000000001,
+      "policy_ms_max": 4.55
+    }
+  ]
+}

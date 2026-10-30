@@ -37,10 +37,19 @@ def _eval(args: argparse.Namespace, argv: list[str] | None = None) -> int:
     from sdp.envs import PandaPickPlaceEnv
     from sdp.eval.act_policy import ACTPolicyAdapter
     from sdp.eval.harness import run_condition, summarize, write_csv, write_summary
+    from sdp.policies.smallbc import is_smallbc_checkpoint
     from sdp.seeds import eval_seeds
 
     t0 = time.perf_counter()
-    policy = ACTPolicyAdapter(args.checkpoint, n_action_steps=args.n_action_steps)
+    if is_smallbc_checkpoint(args.checkpoint):
+        from sdp.policies.smallbc.policy import SmallBCPolicy
+
+        # 1 torch thread, as in experiments/smallbc/eval.py, so episodes reproduce exactly.
+        policy = SmallBCPolicy(args.checkpoint, n_exec=args.n_action_steps or 8, threads=1)
+        policy_type = "smallbc"
+    else:
+        policy = ACTPolicyAdapter(args.checkpoint, n_action_steps=args.n_action_steps)
+        policy_type = "act"
     env = policy.wrap_env(PandaPickPlaceEnv(image_size=policy.image_size))
     seeds = eval_seeds(args.trials, start=args.seed_start)
     rows, summaries = [], []
@@ -62,8 +71,9 @@ def _eval(args: argparse.Namespace, argv: list[str] | None = None) -> int:
     meta = {
         "command": "sdp " + " ".join(sys.argv[1:] if argv is None else argv),
         "checkpoint": str(policy.path),
-        "n_action_steps": policy.policy.config.n_action_steps,
-        "chunk_size": policy.policy.config.chunk_size,
+        "policy_type": policy_type,
+        "n_action_steps": policy.n_action_steps,
+        "chunk_size": policy.chunk_size,
         "image_size": policy.image_size,
         "action_mode": policy.action_mode,
         "wall_time_s": round(time.perf_counter() - t0, 1),
@@ -101,13 +111,22 @@ def build_parser() -> argparse.ArgumentParser:
     )
     rec.set_defaults(func=_record)
 
-    ev = sub.add_parser("eval", help="evaluate an ACT checkpoint on held-out eval seeds")
-    ev.add_argument("--checkpoint", required=True, help="training output dir or pretrained_model")
+    ev = sub.add_parser("eval", help="evaluate a checkpoint (ACT or smallbc) on eval seeds")
+    ev.add_argument(
+        "--checkpoint",
+        required=True,
+        help="ACT: training output dir or pretrained_model; smallbc: a .pt checkpoint file",
+    )
     ev.add_argument("--condition", required=True, help="row name, e.g. act_cpu_scripted50")
     ev.add_argument("--trials", type=int, default=100, help="episodes per distribution")
     ev.add_argument("--seed-start", type=int, default=0, help="offset into eval seeds 10000-19999")
     ev.add_argument("--distributions", nargs="+", default=["nominal", "shifted"])
-    ev.add_argument("--n-action-steps", type=int, default=None, help="override the checkpoint's")
+    ev.add_argument(
+        "--n-action-steps",
+        type=int,
+        default=None,
+        help="actions executed per chunk (ACT: overrides the checkpoint's; smallbc: default 8)",
+    )
     ev.add_argument(
         "--out", default=None, help="output prefix (default results/eval_<condition>_s<seed>)"
     )

@@ -83,6 +83,14 @@ class ACTPolicyAdapter:
         return env
 
     @property
+    def n_action_steps(self) -> int:
+        return int(self.policy.config.n_action_steps)
+
+    @property
+    def chunk_size(self) -> int:
+        return int(self.policy.config.chunk_size)
+
+    @property
     def image_size(self) -> int:
         """Camera resolution the checkpoint was trained on (square images)."""
         return int(self.policy.config.image_features["observation.images.front"].shape[-1])
