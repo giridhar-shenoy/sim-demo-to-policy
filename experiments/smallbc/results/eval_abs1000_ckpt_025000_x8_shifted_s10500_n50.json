@@ -1,0 +1,41 @@
+{
+  "meta": {
+    "checkpoint": "experiments/smallbc/runs/abs1000/ckpt_025000.pt",
+    "checkpoint_step": 25000,
+    "target_mode": "abs",
+    "chunk": 16,
+    "n_exec": 8,
+    "temporal_ensemble": false,
+    "te_m": 0.01,
+    "binarize_gripper": true,
+    "wall_s": 24.3
+  },
+  "conditions": [
+    {
+      "condition": "smallbc_abs1000",
+      "distribution": "shifted",
+      "trials": 50,
+      "successes": 35,
+      "success_rate": 0.7,
+      "wilson95": [
+        0.5624964942316114,
+        0.8089644656969429
+      ],
+      "mean_steps": 159.56,
+      "mean_steps_success": 120.8,
+      "labels": {
+        "success": 35,
+        "collision": 15,
+        "never_reached": 0,
+        "grasp_missed": 0,
+        "dropped": 0,
+        "placed_outside": 0,
+        "timeout": 0
+      },
+      "seed_min": 10500,
+      "seed_max": 10549,
+      "policy_ms_mean": 0.37964,
+      "policy_ms_max": 4.505
+    }
+  ]
+}
