@@ -17,7 +17,7 @@ confidence intervals.
 It shows the whole demonstration-to-policy loop running end to end on a CPU, with every
 success rate traceable to a per-episode CSV whose seeds never overlap the demonstrations.
 
-smallbc, a 574k-parameter spatial-softmax BC policy trained in 66 minutes on a laptop
+smallbc, a 574k-parameter spatial-softmax BC policy trained in 66.5 minutes on a laptop
 CPU, places the cube in 100/100 held-out episodes and 72/100 when the cube starts 8 cm
 outside the training box. Six ACT runs with per-step delta actions scored 0/100; the
 cause is worked through below.
@@ -272,12 +272,12 @@ seeds come from 10000–19999, so the ranges cannot overlap: `sdp/seeds.py` enfo
 and `tests/test_seed_split.py` tests it. There were eight ACT runs and one smallbc run,
 and each choice was made on data the later evaluation does not reuse:
 
-- **Run 1** (the spec'd CPU config, 3000 steps) scored 0/100 on seeds 10000–10099,
+- **Run 1** (the base CPU config, 3000 steps) scored 0/100 on seeds 10000–10099,
   which therefore became the *dev* seeds.
 - **Run 2** changed two settings (backbone lr 1e-5 → 1e-4, CVAE off) after a check on
   run 1's own training frames. Runs 1 and 2 were then scored once each on 10100–10199
   (*test 1*).
-- **Run 3** is run 2 trained for 8000 steps instead of the spec'd 3000. I raised the
+- **Run 3** is run 2 trained for 8000 steps instead of the base 3000. I raised the
   step count because runs 1 and 2 underfit at 3000. It was scored once on fresh seeds
   10200–10299 (*test 2*).
 - **Run 4** is run 2 with the proprioceptive state withheld from the policy (cameras
