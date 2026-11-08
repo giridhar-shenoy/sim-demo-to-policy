@@ -243,23 +243,23 @@ Regenerate with `scripts/train_cpu.sh` (the loss curve is in `results/train_*.cs
 | run 6 (`act_cpu_v6_scripted50`) | run 2 + lr 1e-5 and backbone lr 1e-5 (LeRobot defaults) | 3000 | 16.3 min | 0.114 | `sdp/train/configs/act_cpu_v6.yaml` |
 | run 7 (`act_cpu_v7_abs`) | run 2 + absolute TCP-target actions | 6000 | 32.4 min | 0.065 | `experiments/privileged/run7/act_cpu_v7_abs.yaml` |
 | run 8 (`act_cpu_v8_abs_dart`) | run 7 + 200 demos, half with DART noise | 20000 | 113.4 min | 0.070 | `experiments/privileged/run8/act_cpu_v8_abs_dart.yaml` |
-| smallbc (`smallbc_abs1000_25k`) | from-scratch CNN + spatial-softmax keypoints, MLP, absolute targets, 1000 demo seeds (half DART), batch 64 | 25000 of 50000 | 66.5 min of 130.5 min | 0.057 | `experiments/smallbc/runs/abs1000/config.json` |
+| smallbc (`smallbc_abs1000_25k`) | from-scratch CNN + spatial-softmax keypoints, MLP, absolute targets, 1000 demo seeds (half DART), batch 64 | 25000 of 50000 | 66.5 min of 130.5 min | 0.057 | `results/config_smallbc_abs1000_25k.json` |
 <!-- sdp-report:training:end -->
 
 Stage wall times (recording and eval timings are saved from run 5 on):
 
 <!-- sdp-report:timing:begin -->
-| Run | Demo recording (50 episodes) | Training | Eval (200 episodes) |
+| Run | Demo recording (N episodes) | Training | Eval (200 episodes) |
 |---|---|---|---|
 | run 1 (`act_cpu_scripted50`) | – | 21.0 min | – |
 | run 2 (`act_cpu_v2_scripted50`) | – | 17.1 min | – |
 | run 3 (`act_cpu_v3_scripted50`) | – | 45.3 min | – |
 | run 4 (`act_cpu_v4_scripted50`) | – | 17.2 min | – |
-| run 5 (`act_cpu_v5_scripted50_128px`) | 55 s | 21.5 min | 5.0 min |
+| run 5 (`act_cpu_v5_scripted50_128px`) | 55 s (50) | 21.5 min | 5.0 min |
 | run 6 (`act_cpu_v6_scripted50`) | – | 16.3 min | 4.5 min |
-| run 7 (`act_cpu_v7_abs`) | 44 s | 32.4 min | 3.5 min |
+| run 7 (`act_cpu_v7_abs`) | 44 s (50) | 32.4 min | 3.5 min |
 | run 8 (`act_cpu_v8_abs_dart`) | – | 113.4 min | 3.4 min |
-| smallbc (`smallbc_abs1000_25k`) | 140 s | 130.5 min | 1.4 min |
+| smallbc (`smallbc_abs1000_25k`) | 140 s (1000) | 130.5 min | 1.4 min |
 <!-- sdp-report:timing:end -->
 
 Training budget: 45 min per run on the laptop CPU. For run 3 only, I raised the cap from

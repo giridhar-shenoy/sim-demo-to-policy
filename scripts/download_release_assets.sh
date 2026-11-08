@@ -16,4 +16,4 @@ done
 curl -fsSL "$BASE/smallbc_abs1000_25k.tar.gz" | tar -xz -C outputs
 echo "datasets -> datasets/, checkpoints -> outputs/train/act_cpu*, outputs/smallbc_abs1000_25k/"
 echo "smallbc: sdp eval --checkpoint outputs/smallbc_abs1000_25k/ckpt_025000.pt ..."
-echo "runs 7 and 8: scripts/eval_all.sh <run1..6 dirs> outputs/train/act_cpu_v7_abs outputs/train/act_cpu_v8_abs_dart"
+echo "every eval: scripts/eval_all.sh (its defaults are these paths)"

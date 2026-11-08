@@ -2,6 +2,12 @@
 
 [![CI](https://github.com/giridhar-shenoy/sim-demo-to-policy/actions/workflows/ci.yml/badge.svg)](https://github.com/giridhar-shenoy/sim-demo-to-policy/actions/workflows/ci.yml)
 
+A MuJoCo pick-and-place environment on the Franka Panda, a scripted expert whose
+demonstrations are recorded as LeRobot v3.0 datasets, two kinds of policy trained on a
+laptop CPU (ACT through `lerobot-train`, and smallbc, a small from-scratch spatial-softmax
+BC policy), and an evaluation harness with held-out seeds, a failure taxonomy and
+confidence intervals.
+
 ![Left: the scripted expert on held-out seed 10800. Middle: smallbc on the same seed places the cube. Right: smallbc on a shifted-box seed presses its open fingers into the table short of the cube](docs/assets/rollouts.gif)
 
 *Left: scripted expert (reference) on held-out seed 10800. Middle: smallbc, the headline
@@ -9,18 +15,13 @@ policy, on the same seed. Right: smallbc's first failure in the shifted pose box
 10800 shifted): the cube starts beyond the training box, and the policy presses its
 open fingers into the table short of it. Inset: the 96 px wrist image the policy sees.*
 
-A MuJoCo pick-and-place environment on the Franka Panda, a scripted expert whose
-demonstrations are recorded as LeRobot v3.0 datasets, two kinds of policy trained on a
-laptop CPU (ACT through `lerobot-train`, and smallbc, a small from-scratch spatial-softmax
-BC policy), and an evaluation harness with held-out seeds, a failure taxonomy and
-confidence intervals.
 It shows the whole demonstration-to-policy loop running end to end on a CPU, with every
 success rate traceable to a per-episode CSV whose seeds never overlap the demonstrations.
 
 smallbc, a 574k-parameter spatial-softmax BC policy trained in 66.5 minutes on a laptop
-CPU, places the cube in 100/100 held-out episodes and 72/100 when the cube starts 8 cm
-outside the training box. Six ACT runs with per-step delta actions scored 0/100; the
-cause is worked through below.
+CPU, places the cube in 100/100 held-out episodes and 72/100 when the cube starts in a
+pose box shifted 8 cm from the training box. Six ACT runs with per-step delta actions
+scored 0/100; the cause is worked through below.
 <!-- sdp-report:headline:begin -->
 smallbc (from-scratch CNN + spatial-softmax keypoints, MLP, absolute targets, 1000 demo seeds (half DART), batch 64; checkpoint 25000 of 50000 training steps, 66.5 min on the laptop CPU to that checkpoint, 985 demonstrations) succeeds in 100/100 (100 %, Wilson 95 % 96 %–100 %) held-out test episodes (seeds 10800–10899), and in 72/100 (72 %, Wilson 95 % 63 %–80 %) with the cube's start box shifted by 8 cm. On its own test seeds 10700–10799, ACT run 8 (run 7 + 200 demos, half with DART noise; 20000 training steps, 113.4 min on the laptop CPU, 198 demonstrations) succeeds in 63/100 (63 %, Wilson 95 % 53 %–72 %) nominal and 16/100 (16 %, Wilson 95 % 10 %–24 %) shifted episodes. On its own test seeds 10700–10799, ACT run 7 (run 2 + absolute TCP-target actions; 6000 training steps, 32.4 min on the laptop CPU, 50 demonstrations) succeeds in 57/100 (57 %, Wilson 95 % 47 %–66 %) nominal and 19/100 (19 %, Wilson 95 % 13 %–28 %) shifted episodes. The earlier runs 1–6, with per-step delta actions, score 0/100 each on their own test seeds.
 <!-- sdp-report:headline:end -->
@@ -191,23 +192,23 @@ Failure labels (one per episode, defined in [`sdp/eval/taxonomy.py`](sdp/eval/ta
 | run 6 (`act_cpu_v6_scripted50`) | run 2 + lr 1e-5 and backbone lr 1e-5 (LeRobot defaults) | 3000 | 16.3 min | 0.114 | `sdp/train/configs/act_cpu_v6.yaml` |
 | run 7 (`act_cpu_v7_abs`) | run 2 + absolute TCP-target actions | 6000 | 32.4 min | 0.065 | `experiments/privileged/run7/act_cpu_v7_abs.yaml` |
 | run 8 (`act_cpu_v8_abs_dart`) | run 7 + 200 demos, half with DART noise | 20000 | 113.4 min | 0.070 | `experiments/privileged/run8/act_cpu_v8_abs_dart.yaml` |
-| smallbc (`smallbc_abs1000_25k`) | from-scratch CNN + spatial-softmax keypoints, MLP, absolute targets, 1000 demo seeds (half DART), batch 64 | 25000 of 50000 | 66.5 min of 130.5 min | 0.057 | `experiments/smallbc/runs/abs1000/config.json` |
+| smallbc (`smallbc_abs1000_25k`) | from-scratch CNN + spatial-softmax keypoints, MLP, absolute targets, 1000 demo seeds (half DART), batch 64 | 25000 of 50000 | 66.5 min of 130.5 min | 0.057 | `results/config_smallbc_abs1000_25k.json` |
 <!-- sdp-report:training:end -->
 
 Stage wall times (recording and eval timings are saved from run 5 on):
 
 <!-- sdp-report:timing:begin -->
-| Run | Demo recording (50 episodes) | Training | Eval (200 episodes) |
+| Run | Demo recording (N episodes) | Training | Eval (200 episodes) |
 |---|---|---|---|
 | run 1 (`act_cpu_scripted50`) | – | 21.0 min | – |
 | run 2 (`act_cpu_v2_scripted50`) | – | 17.1 min | – |
 | run 3 (`act_cpu_v3_scripted50`) | – | 45.3 min | – |
 | run 4 (`act_cpu_v4_scripted50`) | – | 17.2 min | – |
-| run 5 (`act_cpu_v5_scripted50_128px`) | 55 s | 21.5 min | 5.0 min |
+| run 5 (`act_cpu_v5_scripted50_128px`) | 55 s (50) | 21.5 min | 5.0 min |
 | run 6 (`act_cpu_v6_scripted50`) | – | 16.3 min | 4.5 min |
-| run 7 (`act_cpu_v7_abs`) | 44 s | 32.4 min | 3.5 min |
+| run 7 (`act_cpu_v7_abs`) | 44 s (50) | 32.4 min | 3.5 min |
 | run 8 (`act_cpu_v8_abs_dart`) | – | 113.4 min | 3.4 min |
-| smallbc (`smallbc_abs1000_25k`) | 140 s | 130.5 min | 1.4 min |
+| smallbc (`smallbc_abs1000_25k`) | 140 s (1000) | 130.5 min | 1.4 min |
 <!-- sdp-report:timing:end -->
 
 Runs 7 and 8 were trained overnight; run 8's 20000 steps took 113.4 min.
@@ -225,8 +226,9 @@ Paired comparison on identical seeds (generated from the per-episode CSVs):
 | ACT run 8 | smallbc | 10700–10799 | shifted | 16 | 0 | 54 | 30 | 1.11e-16 |
 <!-- sdp-report:paired:end -->
 
-Training budget: 45 min per run on the laptop CPU. For run 3 only, I raised the cap from
-45 to 50 min because the laptop was in use.
+Training budget: 45 min per run on the laptop CPU for runs 1–6; run 8 took 113.4 min and
+smallbc 130.5 min (stated in the table). For run 3 only, I raised the cap from 45 to 50 min
+because the laptop was in use.
 
 More tables (dataset, env throughput, seed ranges, pose boxes) and the command behind
 every row: [docs/results.md](docs/results.md).

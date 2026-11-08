@@ -197,11 +197,11 @@ def training_table(results: Path) -> str:
             rows = csv.DictReader(path.with_suffix(".csv").open())
             at = next(r for r in rows if int(float(r["step"])) == meta["checkpoint_step"])
             loss = f"{float(at['loss']):.3f}"
+        config = meta.get("config", "?")
+        if (results / f"config_{run}.json").is_file():  # tracked copy of the run's config
+            config = f"results/config_{run}.json"
         label, change = RUNS.get(run, (run, "–"))
-        lines.append(
-            f"| {label} (`{run}`) | {change} | {steps} | {wall} "
-            f"| {loss} | `{meta.get('config', '?')}` |"
-        )
+        lines.append(f"| {label} (`{run}`) | {change} | {steps} | {wall} | {loss} | `{config}` |")
     return "\n".join(lines)
 
 
@@ -478,7 +478,7 @@ def diagnostics_table(results: Path) -> str:
 def timing_table(results: Path) -> str:
     """Wall time of each stage of a run, where it was recorded (from run 5 on)."""
     lines = [
-        "| Run | Demo recording (50 episodes) | Training | Eval (200 episodes) |",
+        "| Run | Demo recording (N episodes) | Training | Eval (200 episodes) |",
         "|---|---|---|---|",
     ]
     for run, (label, _) in RUNS.items():
@@ -488,7 +488,9 @@ def timing_table(results: Path) -> str:
         rec = "–"
         ds = results / f"dataset_{RUN_DATASET[run]}.json"
         if ds.is_file() and "recording_wall_time_s" in json.loads(ds.read_text()):
-            rec = f"{json.loads(ds.read_text())['recording_wall_time_s']:.0f} s"
+            d = json.loads(ds.read_text())
+            n = d.get("attempted_episodes", d["episodes"])  # smallbc keeps successes only
+            rec = f"{d['recording_wall_time_s']:.0f} s ({n})"
         ev = "–"
         groups = _seed_groups(results, run)
         if groups:

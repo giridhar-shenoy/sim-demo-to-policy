@@ -21,8 +21,8 @@ RUN3=${3:-outputs/train/act_cpu_v3_scripted50}
 RUN4=${4:-outputs/train/act_cpu_v4_scripted50}
 RUN5=${5:-outputs/train/act_cpu_v5_scripted50_128px}
 RUN6=${6:-outputs/train/act_cpu_v6_scripted50}
-RUN7=${7:-experiments/privileged/run7/train/act_cpu_v7_abs/checkpoints/006000}
-RUN8=${8:-experiments/privileged/run8/train/act_cpu_v8_abs_dart/checkpoints/020000}
+RUN7=${7:-outputs/train/act_cpu_v7_abs}
+RUN8=${8:-outputs/train/act_cpu_v8_abs_dart}
 sdp eval --checkpoint "$RUN1" --condition act_cpu_scripted50 --trials 100 --seed-start 0
 sdp eval --checkpoint "$RUN1" --condition act_cpu_scripted50 --trials 100 --seed-start 100
 sdp eval --checkpoint "$RUN2" --condition act_cpu_v2_scripted50 --trials 100 --seed-start 100
@@ -33,11 +33,11 @@ sdp eval --checkpoint "$RUN6" --condition act_cpu_v6_scripted50 --trials 100 --s
 sdp eval --checkpoint "$RUN8" --condition act_cpu_v8_abs_dart --trials 100 --seed-start 700
 sdp eval --checkpoint "$RUN7" --condition act_cpu_v7_abs --trials 100 --seed-start 700
 # smallbc @ 25k (headline): official test 10800-10899, paired comparison 10700-10799.
-SMALLBC=${9:-experiments/smallbc/runs/abs1000/ckpt_025000.pt}
+SMALLBC=${9:-outputs/smallbc_abs1000_25k/ckpt_025000.pt}
 for seed in 10800 10700; do
   for dist in nominal shifted; do
-    python experiments/smallbc/eval.py --ckpt "$SMALLBC" --seed-start "$seed" --n 100 \
-      --distribution "$dist" --condition smallbc_abs1000_25k \
+    sdp eval --checkpoint "$SMALLBC" --condition smallbc_abs1000_25k --trials 100 \
+      --seed-start $((seed - 10000)) --distributions "$dist" \
       --out "results/eval_smallbc_abs1000_25k_s${seed}_${dist}"
   done
 done
