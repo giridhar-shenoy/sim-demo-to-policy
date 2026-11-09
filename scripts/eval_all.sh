@@ -10,7 +10,8 @@
 #   10500-10599: reserved for the experiments under experiments/ (not used here).
 #   10600-10699 "test 5": run 6 (run 2 with lr 1e-5 / backbone 1e-5).
 #   10700-10799 "test 6": runs 7 and 8 (absolute targets), the same seeds for both
-#                         (paired); policies and seeds fixed in NOTES.md before testing.
+#                         (paired); policies and seeds fixed in docs/preregistration.md
+#                         (commit 8060419) before testing.
 #   10800-10899 "test 7": smallbc @ 25k (official); it is also scored on 10700-10799
 #                         for the paired comparison with runs 7 and 8. 11000+: untouched.
 # Every call runs 100 nominal + 100 shifted-pose episodes on the same (paired) seeds.

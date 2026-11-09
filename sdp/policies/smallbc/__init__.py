@@ -1,8 +1,9 @@
 """smallbc: a small from-scratch visuomotor BC policy with absolute-target actions.
 
-Ported from ``experiments/smallbc/`` (the overnight experiment of 30 Oct 2026, which is
-kept unchanged as the record): a per-camera CNN with a spatial-softmax keypoint head,
-an MLP over [keypoints, proprio], and a 16-step chunk of absolute TCP targets.
+Ported from the overnight experiment of 30 Oct 2026 in ``experiments/smallbc/``, whose
+modules now re-export it; the original is in git history. The model: a per-camera CNN with
+a spatial-softmax keypoint head, an MLP over [keypoints, proprio], and a 16-step chunk of
+absolute TCP targets.
 
 * ``python -m sdp.policies.smallbc.record``: scripted demos into uint8 memmap shards;
 * ``python -m sdp.policies.smallbc.train``: L1 training with random-shift augmentation;

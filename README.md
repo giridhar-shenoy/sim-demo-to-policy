@@ -235,10 +235,11 @@ every row: [docs/results.md](docs/results.md).
 
 ### smallbc: the headline policy
 
-Code: [`sdp/policies/smallbc/`](sdp/policies/smallbc/), ported from
-[`experiments/smallbc/`](experiments/smallbc/), the overnight experiment, kept as the
-record. `sdp eval` on the package port reproduces the experiment's dev result episode by
-episode (49/50 on all 50 seeds; [`results/repro/`](results/repro/)).
+Code: [`sdp/policies/smallbc/`](sdp/policies/smallbc/), ported from the overnight
+experiment in [`experiments/smallbc/`](experiments/smallbc/), whose modules now re-export
+it; the original is in git history. `sdp eval` on the package port reproduces the
+experiment's dev result episode by episode (49/50 on all 50 seeds;
+[`results/repro/`](results/repro/)).
 
 - **Model** (573,650 parameters, `results/config_smallbc_abs1000_25k.json`): per camera
   (front and wrist, 96 px), a from-scratch CNN with GroupNorm and strides 2-2-2-1,
