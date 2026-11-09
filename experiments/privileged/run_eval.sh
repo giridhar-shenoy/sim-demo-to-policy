@@ -7,6 +7,7 @@ export SDP_MENAGERIE_DIR=${SDP_MENAGERIE_DIR:-$HOME/work/menagerie}
 P=experiments/privileged
 run() {
   until [ "$(awk '/MemAvailable/ {print int($2/1048576)}' /proc/meminfo)" -ge 5 ]; do sleep 30; done
+  mkdir -p ~/work/.locks
   flock -o ~/work/.locks/heavy.lock flock -o ~/work/.locks/build.lock timeout 900 "$@"
 }
 for v in ${@:-delta abs}; do

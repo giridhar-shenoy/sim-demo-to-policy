@@ -1,5 +1,5 @@
 {
-  "dataset": "/home/giri/work/r4/experiments/privileged/run7/datasets/pickplace_abs_50",
+  "dataset": "experiments/privileged/run7/datasets/pickplace_abs_50",
   "frame": 2,
   "episodes": 20,
   "checkpoints": {

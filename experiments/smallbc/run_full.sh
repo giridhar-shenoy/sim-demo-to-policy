@@ -6,6 +6,7 @@
 set -euo pipefail
 cd "$(dirname "$0")/../.."
 if [ "${1:-}" != "--locked" ]; then
+  mkdir -p ~/work/.locks
   exec flock ~/work/.locks/heavy.lock "$0" --locked
 fi
 

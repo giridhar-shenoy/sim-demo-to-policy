@@ -11,6 +11,7 @@ R7=experiments/privileged/run7
 CK=$P/train/act_cpu_v8_abs_dart/checkpoints
 run() {
   until [ "$(awk '/MemAvailable/ {print int($2/1048576)}' /proc/meminfo)" -ge 5 ]; do sleep 30; done
+  mkdir -p ~/work/.locks
   flock -o ~/work/.locks/heavy.lock flock -o ~/work/.locks/build.lock timeout 1200 "$@"
 }
 run .venv/bin/python $R7/diagnose_swap.py --checkpoints $CK/008000 $CK/012000 $CK/016000 $CK/020000 \

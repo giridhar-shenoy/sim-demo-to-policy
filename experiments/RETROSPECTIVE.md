@@ -26,7 +26,7 @@ The symptom was the same in every run: identical first actions across episodes, 
 4. **The data recipe is hard on BC.** The expert is deterministic, so there is no recovery data. The approach phase is short: 13 frames, a third of them saturated. Actions are chained per-step deltas, so only about 12 % of the targets depend on the cube's position. The task spread is also wide (15×15 cm, ±45° yaw) for 50 demos: ManiSkill PickCube from RGB gets ACT 28 % with 100 demos.
 5. **The time budget drove the design.** A 45-min CPU cap per run, daytime laptop use, and a Sunday deadline pushed toward short one-change runs instead of a few decisive ones.
 
-What went right: the pass criteria were written before training, every run had fresh test seeds, the image-swap and black-image diagnostics were sound, and the README stayed honest.
+What went right: the pass criteria were written before training, every run had fresh test seeds, the image-swap and black-image diagnostics were sound, and the README stayed accurate.
 
 ## What the research says
 

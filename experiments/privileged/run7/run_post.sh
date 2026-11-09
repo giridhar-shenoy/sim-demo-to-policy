@@ -9,6 +9,7 @@ P=experiments/privileged/run7
 CK=$P/train/act_cpu_v7_abs/checkpoints
 run() {
   until [ "$(awk '/MemAvailable/ {print int($2/1048576)}' /proc/meminfo)" -ge 5 ]; do sleep 30; done
+  mkdir -p ~/work/.locks
   flock -o ~/work/.locks/heavy.lock flock -o ~/work/.locks/build.lock timeout 1200 "$@"
 }
 run .venv/bin/python $P/diagnose_swap.py --checkpoints $CK/002000 $CK/004000 $CK/006000 \
